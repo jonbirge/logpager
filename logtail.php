@@ -1,6 +1,3 @@
-<table border='1'>
-<tr><th>IP Address</th><th>Timestamp</th><th>Request</th><th>Status</th><th>Size</th></tr>
-
 <?php
 
 // Get page parameter from URL
@@ -63,21 +60,21 @@ function getTailPage($filePath, $linesPerPage, $page = 0) {
 // Read the last n lines from the file
 $lastPageLines = getTailPage($logFilePath, $linesPerPage, $page);
 
-// Process each line
+// Make array of CLF log headers: IP Address, Timestamp, Request, Status, Size
+$headers = ['IP Address', 'Timestamp', 'Request', 'Status', 'Size'];
+
+// Create array of CLF log lines
+$logLines = [];
+$logLines[] = $headers;
+
+// Process each line and add to the array
 foreach ($lastPageLines as $line) {
     preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) (\S+)/', $line, $matches);
-
-    if (!empty($matches)) {
-        $ip = $matches[1];
-        echo "<tr>";
-        echo "<td>" . htmlspecialchars($ip) . "</td>";
-        for ($i = 2; $i <= 5; $i++) {
-            echo "<td>" . htmlspecialchars($matches[$i] ?? '-') . "</td>";
-        }
-        echo "</tr>";
-    }
+    // Go through each match and add to the array with htmlspecialchars()
+    $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));
 }
 
-?>
+// Output the array as JSON
+echo json_encode($logLines);
 
-</table>
+?>
