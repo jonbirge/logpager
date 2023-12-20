@@ -1,5 +1,5 @@
 <table border='1'>
-<tr><th>IP Address</th><th>Host Name</th><th>Date and Time</th><th>Request</th><th>Status</th><th>Size</th></tr>
+<tr><th>IP Address</th><th>Timestamp</th><th>Request</th><th>Status</th><th>Size</th></tr>
 
 <?php
 
@@ -69,11 +69,8 @@ foreach ($lastPageLines as $line) {
 
     if (!empty($matches)) {
         $ip = $matches[1];
-        $host = gethostbyaddr($ip); // Lookup the host name from the IP address
-
         echo "<tr>";
         echo "<td>" . htmlspecialchars($ip) . "</td>";
-        echo "<td>" . htmlspecialchars($host) . "</td>";
         for ($i = 2; $i <= 5; $i++) {
             echo "<td>" . htmlspecialchars($matches[$i] ?? '-') . "</td>";
         }
