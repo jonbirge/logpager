@@ -1,0 +1,94 @@
+/* Reset some default browser styles */
+body, h1, table {
+    margin: 0;
+    padding: 0;
+}
+
+/* Style the page container */
+.container {
+    font-family: 'Arial', sans-serif;
+    font-size: 14px; /* Slightly smaller font size */
+    margin: 18px;
+}
+
+/* Add space between the titles and the content */
+h1 {
+    margin-top: 32px;
+    margin-bottom: 20px;
+}
+
+/* Style the table */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table, th, td {
+    border: 1px solid #202020;
+    margin-bottom: 20px;
+    text-align: left;
+    padding: 8px;
+}
+
+th {
+    background-color: #323232cc;
+    color: white;
+    font-weight: bold;
+}
+
+/* Style alternating rows */
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+@media screen and (max-width: 600px) {
+    table {
+        width: 100%;
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+/* Center the buttons */
+.button-set {
+    text-align: center;
+}
+
+/* Styling the button for a modern look */
+.toggle-button {
+    margin-bottom: 18px;
+    background-color: #4CAF50; /* Green background */
+    border: none;
+    color: white;
+    padding: 10px 14px; /* Larger padding for a bigger button */
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-family: 'Helvetica', sans-serif;
+    font-weight: normal; /* Bold font weight */
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+/* Change background color on hover to a brighter green */
+.toggle-button:hover {
+    background-color: #5CDB60;
+}
+
+.toggle-button.red {
+    background-color: red;
+}
+
+.toggle-button.red:hover {
+    background-color: lightcoral;
+}
+
+.toggle-button.gray {
+    background-color: rgb(69, 69, 69);
+}
+
+.toggle-button.gray:hover {
+    background-color: rgb(137, 137, 137);
+}
