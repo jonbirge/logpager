@@ -4,6 +4,7 @@ let page = 0;  // last page
 let controller;
 let fetchCount = 0;
 const rDNS = true;  // enable reverse DNS lookups
+const geo = true;  // enable geolocation lookups
 
 // pull the log in JSON form from the server
 function pollServer() {
@@ -11,7 +12,7 @@ function pollServer() {
         controller.abort();
     }
     controller = new AbortController();
-    if (page < 0) {
+    if (page < 0) {ge
         page = 0;  // reset page
     };
     const whoisDiv = document.getElementById('whois');
@@ -43,6 +44,7 @@ function jsonToTable(json) {
         table += '<th>' + data[0][i] + '</th>';
         if (i == 0) {
             table += '<th>Host name</th>'; // Add new header for Host name after the first header
+            table += '<th>Geolocation</th>'; // Add new header for Geolocation after the first header
         }
     }
     table += '</tr>';
@@ -55,12 +57,18 @@ function jsonToTable(json) {
                 // Add new cell for IP address after the first cell
                 const ip = data[i][j];
                 table += '<td><a href="#" onclick="whois(\'' + ip + '\')">' + ip + '</a></td>';
+                rowid = Math.floor(Math.random() * 1000000);
                 // Add new cell for Host name after the first cell, assigning a random ID to the cell
-                hostnameid = 'ip-' + Math.floor(Math.random() * 1000000);
+                hostnameid = 'hostname' + rowid;
                 table += '<td id="' + hostnameid + '">-</td>';
                 // Get the host name from the IP address
                 if (rDNS && !polling)
                     getHostName(hostnameid, ip, signal);
+                geoid = 'geo' + rowid;
+                table += '<td id="' + geoid + '">-</td>';
+                // Get the geolocation from the IP address
+                if (geo && !polling)
+                    getGeoLocation(geoid, ip, signal);
             } else if (j == 3) {  // status
                 if (data[i][j] == '404') {
                     table += '<td class="red">' + data[i][j] + '</td>';
@@ -78,6 +86,7 @@ function jsonToTable(json) {
     return table;
 };
 
+// async function to get the host name from the IP address
 function getHostName(hostnameid, ip, signal) {
     // Get the host name from the IP address
     fetchCount++;
@@ -87,6 +96,31 @@ function getHostName(hostnameid, ip, signal) {
         // Update the cell with id hostnameid with the host name
         const hostnameCell = document.getElementById(hostnameid);
         hostnameCell.innerHTML = data;
+        fetchCount--;
+    })
+    .catch(error => {
+        if (error.name === 'AbortError') {
+          console.log('Fetch safely aborted');
+        } else {
+          console.error('Fetch error:', error);
+        }
+    });
+}
+
+// async function to get the geolocation from the IP address
+function getGeoLocation(geoid, ip, signal) {
+    // Get the geolocation from the IP address
+    fetchCount++;
+    fetch('http://ip-api.com/json/' + ip, {signal})
+    .then(response => response.text())
+    .then(data => {
+        // Parse the JSON data
+        data = JSON.parse(data);
+        // Get the geolocation from the JSON data
+        locstr = data.city + ', ' + data.country;
+        // Update the cell with id geoid with the geolocation
+        const geoCell = document.getElementById(geoid);
+        geoCell.innerHTML = locstr;
         fetchCount--;
     })
     .catch(error => {
