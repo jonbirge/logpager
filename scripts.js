@@ -1,9 +1,15 @@
 let pollInterval;
 let polling = false;
 let page = 0;  // last page
+let controller;
+let fetchCount = 0;
 
-// function to pull the log in JSON form from the server
+// pull the log in JSON form from the server
 function pollServer() {
+    if (fetchCount > 0) {
+        controller.abort();
+    }
+    controller = new AbortController();
     if (page < 0) {
         page = 0;  // reset page
     };
@@ -20,17 +26,17 @@ function pollServer() {
         } else {
             pageSpan.innerHTML = "Page " + page + " from end";
         }
-        updateHostNames();
     });
 };
 
-// function to take (n x 5) JSON array of strings and convert to HTML table,
-// assuming the first row is table headers. in addition, make each IP address
-// (the first element of each row) a link that will run a whois query on that IP
-// using a JS function called whois().
+// take (n x 5) JSON array of strings and convert to HTML table, assuming the
+// first row is table headers. in addition, make each IP address (the first
+// element of each row) a link that will run a whois query on that IP using a JS
+// function called whois().
 function jsonToTable(json) {
     const data = JSON.parse(json);
     let table = '<table id="log-table">';
+    const signal = controller.signal;
     
     // write table headers from first row
     table += '<tr>';
@@ -53,7 +59,7 @@ function jsonToTable(json) {
                 // Add new cell for Host name after the first cell, assigning a random ID to the cell
                 hostnameid = 'ip-' + Math.floor(Math.random() * 1000000);
                 table += '<td id="' + hostnameid + '">-</td>';
-                getHostName(hostnameid, ip);
+                getHostName(hostnameid, ip, signal);
             } else {
                 table += '<td>' + data[i][j] + '</td>';
             }
@@ -65,19 +71,28 @@ function jsonToTable(json) {
     return table;
 };
 
-function getHostName(hostnameid, ip) {
+function getHostName(hostnameid, ip, signal) {
     // Get the host name from the IP address
-    fetch('hostname.php?ip=' + ip)
+    fetchCount++;
+    fetch('hostname.php?ip=' + ip, {signal})
     .then(response => response.text())
     .then(data => {
         // Update the cell with id hostnameid with the host name
         const hostnameCell = document.getElementById(hostnameid);
         hostnameCell.innerHTML = data;
+        fetchCount--;
+    })
+    .catch(error => {
+        if (error.name === 'AbortError') {
+          console.log('Fetch safely aborted');
+        } else {
+          console.error('Fetch error:', error);
+        }
     });
 }
 
-// function to run whois query on IP address string using the ARIN.net web service.
-// the response is a JSON object containing the whois information.
+// run whois query on IP address string using the ARIN.net web service. the
+// response is a JSON object containing the whois information.
 function whois(ip) {
     const whoisDiv = document.getElementById('whois');
     whoisDiv.innerHTML = '<h2>Whois ' + ip + '...</h2>';
