@@ -4,12 +4,12 @@ let page = 0;  // last page
 let controller;
 let fetchCount = 0;
 const rDNS = true;  // enable reverse DNS lookups
-const geo = true;  // enable geolocation lookups
 
 // pull the log in JSON form from the server
 function pollServer() {
     if (fetchCount > 0) {
         controller.abort();
+        fetchCount = 0;
     }
     controller = new AbortController();
     if (page < 0) {ge
@@ -37,14 +37,14 @@ function jsonToTable(json) {
     const data = JSON.parse(json);
     let table = '<table id="log-table">';
     const signal = controller.signal;
-    
+    let ips = [];
+
     // write table headers from first row
     table += '<tr>';
     for (let i = 0; i < data[0].length; i++) {
         table += '<th>' + data[0][i] + '</th>';
         if (i == 0) {
             table += '<th>Host name</th>'; // Add new header for Host name after the first header
-            table += '<th>Geolocation</th>'; // Add new header for Geolocation after the first header
         }
     }
     table += '</tr>';
@@ -57,24 +57,10 @@ function jsonToTable(json) {
                 // Add new cell for IP address after the first cell
                 const ip = data[i][j];
                 table += '<td><a href="#" onclick="whois(\'' + ip + '\')">' + ip + '</a></td>';
-                rowid = Math.floor(Math.random() * 1000000);
-                // Add new cell for Host name after the first cell, assigning a random ID to the cell
-                hostnameid = 'hostname' + rowid;
+                // Add new cell for Host name after the first cell
+                hostnameid = 'hostname-' + ip;
                 table += '<td id="' + hostnameid + '">-</td>';
-                // Get the host name from the IP address
-                if (rDNS && !polling)
-                    getHostName(hostnameid, ip, signal);
-                geoid = 'geo' + rowid;
-                table += '<td id="' + geoid + '">-</td>';
-                // Get the geolocation from the IP address
-                if (geo && !polling)
-                    getGeoLocation(geoid, ip, signal);
-            } else if (j == 3) {  // status
-                if (data[i][j] == '404') {
-                    table += '<td class="red">' + data[i][j] + '</td>';
-                } else {
-                    table += '<td class="green">' + data[i][j] + '</td>';
-                }
+                ips.push(ip);
             } else {
                 table += '<td>' + data[i][j] + '</td>';
             }
@@ -83,52 +69,44 @@ function jsonToTable(json) {
     }
     table += '</table>';
 
+    // Get the host names from the IP addresses
+    if (!polling) {
+        getHostNames(ips, signal);
+    }
+
     return table;
 };
 
-// async function to get the host name from the IP address
-function getHostName(hostnameid, ip, signal) {
-    // Get the host name from the IP address
+// get host names from IP addresses
+function getHostNames(ips, signal) {
+    // Get set of unique ip addresses
+    ips = [...new Set(ips)];
+    console.log('Getting host names for ' + ips);
     fetchCount++;
-    fetch('rdns.php?ip=' + ip, {signal})
-    .then(response => response.text())
-    .then(data => {
-        // Update the cell with id hostnameid with the host name
-        const hostnameCell = document.getElementById(hostnameid);
-        hostnameCell.innerHTML = data;
-        fetchCount--;
-    })
-    .catch(error => {
-        if (error.name === 'AbortError') {
-          console.log('Fetch safely aborted');
-        } else {
-          console.error('Fetch error:', error);
-        }
-    });
-}
-
-// async function to get the geolocation from the IP address
-function getGeoLocation(geoid, ip, signal) {
-    // Get the geolocation from the IP address
-    fetchCount++;
-    fetch('http://ip-api.com/json/' + ip, {signal})
-    .then(response => response.text())
-    .then(data => {
-        // Parse the JSON data
-        data = JSON.parse(data);
-        // Get the geolocation from the JSON data
-        locstr = data.city + ', ' + data.country;
-        // Update the cell with id geoid with the geolocation
-        const geoCell = document.getElementById(geoid);
-        geoCell.innerHTML = locstr;
-        fetchCount--;
-    })
-    .catch(error => {
-        if (error.name === 'AbortError') {
-          console.log('Fetch safely aborted');
-        } else {
-          console.error('Fetch error:', error);
-        }
+    // Grab each ip address and send to rdns.php
+    ips.forEach(ip => {
+        console.log('Getting host name for ' + ip);
+        fetch('rdns.php?ip=' + ip, {signal})
+        .then(response => response.text())
+        .then(data => {
+            console.log('Got host name for ' + ip + ': ' + data);
+            // Update the cell with id hostnameid with the hostname
+            const hostnameid = 'hostname-' + ip;
+            // Get all cells with id of the form hostname-ipAddress
+            const hostnameCells = document.querySelectorAll('[id^="hostname-' + ip + '"]');
+            // set each cell in hostnameCells to data
+            hostnameCells.forEach(cell => {
+                cell.innerHTML = data;
+            });
+            fetchCount--;
+        })
+        .catch(error => {
+            if (error.name === 'AbortError') {
+              console.log('Fetch safely aborted');
+            } else {
+              console.error('Fetch error:', error);
+            }
+        });
     });
 }
 
