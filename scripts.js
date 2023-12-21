@@ -7,19 +7,18 @@ function pollServer() {
     if (page < 0) {
         page = 0;  // reset page
     };
-    const logDiv = document.getElementById('log');
     fetch('logtail.php?page=' + page)
-        .then(response => response.text())
-        .then(data => {
-            logDiv.innerHTML = jsonToTable(data);
-            //logDiv.innerHTML = data;
-            const pageSpan = document.getElementById('page');
-            if (page == 0) {
-                pageSpan.innerHTML = "Last page";
-            } else {
-                pageSpan.innerHTML = "Page " + page + " from end";
-            }
-        });
+    .then(response => response.text())
+    .then(data => {
+        const logDiv = document.getElementById('log');
+        const pageSpan = document.getElementById('page');
+        logDiv.innerHTML = jsonToTable(data);
+        if (page == 0) {
+            pageSpan.innerHTML = "Last page";
+        } else {
+            pageSpan.innerHTML = "Page " + page + " from end";
+        }
+    });
 };
 
 // function to take [n by 5] JSON array of strings and convert to HTML table, assuming first row is header
@@ -44,6 +43,7 @@ function jsonToTable(json) {
     return table;
 };
 
+// function to setup polling
 function runWatch() {
     const watchButton = document.getElementById('watch-button');
     page = 0;  // reset page
@@ -61,4 +61,5 @@ function runWatch() {
     };
 };
 
+// load the log on page load
 window.onload = pollServer;

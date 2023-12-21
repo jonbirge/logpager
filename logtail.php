@@ -1,10 +1,8 @@
 <?php
 
-// Get page parameter from URL
+// Get parameters from URL
 $page = $_GET['page'] ?? 0;
-
-// Number of lines to read from the end of the file
-$linesPerPage = 16; // You can set this to any desired integer value
+$linesPerPage = $_GET['n'] ?? 20;
 
 // Path to the CLF log file
 $logFilePath = '/access.log';
