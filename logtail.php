@@ -2,7 +2,7 @@
 
 // Get parameters from URL
 $page = $_GET['page'] ?? 0;
-$linesPerPage = $_GET['n'] ?? 20;
+$linesPerPage = $_GET['n'] ?? 16;
 
 // Path to the CLF log file
 $logFilePath = '/access.log';
