@@ -17,6 +17,11 @@ h1 {
     margin-bottom: 20px;
 }
 
+/* Make all links black, even if they have been followed */
+a {
+    color: black;
+}
+
 /* Style the table */
 table {
     border-collapse: collapse;
