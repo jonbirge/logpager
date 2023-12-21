@@ -3,7 +3,6 @@ let polling = false;
 let page = 0;  // last page
 let controller;
 let fetchCount = 0;
-const rDNS = true;  // enable reverse DNS lookups
 
 // pull the log in JSON form from the server
 function pollServer() {
@@ -32,7 +31,7 @@ function pollServer() {
 };
 
 // take n x 5 JSON array of strings and convert to HTML table, assuming the
-// first row is table headers.
+// first row is table headers. write table to div.
 function jsonToTable(json) {
     const data = JSON.parse(json);
     let table = '<table id="log-table">';
@@ -44,7 +43,8 @@ function jsonToTable(json) {
     for (let i = 0; i < data[0].length; i++) {
         table += '<th>' + data[0][i] + '</th>';
         if (i == 0) {
-            table += '<th>Host name</th>'; // Add new header for Host name after the first header
+            table += '<th>Host name</th>';
+            table += '<th>Geolocation (courtesy of <a href=ip-api.com style="color: white">ip-api.com</a>)</th>';
         }
     }
     table += '</tr>';
@@ -54,13 +54,16 @@ function jsonToTable(json) {
         table += '<tr>';
         for (let j = 0; j < data[i].length; j++) {
             if (j == 0) {
-                // Add new cell for IP address after the first cell
                 const ip = data[i][j];
+                ips.push(ip);
+                // Add new cell for IP address after the first cell
                 table += '<td><a href="#" onclick="whois(\'' + ip + '\')">' + ip + '</a></td>';
                 // Add new cell for Host name after the first cell
                 hostnameid = 'hostname-' + ip;
                 table += '<td id="' + hostnameid + '">-</td>';
-                ips.push(ip);
+                // Add new cell for Geolocation after the first cell
+                geoid = 'geo-' + ip;
+                table += '<td id="' + geoid + '">-</td>';
             } else {
                 table += '<td>' + data[i][j] + '</td>';
             }
@@ -72,6 +75,7 @@ function jsonToTable(json) {
     // Get the host names from the IP addresses
     if (!polling) {
         getHostNames(ips, signal);
+        getGeoLocations(ips, signal);
     }
 
     return table;
@@ -97,6 +101,39 @@ function getHostNames(ips, signal) {
             // set each cell in hostnameCells to data
             hostnameCells.forEach(cell => {
                 cell.innerHTML = data;
+            });
+            fetchCount--;
+        })
+        .catch(error => {
+            if (error.name === 'AbortError') {
+              console.log('Fetch safely aborted');
+            } else {
+              console.error('Fetch error:', error);
+            }
+        });
+    });
+}
+
+// get geolocations from IP addresses using ip-api.com
+function getGeoLocations(ips, signal) {
+    // Get set of unique ip addresses
+    ips = [...new Set(ips)];
+    console.log('Getting geolocations for ' + ips);
+    fetchCount++;
+    // Grab each ip address and send to ip-api.com
+    ips.forEach(ip => {
+        console.log('Getting geolocation for ' + ip);
+        fetch('http://ip-api.com/json/' + ip, {signal})
+        .then(response => response.json())
+        .then(data => {
+            console.log('Got geolocation for ' + ip + ': ' + data);
+            // Update the cell with id geoid with the geolocation
+            const geoid = 'geo-' + ip;
+            // Get all cells with id of the form geo-ipAddress
+            const geoCells = document.querySelectorAll('[id^="geo-' + ip + '"]');
+            // set each cell in geoCells to data
+            geoCells.forEach(cell => {
+                cell.innerHTML = data.country + ', ' + data.regionName + ', ' + data.city;
             });
             fetchCount--;
         })
