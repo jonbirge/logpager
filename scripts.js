@@ -30,10 +30,8 @@ function pollServer() {
     });
 };
 
-// take (n x 5) JSON array of strings and convert to HTML table, assuming the
-// first row is table headers. in addition, make each IP address (the first
-// element of each row) a link that will run a whois query on that IP using a JS
-// function called whois().
+// take n x 5 JSON array of strings and convert to HTML table, assuming the
+// first row is table headers.
 function jsonToTable(json) {
     const data = JSON.parse(json);
     let table = '<table id="log-table">';
@@ -63,6 +61,12 @@ function jsonToTable(json) {
                 // Get the host name from the IP address
                 if (rDNS && !polling)
                     getHostName(hostnameid, ip, signal);
+            } else if (j == 3) {  // status
+                if (data[i][j] == '404') {
+                    table += '<td class="red">' + data[i][j] + '</td>';
+                } else {
+                    table += '<td class="green">' + data[i][j] + '</td>';
+                }
             } else {
                 table += '<td>' + data[i][j] + '</td>';
             }
@@ -77,7 +81,7 @@ function jsonToTable(json) {
 function getHostName(hostnameid, ip, signal) {
     // Get the host name from the IP address
     fetchCount++;
-    fetch('hostname.php?ip=' + ip, {signal})
+    fetch('rdns.php?ip=' + ip, {signal})
     .then(response => response.text())
     .then(data => {
         // Update the cell with id hostnameid with the host name

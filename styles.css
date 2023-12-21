@@ -41,6 +41,18 @@ th {
     font-weight: bold;
 }
 
+.green {
+    font-weight: bold;
+    color: white;
+    background-color: green;
+}
+
+.red {
+    font-weight: bold;
+    color: white;
+    background-color: darkred;
+}
+
 /* Style alternating rows */
 tr:nth-child(even) {
     background-color: #f2f2f2;
