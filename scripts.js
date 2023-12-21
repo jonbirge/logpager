@@ -3,6 +3,7 @@ let polling = false;
 let page = 0;  // last page
 let controller;
 let fetchCount = 0;
+const rDNS = true;  // enable reverse DNS lookups
 
 // pull the log in JSON form from the server
 function pollServer() {
@@ -59,7 +60,9 @@ function jsonToTable(json) {
                 // Add new cell for Host name after the first cell, assigning a random ID to the cell
                 hostnameid = 'ip-' + Math.floor(Math.random() * 1000000);
                 table += '<td id="' + hostnameid + '">-</td>';
-                getHostName(hostnameid, ip, signal);
+                // Get the host name from the IP address
+                if (rDNS && !polling)
+                    getHostName(hostnameid, ip, signal);
             } else {
                 table += '<td>' + data[i][j] + '</td>';
             }
