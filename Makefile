@@ -33,4 +33,3 @@ stop:
 all: build
 
 .PHONY: build all
-

@@ -1,2 +1,2 @@
 # log-pager
-Common Log Format web interface written using PHP and JS
+Common Log Format paging web interface written using PHP and JS.

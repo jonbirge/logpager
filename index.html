@@ -2,13 +2,11 @@
 <html>
 
 <head>
-    <!-- Tell browser to not cache -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="styles.css?version=16">
+    <link rel="stylesheet" type="text/css" href="styles.css">
     <title>Access logs</title>
-    <script src="scripts.js?version=2"></script>
 </head>
 
 <body>
@@ -19,12 +17,18 @@
             <!-- log file will go here -->
         </div>
         <div class="button-set" id="buttons">
+            <button class="toggle-button gray" onclick="page = page + 10; pollServer()">&lt;&lt;</button>
             <button class="toggle-button gray" onclick="page = page + 1; pollServer()">&lt;</button>
-            <span id="page" style="margin: 12px">Last page</span>
+            <span id="page" style="margin: 12px">Loading...</span>
             <button class="toggle-button gray" onclick="page = page - 1; pollServer()">&gt;</button>
-            <button class="toggle-button gray" onclick="page = 0; pollServer()">&gt;&gt;</button>
+            <button class="toggle-button gray" onclick="page = 0; pollServer()">&gt;&gt;&gt;</button>
+        </div>
+        <div id="whois">
+            <!-- whois info will go here -->
         </div>
     </div>
+
+    <script src="scripts.js?version=9"></script>
 </body>
 
 </html>

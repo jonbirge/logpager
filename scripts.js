@@ -7,6 +7,8 @@ function pollServer() {
     if (page < 0) {
         page = 0;  // reset page
     };
+    const whoisDiv = document.getElementById('whois');
+    whoisDiv.innerHTML = '';
     fetch('logtail.php?page=' + page)
     .then(response => response.text())
     .then(data => {
@@ -21,26 +23,58 @@ function pollServer() {
     });
 };
 
-// function to take [n by 5] JSON array of strings and convert to HTML table, assuming first row is header
+// function to take (n x 5) JSON array of strings and convert to HTML table,
+// assuming the first row is table headers. in addition, make each IP
+// address (the first element of each row) a link that will run a whois query on
+// that IP using a JS function called whois().
 function jsonToTable(json) {
-    let table = "<table>";
-    let data = JSON.parse(json);
-    let header = data[0];
-    let rows = data.slice(1);
-    table += "<tr>";
-    header.forEach(function (cell) {
-        table += "<th>" + cell + "</th>";
-    });
-    table += "</tr>";
-    rows.forEach(function (row) {
-        table += "<tr>";
-        row.forEach(function (cell) {
-            table += "<td>" + cell + "</td>";
-        });
-        table += "</tr>";
-    });
-    table += "</table>";
+    const data = JSON.parse(json);
+    let table = '<table>';
+    
+    // write table headers from first row
+    table += '<tr>';
+    for (let i = 0; i < data[0].length; i++) {
+        table += '<th>' + data[0][i] + '</th>';
+    }
+    
+    // write table rows from remaining rows
+    for (let i = 1; i < data.length; i++) {
+        table += '<tr>';
+        for (let j = 0; j < data[i].length; j++) {
+            if (j == 0) {
+                table += '<td><a href="#" onclick="whois(\'' + data[i][j] + '\')">' + data[i][j] + '</a></td>';
+            } else {
+                table += '<td>' + data[i][j] + '</td>';
+            }
+        }
+        table += '</tr>';
+    }
+    table += '</table>';
+
     return table;
+};
+
+// function to run whois query on IP address string using the ARIN.net web service.
+// the response is a JSON object containing the whois information.
+function whois(ip) {
+    const whoisDiv = document.getElementById('whois');
+    whoisDiv.innerHTML = '<h2>Whois ' + ip + '...</h2>';
+    fetch('https://whois.arin.net/rest/ip/' + ip + '.txt?showPocs=true')
+    .then(response => response.text())
+    .then(data => {
+        // remove comment lines from whois data
+        data = data.replace(/^#.*$/gm, '');
+        
+        // remove all blank lines from whois data
+        data = data.replace(/^\s*[\r\n]/gm, '');
+
+        // output to whois div
+        whoisHTML = '<h2>Whois ' + ip + '</h2>';
+        whoisHTML += '<pre>';
+        whoisHTML += data;
+        whoisHTML += '</pre>';
+        whoisDiv.innerHTML = whoisHTML;
+    });
 };
 
 // function to setup polling
