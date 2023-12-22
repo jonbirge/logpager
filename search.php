@@ -3,49 +3,15 @@
 // Parameters
 $maxResults = 100;
 $logFile = "/access.log";
-$searchLines = 10000;
 
 // Get search term from URL
 $searchTerm = $_GET['term'];
 
-// Read in up to 1000 lines from the log file, starting at the end
-$lines = array();
-$handle = fopen($logFile, "r");
-if ($handle) {
-    $lineCount = 0;
-    $pos = -2;
-    $beginning = false;
-    while ($lineCount < $searchLines) {
-        $t = " ";
-        while ($t != "\n") {
-            if (fseek($handle, $pos, SEEK_END) == -1) {
-                $beginning = true; 
-                break; 
-            }
-            $t = fgetc($handle);
-            $pos--;
-        }
-        $lineCount++;
-        if ($beginning) {
-            rewind($handle);
-        }
-        $lines[$lineCount] = fgets($handle);
-        if ($beginning) break;
-    }
-    fclose ($handle);
-}
+// Build UNIX command
+$command = "grep $searchTerm $logFile | tail -n $maxResults";
 
-// Loop through the lines and return the first $maxResults lines that contain
-// the search term
-$results = array();
-foreach ($lines as $line) {
-    if (strpos($line, $searchTerm) !== false) {
-        $results[] = $line;
-        if (count($results) >= $maxResults) {
-            break;
-        }
-    }
-}
+// Run command and store results in array
+exec($command, $results);
 
 // Make array of CLF log headers: IP Address, Timestamp, Request, Status, Size
 $headers = ['IP Address', 'Timestamp', 'Request', 'Status', 'Size'];
