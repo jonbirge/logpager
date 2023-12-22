@@ -1,7 +1,7 @@
 <?php
 
 // Parameters
-$maxResults = 16;
+$maxResults = 100;
 $logFile = "/access.log";
 $searchLines = 10000;
 

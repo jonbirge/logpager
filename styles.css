@@ -114,3 +114,10 @@ tr:nth-child(even) {
 .toggle-button.gray:hover {
     background-color: rgb(137, 137, 137);
 }
+
+/* Light gray style with white text for disabled buttons */
+.toggle-button.disabled {
+    background-color: #acabab;
+    color: white;
+    cursor: not-allowed;
+}
