@@ -43,14 +43,14 @@ th {
 
 .green {
     font-weight: bold;
-    color: white;
-    background-color: green;
+    color: black;
+    background-color: rgb(128, 204, 128);
 }
 
 .red {
     font-weight: bold;
-    color: white;
-    background-color: darkred;
+    color: black;
+    background-color: rgb(252, 199, 199);
 }
 
 /* Style alternating rows */

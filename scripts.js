@@ -1,8 +1,10 @@
 let pollInterval;
 let polling = false;
-let page = 0;  // last page
 let controller;
 let fetchCount = 0;
+let params = new URLSearchParams(window.location.search);
+let page = params.get('page') !== null ? Number(params.get('page')) : 0;
+const geolocate = false;
 
 // pull the log in JSON form from the server
 function pollServer() {
@@ -11,7 +13,7 @@ function pollServer() {
         fetchCount = 0;
     }
     controller = new AbortController();
-    if (page < 0) {ge
+    if (page < 0) {
         page = 0;  // reset page
     };
     const whoisDiv = document.getElementById('whois');
@@ -28,7 +30,7 @@ function pollServer() {
             pageSpan.innerHTML = "Page " + page + " from end";
         }
     });
-};
+}
 
 // take n x 5 JSON array of strings and convert to HTML table, assuming the
 // first row is table headers. write table to div.
@@ -64,6 +66,13 @@ function jsonToTable(json) {
                 // Add new cell for Geolocation after the first cell
                 geoid = 'geo-' + ip;
                 table += '<td id="' + geoid + '">-</td>';
+            } else if (j == 3) {
+                const status = data[i][j];
+                if (status == '404') {
+                    table += '<td class="green">' + data[i][j] + '</td>';
+                } else {
+                    table += '<td class="red">' + data[i][j] + '</td>';
+                }
             } else {
                 table += '<td>' + data[i][j] + '</td>';
             }
@@ -75,11 +84,12 @@ function jsonToTable(json) {
     // Get the host names from the IP addresses
     if (!polling) {
         getHostNames(ips, signal);
-        getGeoLocations(ips, signal);
+        if (geolocate)
+            getGeoLocations(ips, signal);
     }
 
     return table;
-};
+}
 
 // get host names from IP addresses
 function getHostNames(ips, signal) {
@@ -96,7 +106,7 @@ function getHostNames(ips, signal) {
             console.log('Got host name for ' + ip + ': ' + data);
             // Update the cell with id hostnameid with the hostname
             const hostnameid = 'hostname-' + ip;
-            // Get all cells with id of the form hostname-ipAddress
+            // Get all cells with id of the form hostname-ip
             const hostnameCells = document.querySelectorAll('[id^="hostname-' + ip + '"]');
             // set each cell in hostnameCells to data
             hostnameCells.forEach(cell => {
@@ -168,7 +178,7 @@ function whois(ip) {
         whoisHTML += '</pre>';
         whoisDiv.innerHTML = whoisHTML;
     });
-};
+}
 
 // function to setup polling
 function runWatch() {
@@ -186,7 +196,7 @@ function runWatch() {
         watchButton.innerHTML = "Stop";
         watchButton.classList.add("red");
     };
-};
+}
 
 // load the log on page load
 window.onload = pollServer;
