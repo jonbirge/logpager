@@ -170,7 +170,7 @@ function getGeoLocations(ips, signal) {
 function whois(ip) {
     const whoisDiv = document.getElementById('whois');
     whoisDiv.innerHTML = '<h2>Whois ' + ip + '...</h2>';
-    fetch('https://whois.arin.net/rest/ip/' + ip + '.txt?showPocs=true')
+    fetch('whois.php?ip=' + ip)
     .then(response => response.text())
     .then(data => {
         // remove comment lines from whois data
