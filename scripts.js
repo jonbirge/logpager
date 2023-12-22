@@ -192,7 +192,7 @@ function getGeoLocations(ips, signal) {
     fetchCount++;
     // Grab each ip address and send to ip-api.com
     ips.forEach(ip => {
-        fetch('http://ip-api.com/json/' + ip, {signal})
+        fetch('https://ip-api.com/json/' + ip, {signal})
         .then(response => response.json())
         .then(data => {
             // Update the cell with id geoid with the geolocation
