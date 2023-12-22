@@ -52,10 +52,12 @@ function doSearch() {
     } else {
         console.log('searching for ' + search);
         fetchCount++;
-        logDiv.innerHTML = 'Searching for ' + search + '...';
+        logDiv.innerHTML = '<b>Searching for ' + search + '...</b>';
         fetch('search.php?term=' + search, {signal})
         .then(response => response.text())
         .then(data => {
+            fetchCount--;
+
             // write the search results to the log div
             const pageSpan = document.getElementById('page');
             logDiv.innerHTML = jsonToTable(data);
@@ -89,7 +91,6 @@ function doSearch() {
                 resetButton.classList.remove("disabled");
             }
         });
-        fetchCount--;
     }
 }
 
