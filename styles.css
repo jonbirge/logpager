@@ -66,6 +66,11 @@ tr:nth-child(even) {
     }
 }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+}
+
 /* Center the buttons */
 .button-set {
     text-align: center;
@@ -77,7 +82,7 @@ tr:nth-child(even) {
     background-color: #4CAF50; /* Green background */
     border: none;
     color: white;
-    padding: 10px 14px; /* Larger padding for a bigger button */
+    padding: 8px 10px; /* Larger padding for a bigger button */
     text-align: center;
     text-decoration: none;
     display: inline-block;

@@ -40,6 +40,31 @@ function pollServer() {
     });
 }
 
+// do search on log
+function doSearch() {
+    const searchInput = document.getElementById('search-input');
+    const pageSpan = document.getElementById('page');
+    const search = searchInput.value;
+    if (search == '') {
+        console.log('search is empty');
+        searchSpan.innerHTML = '';
+        pollServer();
+    } else {
+        console.log('searching for ' + search);
+        fetch('search.php?term=' + search)
+        .then(response => response.text())
+        .then(data => {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML = jsonToTable(data);
+            pageSpan.innerHTML = 'Search for ' + search + '...';
+            // set page to 0 so that the page number is reset when the search
+            // is cleared
+            page = 0;
+            // hide 
+        });
+    }
+}
+
 // take n x 5 JSON array of strings and convert to HTML table, assuming the
 // first row is table headers. write table to div.
 function jsonToTable(json) {
