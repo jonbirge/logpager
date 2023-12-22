@@ -5,7 +5,7 @@ let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get('page') !== null ? Number(params.get('page')) : 0;
 const geolocate = true;
-const apiWait = 500;  // ms to wait between external API calls
+const apiWait = 400;  // ms to wait between external API calls
 
 // pull the log in JSON form from the server
 function pollServer() {
