@@ -147,6 +147,8 @@ function jsonToTable(json) {
                 // Add new cell for Geolocation after the first cell
                 geoid = 'geo-' + ip;
                 table += '<td id="' + geoid + '">-</td>';
+            } else if (j == 2) {
+                table += '<td class="request">' + data[i][j] + '</td>';
             } else if (j == 3) {
                 const status = data[i][j];
                 if (status == '200' || status == '304') {

@@ -22,6 +22,14 @@ a {
     color: black;
 }
 
+.log {
+    text-align: center;
+    margin: 0 auto;
+    width: 100%;
+    overflow: auto;
+    white-space: nowrap;
+}
+
 /* Style the table */
 table {
     border-collapse: collapse;
@@ -39,6 +47,11 @@ th {
     background-color: #323232cc;
     color: white;
     font-weight: bold;
+}
+
+/* Console font for HTTP requests */
+.request {
+    font-family: 'Consolas', monospace;
 }
 
 .green {
