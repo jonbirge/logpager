@@ -8,6 +8,7 @@ const geolocate = false;
 
 // pull the log in JSON form from the server
 function pollServer() {
+    // abort any pending fetches
     if (fetchCount > 0) {
         controller.abort();
         fetchCount = 0;
@@ -16,6 +17,13 @@ function pollServer() {
     if (page < 0) {
         page = 0;  // reset page
     };
+
+    // update the page number in the URL
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page);
+    window.history.replaceState({}, '', url);
+
+    // get the log from the server
     const whoisDiv = document.getElementById('whois');
     whoisDiv.innerHTML = '';
     fetch('logtail.php?page=' + page)
