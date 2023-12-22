@@ -45,20 +45,21 @@ function pollServer() {
 function doSearch() {
     const signal = controller.signal;
     const searchInput = document.getElementById('search-input');
+    const logDiv = document.getElementById('log');
     const search = searchInput.value;
     if (search == '') {
         console.log('search is empty');
     } else {
         console.log('searching for ' + search);
         fetchCount++;
+        logDiv.innerHTML = 'Searching for ' + search + '...';
         fetch('search.php?term=' + search, {signal})
         .then(response => response.text())
         .then(data => {
             // write the search results to the log div
-            const logDiv = document.getElementById('log');
             const pageSpan = document.getElementById('page');
             logDiv.innerHTML = jsonToTable(data);
-            pageSpan.innerHTML = 'Search for ' + search + '...';
+            pageSpan.innerHTML = '<b>Search results for ' + search + '</b>';
 
             // disable all other buttons and 
             const buttons = document.querySelectorAll('button');
@@ -67,34 +68,48 @@ function doSearch() {
                 button.classList.add("disabled");
             });
 
-            // turn the search button into a reset button and enable
+            // enable search button
             const searchButton = document.getElementById('search-button');
-            searchButton.innerHTML = 'Reset';
-            searchButton.onclick = resetSearch;
             searchButton.disabled = false;
             searchButton.classList.remove("disabled");
+
+            // add a reset button to the left of the search text box if it doesn't exist
+            const resetButton = document.getElementById('reset-button');
+            if (resetButton === null) {
+                const resetButton = document.createElement('button');
+                resetButton.id = 'reset-button';
+                resetButton.innerHTML = 'Reset';
+                resetButton.classList.add("toggle-button");
+                resetButton.classList.add("gray");
+                resetButton.onclick = resetSearch;
+                const searchSpan = document.getElementById('search-span');
+                searchSpan.insertBefore(resetButton, searchSpan.firstChild);
+            } else {
+                resetButton.disabled = false;
+                resetButton.classList.remove("disabled");
+            }
         });
         fetchCount--;
     }
 }
 
-// reset search
+// reset search, re-enable all buttons and remove reset button
 function resetSearch() {
-    const searchInput = document.getElementById('search-input');
-    searchInput.value = '';
-    const searchButton = document.getElementById('search-button');
-    searchButton.innerHTML = 'Search';
-    searchButton.onclick = doSearch;
+    const signal = controller.signal;
+    const logDiv = document.getElementById('log');
     const pageSpan = document.getElementById('page');
-    pageSpan.innerHTML = '';
-
-    // enable all other buttons
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+    const resetButton = document.getElementById('reset-button');
     const buttons = document.querySelectorAll('button');
     buttons.forEach(button => {
         button.disabled = false;
         button.classList.remove("disabled");
     });
-
+    searchButton.innerHTML = 'Search';
+    searchButton.onclick = doSearch;
+    searchInput.value = '';
+    resetButton.remove();
     pollServer();
 }
 

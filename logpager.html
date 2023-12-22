@@ -2,10 +2,9 @@
 <html>
 
 <head>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="styles.css?version=17">
+    <link rel="stylesheet" type="text/css" href="styles.css?version=21">
     <title>Access logs</title>
 </head>
 
@@ -19,10 +18,12 @@
             <button class="toggle-button" id="watch-button" onclick="runWatch()">Watch</button>
         
             <!-- search form -->
-            <form id="search-form" onsubmit="doSearch(); return false;">
-                <input type="text" id="search-input" placeholder="Search..." autocomplete="off" style="font-size: 16px;">
-                <button class="toggle-button gray" id="search-button">Search</button>
-            </form>
+            <span id="search-span" class="header">
+                <form id="search-form" onsubmit="doSearch(); return false;">
+                    <input type="text" id="search-input" placeholder="Search..." autocomplete="off" class="text-box">
+                    <button class="toggle-button gray" id="search-button">Search</button>
+                </form>
+            </span>
         </div>
 
         <div id="log">
@@ -44,7 +45,7 @@
 
     </div>
 
-    <script src="scripts.js?version=14"></script>
+    <script src="scripts.js?version=19"></script>
 </body>
 
 </html>

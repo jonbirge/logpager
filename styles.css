@@ -71,6 +71,13 @@ tr:nth-child(even) {
     justify-content: space-between;
 }
 
+/* Text box with 16pt font and wide left and right margins */
+.text-box {
+    font-size: 16px;
+    margin-left: 16px;
+    margin-right: 12px;
+}
+
 /* Center the buttons */
 .button-set {
     text-align: center;
@@ -117,7 +124,7 @@ tr:nth-child(even) {
 
 /* Light gray style with white text for disabled buttons */
 .toggle-button.disabled {
-    background-color: #acabab;
+    background-color: #d0d0d0;
     color: white;
     cursor: not-allowed;
 }
