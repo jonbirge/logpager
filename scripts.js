@@ -4,7 +4,7 @@ let controller;
 let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get('page') !== null ? Number(params.get('page')) : 0;
-const geolocate = false;
+const geolocate = true;
 
 // pull the log in JSON form from the server
 function pollServer() {
@@ -40,13 +40,67 @@ function pollServer() {
     });
 }
 
+// do search on log
+function doSearch() {
+    const searchInput = document.getElementById('search-input');
+    const search = searchInput.value;
+    if (search == '') {
+        console.log('search is empty');
+    } else {
+        console.log('searching for ' + search);
+        fetch('search.php?term=' + search)
+        .then(response => response.text())
+        .then(data => {
+            // write the search results to the log div
+            const logDiv = document.getElementById('log');
+            const pageSpan = document.getElementById('page');
+            logDiv.innerHTML = jsonToTable(data);
+            pageSpan.innerHTML = 'Search for ' + search + '...';
+
+            // disable all other buttons and 
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.disabled = true;
+                button.classList.add("disabled");
+            });
+
+            // turn the search button into a reset button and enable
+            const searchButton = document.getElementById('search-button');
+            searchButton.innerHTML = 'Reset';
+            searchButton.onclick = resetSearch;
+            searchButton.disabled = false;
+            searchButton.classList.remove("disabled");
+        });
+    }
+}
+
+// reset search
+function resetSearch() {
+    const searchInput = document.getElementById('search-input');
+    searchInput.value = '';
+    const searchButton = document.getElementById('search-button');
+    searchButton.innerHTML = 'Search';
+    searchButton.onclick = doSearch;
+    const pageSpan = document.getElementById('page');
+    pageSpan.innerHTML = '';
+
+    // enable all other buttons
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.disabled = false;
+        button.classList.remove("disabled");
+    });
+
+    pollServer();
+}
+
 // take n x 5 JSON array of strings and convert to HTML table, assuming the
 // first row is table headers. write table to div.
 function jsonToTable(json) {
-    const data = JSON.parse(json);
-    let table = '<table id="log-table">';
     const signal = controller.signal;
     let ips = [];
+    const data = JSON.parse(json);
+    let table = '<table id="log-table">';
 
     // write table headers from first row
     table += '<tr>';
@@ -77,9 +131,9 @@ function jsonToTable(json) {
             } else if (j == 3) {
                 const status = data[i][j];
                 if (status == '404') {
-                    table += '<td class="green">' + data[i][j] + '</td>';
-                } else {
                     table += '<td class="red">' + data[i][j] + '</td>';
+                } else {
+                    table += '<td class="green">' + data[i][j] + '</td>';
                 }
             } else {
                 table += '<td>' + data[i][j] + '</td>';
@@ -107,11 +161,9 @@ function getHostNames(ips, signal) {
     fetchCount++;
     // Grab each ip address and send to rdns.php
     ips.forEach(ip => {
-        console.log('Getting host name for ' + ip);
         fetch('rdns.php?ip=' + ip, {signal})
         .then(response => response.text())
         .then(data => {
-            console.log('Got host name for ' + ip + ': ' + data);
             // Update the cell with id hostnameid with the hostname
             const hostnameid = 'hostname-' + ip;
             // Get all cells with id of the form hostname-ip
@@ -140,11 +192,9 @@ function getGeoLocations(ips, signal) {
     fetchCount++;
     // Grab each ip address and send to ip-api.com
     ips.forEach(ip => {
-        console.log('Getting geolocation for ' + ip);
         fetch('http://ip-api.com/json/' + ip, {signal})
         .then(response => response.json())
         .then(data => {
-            console.log('Got geolocation for ' + ip + ': ' + data);
             // Update the cell with id geoid with the geolocation
             const geoid = 'geo-' + ip;
             // Get all cells with id of the form geo-ipAddress

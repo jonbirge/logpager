@@ -5,17 +5,31 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="styles.css?version=7">
+    <link rel="stylesheet" type="text/css" href="styles.css?version=17">
     <title>Access logs</title>
 </head>
 
 <body>
     <div class="container">
+
         <h1>Access log</h1>
-        <button class="toggle-button" id="watch-button" onclick="runWatch()">Watch</button>
+        
+        <div class="header">
+            <!-- watch button -->
+            <button class="toggle-button" id="watch-button" onclick="runWatch()">Watch</button>
+        
+            <!-- search form -->
+            <form id="search-form" onsubmit="doSearch(); return false;">
+                <input type="text" id="search-input" placeholder="Search..." autocomplete="off" style="font-size: 16px;">
+                <button class="toggle-button gray" id="search-button" onclick="doSearch()">Search</button>
+            </form>
+        </div>
+
         <div id="log">
             <!-- log file will go here -->
         </div>
+ 
+        <!-- paging buttons -->
         <div class="button-set" id="buttons">
             <button class="toggle-button gray" onclick="page = page + 10; pollServer()">&lt;&lt;</button>
             <button class="toggle-button gray" onclick="page = page + 1; pollServer()">&lt;</button>
@@ -23,12 +37,14 @@
             <button class="toggle-button gray" onclick="page = page - 1; pollServer()">&gt;</button>
             <button class="toggle-button gray" onclick="page = 0; pollServer()">&gt;&gt;&gt;</button>
         </div>
+
         <div id="whois">
             <!-- whois info will go here -->
         </div>
+
     </div>
 
-    <script src="scripts.js"></script>
+    <script src="scripts.js?version=11"></script>
 </body>
 
 </html>
