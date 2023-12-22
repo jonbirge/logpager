@@ -13,6 +13,9 @@ $command = "grep $searchTerm $logFile | tail -n $maxResults";
 // Run command and store results in array
 exec($command, $results);
 
+// Wait two seconds to simulate long running process
+sleep(2);
+
 // Make array of CLF log headers: IP Address, Timestamp, Request, Status, Size
 $headers = ['IP Address', 'Timestamp', 'Request', 'Status', 'Size'];
 
