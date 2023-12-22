@@ -4,7 +4,7 @@ let controller;
 let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get('page') !== null ? Number(params.get('page')) : 0;
-const geolocate = false;
+const geolocate = true;
 
 // pull the log in JSON form from the server
 function pollServer() {
