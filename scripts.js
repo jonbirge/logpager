@@ -108,7 +108,7 @@ function jsonToTable(json) {
         table += '<th>' + data[0][i] + '</th>';
         if (i == 0) {
             table += '<th>Host name</th>';
-            table += '<th>Geolocation (courtesy of <a href=ip-api.com style="color: white">ip-api.com</a>)</th>';
+            table += '<th>Geolocation (courtesy of <a href=https://www.ip-api.com style="color: white">ip-api.com</a>)</th>';
         }
     }
     table += '</tr>';
@@ -192,7 +192,7 @@ function getGeoLocations(ips, signal) {
     fetchCount++;
     // Grab each ip address and send to ip-api.com
     ips.forEach(ip => {
-        fetch('http://ip-api.com/json/' + ip, {signal})
+        fetch('geo.php?ip=' + ip, {signal})
         .then(response => response.json())
         .then(data => {
             // Update the cell with id geoid with the geolocation
