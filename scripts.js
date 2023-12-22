@@ -11,9 +11,10 @@ const apiWait = 400;  // ms to wait between external API calls
 function pollServer() {
     // abort any pending fetches
     if (fetchCount > 0) {
+        console.log('Aborting ' + fetchCount + ' fetches');
         controller.abort();
-        fetchCount = 0;
     }
+    fetchCount = 0;
     controller = new AbortController();
     if (page < 0) {
         page = 0;  // reset page
