@@ -5,6 +5,7 @@ let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get('page') !== null ? Number(params.get('page')) : 0;
 const geolocate = true;
+const apiWait = 500;  // ms to wait between external API calls
 
 // pull the log in JSON form from the server
 function pollServer() {
@@ -42,13 +43,15 @@ function pollServer() {
 
 // do search on log
 function doSearch() {
+    const signal = controller.signal;
     const searchInput = document.getElementById('search-input');
     const search = searchInput.value;
     if (search == '') {
         console.log('search is empty');
     } else {
         console.log('searching for ' + search);
-        fetch('search.php?term=' + search)
+        fetchCount++;
+        fetch('search.php?term=' + search, {signal})
         .then(response => response.text())
         .then(data => {
             // write the search results to the log div
@@ -71,6 +74,7 @@ function doSearch() {
             searchButton.disabled = false;
             searchButton.classList.remove("disabled");
         });
+        fetchCount--;
     }
 }
 
@@ -191,7 +195,9 @@ function getGeoLocations(ips, signal) {
     console.log('Getting geolocations for ' + ips);
     fetchCount++;
     // Grab each ip address and send to ip-api.com
+    let waitTime = 0;
     ips.forEach(ip => {
+        setTimeout(() => {
         fetch('geo.php?ip=' + ip, {signal})
         .then(response => response.json())
         .then(data => {
@@ -212,6 +218,8 @@ function getGeoLocations(ips, signal) {
               console.error('Fetch error:', error);
             }
         });
+        }, waitTime, {signal});
+        waitTime += apiWait;
     });
 }
 

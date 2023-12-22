@@ -13,7 +13,7 @@ push: build
 	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
 
 # No cache build (a clear abuse of 'make clean')
-clean:
+no-cache:
 	docker build --no-cache .
 
 # Run locally for final testing
