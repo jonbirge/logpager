@@ -134,10 +134,10 @@ function jsonToTable(json) {
                 table += '<td id="' + geoid + '">-</td>';
             } else if (j == 3) {
                 const status = data[i][j];
-                if (status == '404') {
-                    table += '<td class="red">' + data[i][j] + '</td>';
-                } else {
+                if (status == '200') {
                     table += '<td class="green">' + data[i][j] + '</td>';
+                } else {
+                    table += '<td class="red">' + data[i][j] + '</td>';
                 }
             } else {
                 table += '<td>' + data[i][j] + '</td>';
