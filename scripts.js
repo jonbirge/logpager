@@ -273,10 +273,28 @@ function runWatch() {
         clearInterval(pollInterval);
         watchButton.innerHTML = "Watch";
         watchButton.classList.remove("red");
+
+        // enable all other buttons
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.disabled = false;
+            button.classList.remove("disabled");
+        });
     } else {
         pollServer();
         polling = true;
         pollInterval = setInterval(pollServer, 10000);
+
+        // disable all other buttons
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.disabled = true;
+            button.classList.add("disabled");
+        });
+
+        // enable watch button
+        watchButton.disabled = false;
+        watchButton.classList.remove("disabled");
         watchButton.innerHTML = "Stop";
         watchButton.classList.add("red");
     };
