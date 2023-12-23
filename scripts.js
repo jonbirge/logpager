@@ -268,30 +268,28 @@ function whois(ip) {
 function runWatch() {
     const watchButton = document.getElementById('watch-button');
     page = 0;  // reset page
-    if (polling) {
+    if (polling) {  // stop polling
         polling = false;
         clearInterval(pollInterval);
         watchButton.innerHTML = "Watch";
         watchButton.classList.remove("red");
-
         // enable all other buttons
         const buttons = document.querySelectorAll('button');
         buttons.forEach(button => {
             button.disabled = false;
             button.classList.remove("disabled");
         });
+        pollServer();
     } else {
         pollServer();
         polling = true;
         pollInterval = setInterval(pollServer, 10000);
-
         // disable all other buttons
         const buttons = document.querySelectorAll('button');
         buttons.forEach(button => {
             button.disabled = true;
             button.classList.add("disabled");
         });
-
         // enable watch button
         watchButton.disabled = false;
         watchButton.classList.remove("disabled");
