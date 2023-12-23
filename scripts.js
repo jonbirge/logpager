@@ -11,10 +11,11 @@ const apiWait = 400;  // ms to wait between external API calls
 function pollServer() {
     // abort any pending fetches
     if (fetchCount > 0) {
+        console.log('Aborting ' + fetchCount + ' fetches');
         controller.abort();
-        fetchCount = 0;
     }
     controller = new AbortController();
+    fetchCount = 0;
     if (page < 0) {
         page = 0;  // reset page
     };
@@ -52,14 +53,17 @@ function doSearch() {
     } else {
         console.log('searching for ' + search);
         fetchCount++;
-        logDiv.innerHTML = 'Searching for ' + search + '...';
+        searchInput.value = 'Searching...';
         fetch('search.php?term=' + search, {signal})
         .then(response => response.text())
         .then(data => {
+            fetchCount--;
+
             // write the search results to the log div
             const pageSpan = document.getElementById('page');
             logDiv.innerHTML = jsonToTable(data);
             pageSpan.innerHTML = '<b>Search results for ' + search + '</b>';
+            searchInput.value = '';
 
             // disable all other buttons and 
             const buttons = document.querySelectorAll('button');
@@ -89,7 +93,6 @@ function doSearch() {
                 resetButton.classList.remove("disabled");
             }
         });
-        fetchCount--;
     }
 }
 

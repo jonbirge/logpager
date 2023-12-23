@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="styles.css?version=22">
+    <link rel="stylesheet" type="text/css" href="styles.css?version=21">
     <title>Access logs</title>
 </head>
 
@@ -33,11 +33,11 @@
  
         <!-- paging buttons -->
         <div class="button-set" id="buttons">
-            <button class="toggle-button gray" onclick="page = page + 10; pollServer()">&lt;&lt;</button>
-            <button class="toggle-button gray" onclick="page = page + 1; pollServer()">&lt;</button>
+            <button class="toggle-button gray" onclick="page = page + 10; pollServer();">&lt;&lt;</button>
+            <button class="toggle-button gray" onclick="page = page + 1; pollServer();">&lt;</button>
             <span id="page" style="margin: 12px">Loading...</span>
-            <button class="toggle-button gray" onclick="page = page - 1; pollServer()">&gt;</button>
-            <button class="toggle-button gray" onclick="page = 0; pollServer()">&gt;&gt;&gt;</button>
+            <button class="toggle-button gray" onclick="page = page - 1; pollServer();">&gt;</button>
+            <button class="toggle-button gray" onclick="page = 0; pollServer();">&gt;&gt;&gt;</button>
         </div>
 
         <div id="whois">
