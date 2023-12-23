@@ -4,8 +4,8 @@ let controller;
 let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get('page') !== null ? Number(params.get('page')) : 0;
-const geolocate = true;
-const apiWait = 400;  // ms to wait between external API calls
+let geolocate = true;
+const apiWait = 250;  // ms to wait between external API calls
 
 // pull the log in JSON form from the server
 function pollServer() {
@@ -168,11 +168,9 @@ function jsonToTable(json) {
     table += '</table>';
 
     // Get the host names from the IP addresses
-    if (!polling) {
-        getHostNames(ips, signal);
-        if (geolocate)
-            getGeoLocations(ips, signal);
-    }
+    getHostNames(ips, signal);
+    if (geolocate)
+        getGeoLocations(ips, signal);
 
     return table;
 }
