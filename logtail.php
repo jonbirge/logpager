@@ -9,49 +9,20 @@ $logFilePath = '/access.log';
 
 // Function to read the nth page from the end of the file
 function getTailPage($filePath, $linesPerPage, $page = 0) {
-    // Check if the file exists and is readable
-    if (!is_readable($filePath)) {
-        return "File not found or not readable.";
-    }
+    // compute the first and last line numbers
+    $firstLine = $page * $linesPerPage + 1;
+    $lastLine = $firstLine + ($linesPerPage - 1);
 
-    // Open the file for reading
-    $fileHandle = fopen($filePath, 'r');
-    if (!$fileHandle) {
-        return "Unable to open file.";
-    }
+    // use popen to read the file in reverse using fast unix tools
+    $cmd = sprintf('tail -n %d %s | head -n %d', $lastLine, escapeshellarg($filePath), $linesPerPage);
+    $fp = popen($cmd, 'r');
 
-    // Seek to the end of the file
-    fseek($fileHandle, 0, SEEK_END);
-    $fileSize = ftell($fileHandle);
+    // read the lines from the pipe
     $lines = [];
-    $currentLine = '';
-    $lineCount = 0;
-
-    // Read backwards to find the starting line
-    for ($pos = $fileSize - 2; $pos >= 0; $pos--) {
-        fseek($fileHandle, $pos);
-        $char = fgetc($fileHandle);
-
-        if ($char === "\n") {
-            // Start capturing lines after reaching the required page
-            if (++$lineCount >= $linesPerPage * ($page + 1)) {
-                break;
-            }
-            if ($lineCount > $linesPerPage * $page) {
-                array_unshift($lines, $currentLine);
-                $currentLine = '';
-            }
-        } elseif ($pos > 0) {
-            $currentLine = $char . $currentLine;
-        }
+    while ($line = fgets($fp)) {
+        $lines[] = $line;
     }
 
-    // Add the last line if the file does not end with a newline
-    if ($lineCount > $linesPerPage * $page && $currentLine !== '') {
-        array_unshift($lines, $currentLine);
-    }
-
-    fclose($fileHandle);
     return $lines;
 }
 
