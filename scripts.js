@@ -266,6 +266,9 @@ function whois(ip) {
 
 // function to setup polling
 function runWatch() {
+    const uielements = document.querySelectorAll('button');
+    const textedit = document.getElementById('search-input');
+    uielements.push(textedit);
     const watchButton = document.getElementById('watch-button');
     page = 0;  // reset page
     if (polling) {  // stop polling
@@ -274,9 +277,6 @@ function runWatch() {
         watchButton.innerHTML = "Watch";
         watchButton.classList.remove("red");
         // enable all other ui elements
-        const buttons = document.querySelectorAll('button');
-        const textedit = document.getElementById('search-input');
-        const uielements = buttons + textedit;
         uielements.forEach(uielement => {
             uielement.disabled = false;
             uielement.classList.remove("disabled");
@@ -287,9 +287,6 @@ function runWatch() {
         polling = true;
         pollInterval = setInterval(pollServer, 10000);
         // disable all other ui elements
-        const buttons = document.querySelectorAll('button');
-        const textedit = document.getElementById('search-input');
-        const uielements = buttons + textedit;
         uielements.forEach(uielement => {
             uielement.disabled = true;
             uielement.classList.add("disabled");
