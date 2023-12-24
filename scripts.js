@@ -273,22 +273,26 @@ function runWatch() {
         clearInterval(pollInterval);
         watchButton.innerHTML = "Watch";
         watchButton.classList.remove("red");
-        // enable all other buttons
+        // enable all other ui elements
         const buttons = document.querySelectorAll('button');
-        buttons.forEach(button => {
-            button.disabled = false;
-            button.classList.remove("disabled");
+        const textedit = document.getElementById('search-input');
+        const uielements = buttons + textedit;
+        uielements.forEach(uielement => {
+            uielement.disabled = false;
+            uielement.classList.remove("disabled");
         });
         pollServer();
     } else {
         pollServer();
         polling = true;
         pollInterval = setInterval(pollServer, 10000);
-        // disable all other buttons
+        // disable all other ui elements
         const buttons = document.querySelectorAll('button');
-        buttons.forEach(button => {
-            button.disabled = true;
-            button.classList.add("disabled");
+        const textedit = document.getElementById('search-input');
+        const uielements = buttons + textedit;
+        uielements.forEach(uielement => {
+            uielement.disabled = true;
+            uielement.classList.add("disabled");
         });
         // enable watch button
         watchButton.disabled = false;
