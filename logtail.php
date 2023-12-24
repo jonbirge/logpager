@@ -9,23 +9,20 @@ $logFilePath = '/access.log';
 
 // Function to read the nth page from the end of the file
 function getTailPage($filePath, $linesPerPage, $page = 0) {
-    // read the file in reverse using tac
-    $tac = popen("tac $filePath", 'r');
-
     // compute the first and last line numbers
     $firstLine = $page * $linesPerPage;
     $lastLine = $firstLine + ($linesPerPage - 1);
 
-    // return the lines of interest as an array
+    // use popen to read the file in reverse using tac and pipe to sed to pick out the lines
+    $cmd = sprintf('tac %s | sed -n %d,%dp', escapeshellarg($filePath), $firstLine + 1, $lastLine + 1);
+    $fp = popen($cmd, 'r');
+
+    // read the lines from the pipe
     $lines = [];
-    $lineNumber = 0;
-    while (($line = fgets($tac)) !== false) {
-        if ($lineNumber >= $firstLine && $lineNumber <= $lastLine) {
-            $lines[] = $line;
-        }
-        $lineNumber++;
+    while ($line = fgets($fp)) {
+        $lines[] = $line;
     }
-    pclose($tac);
+
     return $lines;
 }
 
