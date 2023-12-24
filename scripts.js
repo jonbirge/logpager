@@ -266,7 +266,7 @@ function whois(ip) {
 
 // function to setup polling
 function runWatch() {
-    const uielements = document.querySelectorAll('button');
+    const uielements = [...document.querySelectorAll('button')];
     const textedit = document.getElementById('search-input');
     uielements.push(textedit);
     const watchButton = document.getElementById('watch-button');
