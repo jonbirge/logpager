@@ -4,8 +4,8 @@ let controller;
 let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get('page') !== null ? Number(params.get('page')) : 0;
-const geolocate = true;
-const apiWait = 400;  // ms to wait between external API calls
+let geolocate = true;
+const apiWait = 250;  // ms to wait between external API calls
 
 // pull the log in JSON form from the server
 function pollServer() {
@@ -168,11 +168,9 @@ function jsonToTable(json) {
     table += '</table>';
 
     // Get the host names from the IP addresses
-    if (!polling) {
-        getHostNames(ips, signal);
-        if (geolocate)
-            getGeoLocations(ips, signal);
-    }
+    getHostNames(ips, signal);
+    if (geolocate)
+        getGeoLocations(ips, signal);
 
     return table;
 }
@@ -270,15 +268,35 @@ function whois(ip) {
 function runWatch() {
     const watchButton = document.getElementById('watch-button');
     page = 0;  // reset page
-    if (polling) {
+    if (polling) {  // stop polling
         polling = false;
         clearInterval(pollInterval);
         watchButton.innerHTML = "Watch";
         watchButton.classList.remove("red");
+        // enable all other ui elements
+        const buttons = document.querySelectorAll('button');
+        const textedit = document.getElementById('search-input');
+        const uielements = buttons + textedit;
+        uielements.forEach(uielement => {
+            uielement.disabled = false;
+            uielement.classList.remove("disabled");
+        });
+        pollServer();
     } else {
         pollServer();
         polling = true;
         pollInterval = setInterval(pollServer, 10000);
+        // disable all other ui elements
+        const buttons = document.querySelectorAll('button');
+        const textedit = document.getElementById('search-input');
+        const uielements = buttons + textedit;
+        uielements.forEach(uielement => {
+            uielement.disabled = true;
+            uielement.classList.add("disabled");
+        });
+        // enable watch button
+        watchButton.disabled = false;
+        watchButton.classList.remove("disabled");
         watchButton.innerHTML = "Stop";
         watchButton.classList.add("red");
     };
