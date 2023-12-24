@@ -29,17 +29,17 @@ function pollServer() {
     const whoisDiv = document.getElementById('whois');
     whoisDiv.innerHTML = '';
     fetch('logtail.php?page=' + page)
-    .then(response => response.text())
-    .then(data => {
-        const logDiv = document.getElementById('log');
-        const pageSpan = document.getElementById('page');
-        logDiv.innerHTML = jsonToTable(data);
-        if (page == 0) {
-            pageSpan.innerHTML = "Last page";
-        } else {
-            pageSpan.innerHTML = "Page " + page + " from end";
-        }
-    });
+        .then(response => response.text())
+        .then(data => {
+            const logDiv = document.getElementById('log');
+            const pageSpan = document.getElementById('page');
+            logDiv.innerHTML = jsonToTable(data);
+            if (page == 0) {
+                pageSpan.innerHTML = "Last page";
+            } else {
+                pageSpan.innerHTML = "Page " + page + " from end";
+            }
+        });
 }
 
 // do search on log
@@ -54,45 +54,45 @@ function doSearch() {
         console.log('searching for ' + search);
         fetchCount++;
         searchInput.value = 'Searching...';
-        fetch('search.php?term=' + search, {signal})
-        .then(response => response.text())
-        .then(data => {
-            fetchCount--;
+        fetch('search.php?term=' + search, { signal })
+            .then(response => response.text())
+            .then(data => {
+                fetchCount--;
 
-            // write the search results to the log div
-            const pageSpan = document.getElementById('page');
-            logDiv.innerHTML = jsonToTable(data);
-            pageSpan.innerHTML = '<b>Search results for ' + search + '</b>';
-            searchInput.value = '';
+                // write the search results to the log div
+                const pageSpan = document.getElementById('page');
+                logDiv.innerHTML = jsonToTable(data);
+                pageSpan.innerHTML = '<b>Search results for ' + search + '</b>';
+                searchInput.value = '';
 
-            // disable all other buttons and 
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(button => {
-                button.disabled = true;
-                button.classList.add("disabled");
+                // disable all other buttons and 
+                const buttons = document.querySelectorAll('button');
+                buttons.forEach(button => {
+                    button.disabled = true;
+                    button.classList.add("disabled");
+                });
+
+                // enable search button
+                const searchButton = document.getElementById('search-button');
+                searchButton.disabled = false;
+                searchButton.classList.remove("disabled");
+
+                // add a reset button to the left of the search text box if it doesn't exist
+                const resetButton = document.getElementById('reset-button');
+                if (resetButton === null) {
+                    const resetButton = document.createElement('button');
+                    resetButton.id = 'reset-button';
+                    resetButton.innerHTML = 'Reset';
+                    resetButton.classList.add("toggle-button");
+                    resetButton.classList.add("gray");
+                    resetButton.onclick = resetSearch;
+                    const searchSpan = document.getElementById('search-span');
+                    searchSpan.insertBefore(resetButton, searchSpan.firstChild);
+                } else {
+                    resetButton.disabled = false;
+                    resetButton.classList.remove("disabled");
+                }
             });
-
-            // enable search button
-            const searchButton = document.getElementById('search-button');
-            searchButton.disabled = false;
-            searchButton.classList.remove("disabled");
-
-            // add a reset button to the left of the search text box if it doesn't exist
-            const resetButton = document.getElementById('reset-button');
-            if (resetButton === null) {
-                const resetButton = document.createElement('button');
-                resetButton.id = 'reset-button';
-                resetButton.innerHTML = 'Reset';
-                resetButton.classList.add("toggle-button");
-                resetButton.classList.add("gray");
-                resetButton.onclick = resetSearch;
-                const searchSpan = document.getElementById('search-span');
-                searchSpan.insertBefore(resetButton, searchSpan.firstChild);
-            } else {
-                resetButton.disabled = false;
-                resetButton.classList.remove("disabled");
-            }
-        });
     }
 }
 
@@ -134,7 +134,7 @@ function jsonToTable(json) {
         }
     }
     table += '</tr>';
-    
+
     // write table rows from remaining rows
     for (let i = 1; i < data.length; i++) {
         table += '<tr>';
@@ -183,26 +183,26 @@ function getHostNames(ips, signal) {
     fetchCount++;
     // Grab each ip address and send to rdns.php
     ips.forEach(ip => {
-        fetch('rdns.php?ip=' + ip, {signal})
-        .then(response => response.text())
-        .then(data => {
-            // Update the cell with id hostnameid with the hostname
-            const hostnameid = 'hostname-' + ip;
-            // Get all cells with id of the form hostname-ip
-            const hostnameCells = document.querySelectorAll('[id^="hostname-' + ip + '"]');
-            // set each cell in hostnameCells to data
-            hostnameCells.forEach(cell => {
-                cell.innerHTML = data;
+        fetch('rdns.php?ip=' + ip, { signal })
+            .then(response => response.text())
+            .then(data => {
+                // Update the cell with id hostnameid with the hostname
+                const hostnameid = 'hostname-' + ip;
+                // Get all cells with id of the form hostname-ip
+                const hostnameCells = document.querySelectorAll('[id^="hostname-' + ip + '"]');
+                // set each cell in hostnameCells to data
+                hostnameCells.forEach(cell => {
+                    cell.innerHTML = data;
+                });
+                fetchCount--;
+            })
+            .catch(error => {
+                if (error.name === 'AbortError') {
+                    console.log('Fetch safely aborted');
+                } else {
+                    console.error('Fetch error:', error);
+                }
             });
-            fetchCount--;
-        })
-        .catch(error => {
-            if (error.name === 'AbortError') {
-              console.log('Fetch safely aborted');
-            } else {
-              console.error('Fetch error:', error);
-            }
-        });
     });
 }
 
@@ -216,27 +216,27 @@ function getGeoLocations(ips, signal) {
     let waitTime = 0;
     ips.forEach(ip => {
         setTimeout(() => {
-        fetch('geo.php?ip=' + ip, {signal})
-        .then(response => response.json())
-        .then(data => {
-            // Update the cell with id geoid with the geolocation
-            const geoid = 'geo-' + ip;
-            // Get all cells with id of the form geo-ipAddress
-            const geoCells = document.querySelectorAll('[id^="geo-' + ip + '"]');
-            // set each cell in geoCells to data
-            geoCells.forEach(cell => {
-                cell.innerHTML = data.country + ', ' + data.regionName + ', ' + data.city;
-            });
-            fetchCount--;
-        })
-        .catch(error => {
-            if (error.name === 'AbortError') {
-              console.log('Fetch safely aborted');
-            } else {
-              console.error('Fetch error:', error);
-            }
-        });
-        }, waitTime, {signal});
+            fetch('geo.php?ip=' + ip, { signal })
+                .then(response => response.json())
+                .then(data => {
+                    // Update the cell with id geoid with the geolocation
+                    const geoid = 'geo-' + ip;
+                    // Get all cells with id of the form geo-ipAddress
+                    const geoCells = document.querySelectorAll('[id^="geo-' + ip + '"]');
+                    // set each cell in geoCells to data
+                    geoCells.forEach(cell => {
+                        cell.innerHTML = data.country + ', ' + data.regionName + ', ' + data.city;
+                    });
+                    fetchCount--;
+                })
+                .catch(error => {
+                    if (error.name === 'AbortError') {
+                        console.log('Fetch safely aborted');
+                    } else {
+                        console.error('Fetch error:', error);
+                    }
+                });
+        }, waitTime, { signal });
         waitTime += apiWait;
     });
 }
@@ -247,21 +247,21 @@ function whois(ip) {
     const whoisDiv = document.getElementById('whois');
     whoisDiv.innerHTML = '<h2>Whois ' + ip + '...</h2>';
     fetch('whois.php?ip=' + ip)
-    .then(response => response.text())
-    .then(data => {
-        // remove comment lines from whois data
-        data = data.replace(/^#.*$/gm, '');
-        
-        // remove all blank lines from whois data
-        data = data.replace(/^\s*[\r\n]/gm, '');
+        .then(response => response.text())
+        .then(data => {
+            // remove comment lines from whois data
+            data = data.replace(/^#.*$/gm, '');
 
-        // output to whois div
-        whoisHTML = '<h2>Whois ' + ip + '</h2>';
-        whoisHTML += '<pre>';
-        whoisHTML += data;
-        whoisHTML += '</pre>';
-        whoisDiv.innerHTML = whoisHTML;
-    });
+            // remove all blank lines from whois data
+            data = data.replace(/^\s*[\r\n]/gm, '');
+
+            // output to whois div
+            whoisHTML = '<h2>Whois ' + ip + '</h2>';
+            whoisHTML += '<pre>';
+            whoisHTML += data;
+            whoisHTML += '</pre>';
+            whoisDiv.innerHTML = whoisHTML;
+        });
 }
 
 // function to setup polling
