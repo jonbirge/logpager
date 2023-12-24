@@ -13,8 +13,8 @@ function getTailPage($filePath, $linesPerPage, $page = 0) {
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
 
-    // use popen to read the file in reverse using tac and pipe to sed to pick out the lines
-    $cmd = sprintf('tac %s | sed -n %d,%dp | tac', escapeshellarg($filePath), $firstLine + 1, $lastLine + 1);
+    // use popen to read the file in reverse using fast unix tools
+    $cmd = sprintf('tail -n %d %s | head -n %d', $lastLine, escapeshellarg($filePath), $linesPerPage);
     $fp = popen($cmd, 'r');
 
     // read the lines from the pipe
