@@ -30,17 +30,19 @@ a {
     white-space: nowrap;
 }
 
-/* Style the table */
+/* Style the table to responsively fit all screen sizes, and wrap text to avoid scrolling if possible */
 table {
-    border-collapse: collapse;
     width: 100%;
+    text-align: center;
+    text-wrap: pretty;
+    word-wrap: break-word;
+    border-collapse: collapse;
 }
 
 table, th, td {
     border: 1px solid #202020;
     margin-bottom: 20px;
-    text-align: left;
-    padding: 8px;
+    padding: 6px;
 }
 
 th {
@@ -49,7 +51,7 @@ th {
     font-weight: bold;
 }
 
-/* Console font for HTTP requests */
+/* Console font for HTTP request column */
 .request {
     font-family: 'Consolas', monospace;
 }

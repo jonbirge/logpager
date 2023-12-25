@@ -1,11 +1,24 @@
+// settings
+const geolocate = true;
+const apiWait = 250;  // ms to wait between external API calls
+
+// global variables
 let pollInterval;
 let polling = false;
 let controller;
 let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get('page') !== null ? Number(params.get('page')) : 0;
-let geolocate = true;
-const apiWait = 250;  // ms to wait between external API calls
+let search = params.get('search');
+
+// decide what to do on page load
+if (search !== null) {  // search beats page
+    console.log('on page load: searching for ' + search);
+    window.onload = doSearch;
+} else {
+    console.log('on page load: polling server');
+    window.onload = pollServer;
+}
 
 // pull the log in JSON form from the server
 function pollServer() {
@@ -20,8 +33,9 @@ function pollServer() {
         page = 0;  // reset page
     };
 
-    // update the page number in the URL
+    // remove search term from URL and update page numbers
     const url = new URL(window.location.href);
+    url.searchParams.delete('search');
     url.searchParams.set('page', page);
     window.history.replaceState({}, '', url);
 
@@ -42,28 +56,53 @@ function pollServer() {
         });
 }
 
+// uiSearch is called when the search button is clicked
+function uiSearch() {
+    const searchButton = document.getElementById('search-button');
+    const searchInput = document.getElementById('search-input');
+    search = searchInput.value;
+    console.log('uiSearch: searching for ' + search);
+
+    // add search term to URL
+    const url = new URL(window.location.href);
+    url.searchParams.set('search', search);
+    url.searchParams.delete('page');
+    window.history.replaceState({}, '', url);
+
+    doSearch();
+}
+
 // do search on log
 function doSearch() {
-    const signal = controller.signal;
     const searchInput = document.getElementById('search-input');
+    searchInput.value = search;  // handle case where search is set by URL
     const logDiv = document.getElementById('log');
-    const search = searchInput.value;
+
+    console.log('doSearch: searching for ' + search);
+
+    // abort any pending fetches
+    if (fetchCount > 0) {
+        console.log('Aborting ' + fetchCount + ' fetches');
+        controller.abort();
+    }
+    controller = new AbortController();
+    fetchCount = 0;
+
+    // remove page parameter from URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete('page');
+    window.history.replaceState({}, '', url);
+
     if (search == '') {
         console.log('search is empty');
     } else {
-        console.log('searching for ' + search);
-        fetchCount++;
-        searchInput.value = 'Searching...';
-        fetch('search.php?term=' + search, { signal })
+        fetch('search.php?term=' + search)
             .then(response => response.text())
             .then(data => {
-                fetchCount--;
-
                 // write the search results to the log div
                 const pageSpan = document.getElementById('page');
                 logDiv.innerHTML = jsonToTable(data);
                 pageSpan.innerHTML = '<b>Search results for ' + search + '</b>';
-                searchInput.value = '';
 
                 // disable all other buttons and 
                 const buttons = document.querySelectorAll('button');
@@ -110,7 +149,7 @@ function resetSearch() {
         button.classList.remove("disabled");
     });
     searchButton.innerHTML = 'Search';
-    searchButton.onclick = doSearch;
+    // searchButton.onclick = uiSearch;
     searchInput.value = '';
     resetButton.remove();
     pollServer();
@@ -139,7 +178,7 @@ function jsonToTable(json) {
     for (let i = 1; i < data.length; i++) {
         table += '<tr>';
         for (let j = 0; j < data[i].length; j++) {
-            if (j == 0) {
+            if (j == 0) {  // ip address
                 const ip = data[i][j];
                 ips.push(ip);
                 // Add new cell for IP address after the first cell
@@ -150,16 +189,20 @@ function jsonToTable(json) {
                 // Add new cell for Geolocation after the first cell
                 geoid = 'geo-' + ip;
                 table += '<td id="' + geoid + '">-</td>';
-            } else if (j == 2) {
+            } else if (j == 1) {  // timestamp
+                // remove the timezone from the timestamp
+                const timestamp = data[i][j].replace(/\s.*$/, '');
+                table += '<td>' + timestamp + '</td>';
+            } else if (j == 2) {  // request
                 table += '<td class="request">' + data[i][j] + '</td>';
-            } else if (j == 3) {
+            } else if (j == 3) {  // status
                 const status = data[i][j];
                 if (status == '200' || status == '304') {
                     table += '<td class="green">' + data[i][j] + '</td>';
                 } else {
                     table += '<td class="red">' + data[i][j] + '</td>';
                 }
-            } else {
+            } else {  // anything else
                 table += '<td>' + data[i][j] + '</td>';
             }
         }
@@ -298,6 +341,3 @@ function runWatch() {
         watchButton.classList.add("red");
     };
 }
-
-// load the log on page load
-window.onload = pollServer;

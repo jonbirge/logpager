@@ -2,9 +2,11 @@
 <html>
 
 <head>
+    <!-- instruct browser to never cache this -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="styles.css?version=21">
+    <link rel="stylesheet" type="text/css" href="styles.css?version=23">
     <title>Access logs</title>
 </head>
 
@@ -19,7 +21,7 @@
         
             <!-- search form -->
             <span id="search-span" class="header">
-                <form id="search-form" onsubmit="doSearch(); return false;">
+                <form id="search-form" onsubmit="uiSearch(); return false;">
                     <input type="text" id="search-input" placeholder="Search..." autocomplete="off" class="text-box">
                     <button class="toggle-button gray" id="search-button">Search</button>
                 </form>
@@ -46,7 +48,7 @@
 
     </div>
 
-    <script src="scripts.js?version=21"></script>
+    <script src="scripts.js?version=27"></script>
 </body>
 
 </html>
