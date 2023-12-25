@@ -300,9 +300,7 @@ function whois(ip) {
 
             // output to whois div
             whoisHTML = '<h2>Whois ' + ip + '</h2>';
-            whoisHTML += '<pre>';
             whoisHTML += data;
-            whoisHTML += '</pre>';
             whoisDiv.innerHTML = whoisHTML;
         });
 }
