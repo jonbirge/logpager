@@ -15,6 +15,10 @@
 
         <h1>Access log</h1>
         
+        <div id="heatmap">
+            <!-- summary chart will go here -->
+        </div>
+
         <div class="header">
             <!-- watch button -->
             <button class="toggle-button" id="watch-button" onclick="runWatch()">Watch</button>
@@ -51,7 +55,9 @@
 
     </div>
 
-    <script src="scripts.js?version=27"></script>
+    <!-- load D3.js -->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="scripts.js?version=29"></script>
 </body>
 
 </html>

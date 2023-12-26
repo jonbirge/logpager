@@ -1,5 +1,5 @@
 // settings
-const geolocate = true;
+const geolocate = false;
 const apiWait = 250;  // ms to wait between external API calls
 
 // global variables
@@ -13,15 +13,22 @@ let search = params.get('search');
 
 // decide what to do on page load
 if (search !== null) {  // search beats page
-    console.log('on page load: searching for ' + search);
+    console.log('on page load: searching for ' + search + '...');
     window.onload = doSearch;
 } else {
-    console.log('on page load: polling server');
-    window.onload = pollServer;
+    console.log('on page load: loading logs...');
+
+    // on window load run pollServer and plotHeatmap
+    window.onload = () => {
+        pollServer();
+        plotHeatmap();
+    };
 }
 
 // pull the log in JSON form from the server
 function pollServer() {
+    console.log('pollServer: fetching page ' + page);
+
     // abort any pending fetches
     if (fetchCount > 0) {
         console.log('Aborting ' + fetchCount + ' fetches');
@@ -53,6 +60,83 @@ function pollServer() {
             } else {
                 pageSpan.innerHTML = "Page " + page + " from end";
             }
+        });
+}
+
+// plot heatmap of log entries by hour and day
+function plotHeatmap() {
+    console.log('plotHeatmap: plotting heatmap');
+
+    // get summary data (2D map of log entry counts referenced by day-of-the-year and hour)
+    fetch('heatmap.php')
+        .then(response => response.json())
+        .then(jsonData => {
+
+            // Process the data to fill in missing hours with zero counts
+            const processedData = [];
+            Object.keys(jsonData).forEach(date => {
+                for (let hour = 1; hour <= 24; hour++) {
+                    processedData.push({
+                        date: date,
+                        hour: hour,
+                        count: jsonData[date][hour] || 0 // Use zero if the hour is missing
+                    });
+                }
+            });
+
+            // Set dimensions for the heatmap
+            const cellSize = 10; // size of each tile
+            const margin = { top: 50, right: 20, bottom: 50, left: 60 };
+            const width = Object.keys(jsonData).length * cellSize;
+            const height = 24 * cellSize; // 24 hours
+
+            // Color scale
+            const colorScale = d3.scaleSequential(d3.interpolateInferno)
+                .domain([0, d3.max(processedData, d => d.count)]);
+
+            // Creating scales for the axes
+            const xScale = d3.scaleBand()
+                .domain(Object.keys(jsonData))
+                .range([0, width]);
+
+            const yScale = d3.scaleBand()
+                .domain(d3.range(1, 25))
+                .range([0, height]);
+
+            // Create SVG element
+            const svg = d3.select('#heatmap')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Creating the tiles
+            svg.selectAll()
+                .data(processedData)
+                .enter()
+                .append('rect')
+                .attr('x', d => xScale(d.date))
+                .attr('y', d => yScale(d.hour))
+                .attr('width', xScale.bandwidth())
+                .attr('height', yScale.bandwidth())
+                .style('fill', d => colorScale(d.count));
+
+            // Add X-axis
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(xScale).tickValues(xScale.domain().filter(function (d, i) { return !(i % 5); }))); // Adjust the tick interval as needed
+
+            // Add Y-axis
+            svg.append('g')
+                .call(d3.axisLeft(yScale));
+
+            // Center the chart in the div
+            d3.select('#heatmap')
+                .style('display', 'flex')
+                .style('justify-content', 'center')
+                .style('align-items', 'center');
+
         });
 }
 
