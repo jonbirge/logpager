@@ -119,8 +119,8 @@ function plotHeatmap() {
                 .append('rect')
                 .attr('x', d => xScale(d.date))
                 .attr('y', d => yScale(d.hour))
-                .attr('width', xScale.bandwidth())
-                .attr('height', yScale.bandwidth())
+                .attr('width', xScale.bandwidth() - 1) // Subtract 1 to create a gap between tiles
+                .attr('height', yScale.bandwidth() - 1) // Subtract 1 to create a gap between tiles
                 .style('fill', d => colorScale(d.count))
                 .on('click', function(d) {
                     // get the date and hour from the data
