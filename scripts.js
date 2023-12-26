@@ -86,8 +86,9 @@ function plotHeatmap() {
 
             // Set dimensions for the heatmap
             const cellSize = 10; // size of each tile
+            const ratio = 3; // width to height ratio
             const margin = { top: 50, right: 20, bottom: 50, left: 60 };
-            const width = Object.keys(jsonData).length * cellSize;
+            const width = ratio * Object.keys(jsonData).length * cellSize;
             const height = 24 * cellSize; // 24 hours
 
             // Color scale
@@ -120,7 +121,15 @@ function plotHeatmap() {
                 .attr('y', d => yScale(d.hour))
                 .attr('width', xScale.bandwidth())
                 .attr('height', yScale.bandwidth())
-                .style('fill', d => colorScale(d.count));
+                .style('fill', d => colorScale(d.count))
+                .on('click', function(d) {
+                    // get the date and hour from the data
+                    const date = d.date;
+                    const hour = d.hour;
+                    // build a partial date and time string for search
+                    const partial = date + ' ' + hour + ':';
+                    console.log('plotHeatmap: searching for ' + partial);
+                });
 
             // Add X-axis
             svg.append('g')
@@ -136,6 +145,31 @@ function plotHeatmap() {
                 .style('display', 'flex')
                 .style('justify-content', 'center')
                 .style('align-items', 'center');
+
+            // Add title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', -20)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .text('Log entry counts per hour');
+
+            // Add X-axis label
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + 40)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .text('Day of the year');
+
+            // Add Y-axis label
+            svg.append('text')
+                .attr('x', -(height / 2))
+                .attr('y', -40)
+                .attr('text-anchor', 'middle')
+                .attr('transform', 'rotate(-90)')
+                .style('font-size', '12px')
+                .text('Hour of the day');
 
         });
 }
