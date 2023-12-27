@@ -72,7 +72,7 @@ function plotHeatmap() {
         .then(response => response.json())
         .then(jsonData => {
 
-            // Process the data to fill in missing hours with zero counts
+            // Process the data to work with D3 library
             const processedData = [];
             Object.keys(jsonData).forEach(date => {
                 for (let hour = 1; hour <= 24; hour++) {
@@ -85,9 +85,9 @@ function plotHeatmap() {
             });
 
             // Set dimensions for the heatmap
-            const cellSize = 10; // size of each tile
-            const ratio = 3; // width to height ratio
-            const margin = { top: 50, right: 20, bottom: 50, left: 60 };
+            const cellSize = 12; // size of each tile
+            const ratio = 2; // width to height ratio
+            const margin = { top: 20, right: 20, bottom: 50, left: 60 };
             const width = ratio * Object.keys(jsonData).length * cellSize;
             const height = 24 * cellSize; // 24 hours
 
@@ -108,7 +108,9 @@ function plotHeatmap() {
             const svg = d3.select('#heatmap')
                 .append('svg')
                 .attr('class', 'responsive-svg') // Add a class for styling
+                .attr('width', '100%') // Set width to 100%
                 .attr('height', height + margin.top + margin.bottom)
+                .attr('viewBox', `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`) // Add viewBox
                 .append('g')
                 .attr('transform', `translate(${margin.left},${margin.top})`);
 
@@ -141,7 +143,7 @@ function plotHeatmap() {
                     // build a partial date and time string for search
                     const partial = date + ' ' + hour + ':';
                     console.log('plotHeatmap: clicked on ' + partial);
-                    const searchTerm = buildSearch(date, hour);
+                    const searchTerm = buildTimestampSearch(date, hour);
                     console.log('plotHeatmap: searching for ' + searchTerm);
                     // update the search box
                     const searchInput = document.getElementById('search-input');
@@ -187,7 +189,7 @@ function plotHeatmap() {
 // take date of the form YYYY-MM-DD as one parameter, and the hour of the day as another parameter,
 // and return a search string for the beginning of the corresponding Common Log Format timestamp.
 // example: buildSearch('2020-01-01', '12') would return '[01/Jan/2020:12:'
-function buildSearch(date, hour) {
+function buildTimestampSearch(date, hour) {
     const monthnum = date.substring(5, 7);
     // convert month number to month name
     const monthnames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
@@ -195,7 +197,9 @@ function buildSearch(date, hour) {
     const month = monthnames[monthnum - 1];
     const day = date.substring(8, 10);
     const year = date.substring(0, 4);
-    const timestamp = day + '/' + month + '/' + year + ':' + hour + ':';
+    // add leading zero to hour if necessary
+    const hourPad = hour.toString().padStart(2, '0');
+    const timestamp = day + '/' + month + '/' + year + ':' + hourPad + ':';
     return timestamp;
 }
 
@@ -383,7 +387,7 @@ function getHostNames(ips, signal) {
                 if (error.name === 'AbortError') {
                     console.log('Fetch safely aborted');
                 } else {
-                    console.error('Fetch error:', error);
+                    console.log('Fetch error:', error);
                 }
             });
     });
@@ -414,7 +418,7 @@ function getGeoLocations(ips, signal) {
                     if (error.name === 'AbortError') {
                         console.log('Fetch safely aborted');
                     } else {
-                        console.error('Fetch error:', error);
+                        console.log('Fetch error:', error);
                     }
                 });
         }, waitTime, { signal });
