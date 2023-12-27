@@ -32,7 +32,7 @@ a {
 
 /* Style the table to responsively fit all screen sizes, and wrap text to avoid scrolling if possible */
 table {
-    width: 100%;
+    width: max(100%, 480px);
     text-align: center;
     text-wrap: pretty;
     word-wrap: break-word;
@@ -41,12 +41,13 @@ table {
 
 table, th, td {
     border: 1px solid #202020;
+    /* border: 3px solid white; */
     margin-bottom: 20px;
     padding: 6px;
 }
 
 th {
-    background-color: #323232cc;
+    background-color: #575757cc;
     color: white;
     font-weight: bold;
 }

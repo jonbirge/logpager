@@ -79,7 +79,7 @@ function plotHeatmap() {
                     processedData.push({
                         date: date,
                         hour: hour,
-                        count: jsonData[date][hour] || 0 // Use zero if the hour is missing
+                        count: jsonData[date][hour] !== undefined ? jsonData[date][hour] : null
                     });
                 }
             });
@@ -107,10 +107,22 @@ function plotHeatmap() {
             // Create SVG element
             const svg = d3.select('#heatmap')
                 .append('svg')
-                .attr('width', width + margin.left + margin.right)
+                .attr('class', 'responsive-svg') // Add a class for styling
                 .attr('height', height + margin.top + margin.bottom)
                 .append('g')
                 .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Function to handle resizing of the SVG element
+            function handleResize() {
+                const containerWidth = d3.select('#heatmap').node().getBoundingClientRect().width;
+                const newWidth = Math.min(containerWidth, width); // Limit the width to the desired width
+
+                svg.attr('width', newWidth);
+            }
+
+            // Call the handleResize function initially and on window resize
+            handleResize();
+            window.addEventListener('resize', handleResize);
 
             // Creating the tiles
             svg.selectAll()

@@ -1,5 +1,8 @@
 <?php
 
+// IP addresses to exclude from counts (use 173.48.140.140 for testing)
+$excludedIPs = ['173.48.140.140', '172.58.222.184'];
+
 // Log file to read
 $logFilePath = '/access.log';
 
@@ -15,10 +18,16 @@ $logSummary = [];
 
 // Read each line of the log file
 while (($line = fgets($logFile)) !== false) {
-    // Extract the timestamp the CLF log entry
+    // Extract the IP from the CLF log entry
     $logEntry = explode(' ', $line);
-    $timeStamp = $logEntry[3];
+    $ipAddress = $logEntry[0];
+    // Skip this log entry if the IP address is in the excluded list
+    if (in_array($ipAddress, $excludedIPs)) {
+        continue;
+    }
 
+    // Extract the timestamp from the CLF log entry
+    $timeStamp = $logEntry[3];
     // Convert the timestamp to a DateTime object
     $date = DateTime::createFromFormat('[d/M/Y:H:i:s', $timeStamp);
 
