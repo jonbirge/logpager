@@ -1,7 +1,7 @@
 <?php
 
 // Parameters
-$maxResults = 100;
+$maxResults = 1024;
 $logFile = "/access.log";
 
 // Get search term from URL

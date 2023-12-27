@@ -1,5 +1,5 @@
 // settings
-const geolocate = false;
+const geolocate = true;
 const apiWait = 250;  // ms to wait between external API calls
 
 // global variables
@@ -131,8 +131,8 @@ function plotHeatmap() {
                 .append('rect')
                 .attr('x', d => xScale(d.date))
                 .attr('y', d => yScale(d.hour))
-                .attr('width', xScale.bandwidth() - 1) // Subtract 1 to create a gap between tiles
-                .attr('height', yScale.bandwidth() - 1) // Subtract 1 to create a gap between tiles
+                .attr('width', xScale.bandwidth() - 1) // create a gap between tiles
+                .attr('height', yScale.bandwidth() - 1) // create a gap between tiles
                 .style('fill', d => colorScale(d.count))
                 .on('click', function(d) {
                     // get the date and hour from the data
@@ -140,7 +140,14 @@ function plotHeatmap() {
                     const hour = d.hour;
                     // build a partial date and time string for search
                     const partial = date + ' ' + hour + ':';
-                    console.log('plotHeatmap: searching for ' + partial);
+                    console.log('plotHeatmap: clicked on ' + partial);
+                    const searchTerm = buildSearch(date, hour);
+                    console.log('plotHeatmap: searching for ' + searchTerm);
+                    // update the search box
+                    const searchInput = document.getElementById('search-input');
+                    searchInput.value = searchTerm;
+                    // run the search
+                    uiSearch();
                 });
 
             // Add X-axis
@@ -158,14 +165,6 @@ function plotHeatmap() {
                 .style('justify-content', 'center')
                 .style('align-items', 'center');
 
-            // Add title
-            svg.append('text')
-                .attr('x', width / 2)
-                .attr('y', -20)
-                .attr('text-anchor', 'middle')
-                .style('font-size', '16px')
-                .text('Log entry counts per hour');
-
             // Add X-axis label
             svg.append('text')
                 .attr('x', width / 2)
@@ -182,13 +181,26 @@ function plotHeatmap() {
                 .attr('transform', 'rotate(-90)')
                 .style('font-size', '12px')
                 .text('Hour of the day');
-
         });
+}
+
+// take date of the form YYYY-MM-DD as one parameter, and the hour of the day as another parameter,
+// and return a search string for the beginning of the corresponding Common Log Format timestamp.
+// example: buildSearch('2020-01-01', '12') would return '[01/Jan/2020:12:'
+function buildSearch(date, hour) {
+    const monthnum = date.substring(5, 7);
+    // convert month number to month name
+    const monthnames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+        'Oct', 'Nov', 'Dec'];
+    const month = monthnames[monthnum - 1];
+    const day = date.substring(8, 10);
+    const year = date.substring(0, 4);
+    const timestamp = day + '/' + month + '/' + year + ':' + hour + ':';
+    return timestamp;
 }
 
 // uiSearch is called when the search button is clicked
 function uiSearch() {
-    const searchButton = document.getElementById('search-button');
     const searchInput = document.getElementById('search-input');
     search = searchInput.value;
     console.log('uiSearch: searching for ' + search);
@@ -267,9 +279,6 @@ function doSearch() {
 
 // reset search, re-enable all buttons and remove reset button
 function resetSearch() {
-    const signal = controller.signal;
-    const logDiv = document.getElementById('log');
-    const pageSpan = document.getElementById('page');
     const searchInput = document.getElementById('search-input');
     const searchButton = document.getElementById('search-button');
     const resetButton = document.getElementById('reset-button');
@@ -324,7 +333,10 @@ function jsonToTable(json) {
                 const timestamp = data[i][j].replace(/\s.*$/, '');
                 table += '<td>' + timestamp + '</td>';
             } else if (j == 2) {  // request
-                table += '<td class="request">' + data[i][j] + '</td>';
+                const rawRequest = data[i][j];
+                // truncate request to 32 characters
+                const truncRequest = rawRequest.length > 32 ? rawRequest.substring(0, 32) + '...' : rawRequest;
+                table += '<td class="request">' + truncRequest + '</td>';
             } else if (j == 3) {  // status
                 const status = data[i][j];
                 if (status == '200' || status == '304') {
@@ -359,8 +371,6 @@ function getHostNames(ips, signal) {
         fetch('rdns.php?ip=' + ip, { signal })
             .then(response => response.text())
             .then(data => {
-                // Update the cell with id hostnameid with the hostname
-                const hostnameid = 'hostname-' + ip;
                 // Get all cells with id of the form hostname-ip
                 const hostnameCells = document.querySelectorAll('[id^="hostname-' + ip + '"]');
                 // set each cell in hostnameCells to data
@@ -392,8 +402,6 @@ function getGeoLocations(ips, signal) {
             fetch('geo.php?ip=' + ip, { signal })
                 .then(response => response.json())
                 .then(data => {
-                    // Update the cell with id geoid with the geolocation
-                    const geoid = 'geo-' + ip;
                     // Get all cells with id of the form geo-ipAddress
                     const geoCells = document.querySelectorAll('[id^="geo-' + ip + '"]');
                     // set each cell in geoCells to data
