@@ -1,12 +1,12 @@
 <?php
 
-// IP addresses to exclude from counts (use 173.48.140.140 for testing)
-$excludedIPs = ['173.48.140.140', '172.58.222.184'];
+// IP addresses to exclude from counts
+$excludedIPs = ['173.48.140.140', '172.58.222.184', '167.71.120.76', '159.203.109.206'];
 
 // Log file to read
 $logFilePath = '/access.log';
 
-// Open the log file for reading
+// Open th e log file for reading
 $logFile = fopen($logFilePath, 'r');
 if (!$logFile) {
     echo "Failed to open log file.";

@@ -73,7 +73,7 @@ function plotHeatmap() {
         .then(jsonData => {
 
             // Process the data to work with D3 library
-            const processedData = [];
+            let processedData = [];
             Object.keys(jsonData).forEach(date => {
                 for (let hour = 1; hour <= 24; hour++) {
                     processedData.push({
@@ -84,10 +84,13 @@ function plotHeatmap() {
                 }
             });
 
+            // Remove null values from the data
+            processedData = processedData.filter(d => d.count !== null);
+
             // Set dimensions for the heatmap
-            const cellSize = 12; // size of each tile
+            const cellSize = 14; // size of each tile
             const ratio = 2; // width to height ratio
-            const margin = { top: 20, right: 20, bottom: 50, left: 60 };
+            const margin = { top: 10, right: 20, bottom: 50, left: 60 };
             const width = ratio * Object.keys(jsonData).length * cellSize;
             const height = 24 * cellSize; // 24 hours
 
@@ -118,7 +121,6 @@ function plotHeatmap() {
             function handleResize() {
                 const containerWidth = d3.select('#heatmap').node().getBoundingClientRect().width;
                 const newWidth = Math.min(containerWidth, width); // Limit the width to the desired width
-
                 svg.attr('width', newWidth);
             }
 
@@ -126,7 +128,7 @@ function plotHeatmap() {
             handleResize();
             window.addEventListener('resize', handleResize);
 
-            // Creating the tiles
+            // Create the tiles
             svg.selectAll()
                 .data(processedData)
                 .enter()
@@ -151,6 +153,21 @@ function plotHeatmap() {
                     // run the search
                     uiSearch();
                 });
+
+            // Add text labels to each tile
+            svg.selectAll()
+                .data(processedData)
+                .enter()
+                .append('text')
+                .attr('x', d => xScale(d.date) + xScale.bandwidth() / 2) // center text
+                .attr('y', d => yScale(d.hour) + yScale.bandwidth() / 2) // center text
+                .attr('dy', '.35em') // vertically align middle
+                .text(d => d.count)
+                .attr('font-size', '9px')
+                .attr('fill', 'white')
+                .attr('text-anchor', 'middle')
+                .style('pointer-events', 'none')
+                .style('opacity', '0.5');
 
             // Add X-axis
             svg.append('g')
