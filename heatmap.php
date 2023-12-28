@@ -38,7 +38,7 @@ while (($line = fgets($logFile)) !== false) {
         // Get the date in the format YYYY-MM-DD
         $dayOfYear = $date->format('Y-m-d');
         // Get the hour of the day
-        $hour = $date->format('G') + 1; // 24-hour format without leading zeros
+        $hour = $date->format('G'); // 24-hour format without leading zeros
     } else {
         echo "Invalid timestamp format!";
         return;
