@@ -1,5 +1,8 @@
 <?php
 
+// Get an optional 'ip' query string parameter
+$searchTerm = $_GET['search'] ?? null;
+
 // IP addresses to exclude from counts
 include 'exclusions.php';
 $excludedIPs = getExcludedIPs();
@@ -19,9 +22,15 @@ $logSummary = [];
 
 // Read each line of the log file
 while (($line = fgets($logFile)) !== false) {
+    // Skip this log entry if the search term isn't found in $line
+    if ($searchTerm !== null && strpos($line, $searchTerm) === false) {
+        continue;
+    }
+    
     // Extract the IP from the CLF log entry
     $logEntry = explode(' ', $line);
     $ipAddress = $logEntry[0];
+
     // Skip this log entry if the IP address is in the excluded list
     if (in_array($ipAddress, $excludedIPs)) {
         continue;

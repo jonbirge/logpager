@@ -64,11 +64,17 @@ function pollServer() {
 }
 
 // plot heatmap of log entries by hour and day
-function plotHeatmap() {
+function plotHeatmap(searchTerm) {
     console.log('plotHeatmap: plotting heatmap');
 
+    // Build data query URL
+    let heatmapURL = 'heatmap.php';
+    if (searchTerm) {
+        heatmapURL += '?search=' + encodeURIComponent(searchTerm);
+    }
+
     // get summary data (2D map of log entry counts referenced by day-of-the-year and hour)
-    fetch('heatmap.php')
+    fetch(heatmapURL)
         .then(response => response.json())
         .then(jsonData => {
 
@@ -106,6 +112,11 @@ function plotHeatmap() {
             const yScale = d3.scaleBand()
                 .domain(d3.range(1, 25))
                 .range([0, height]);
+
+            // Check to see if SVG already exists
+            if (d3.select('#heatmap svg')) {
+                d3.select('#heatmap svg').remove();
+            }
 
             // Create SVG element
             const svg = d3.select('#heatmap')
@@ -251,7 +262,7 @@ function doSearch() {
     controller = new AbortController();
     fetchCount = 0;
 
-    // remove page parameter from URL
+    // remove any page parameter from URL
     const url = new URL(window.location.href);
     url.searchParams.delete('page');
     window.history.replaceState({}, '', url);
@@ -294,6 +305,9 @@ function doSearch() {
                     resetButton.disabled = false;
                     resetButton.classList.remove("disabled");
                 }
+
+                // update the heatmap with the search term
+                plotHeatmap(search);
             });
     }
 }
