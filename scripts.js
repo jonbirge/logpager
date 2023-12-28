@@ -63,6 +63,72 @@ function pollServer() {
         });
 }
 
+// take n x 5 JSON array of strings and convert to HTML table, assuming the
+// first row is table headers. write table to div.
+function jsonToTable(json) {
+    const signal = controller.signal;
+    let ips = [];
+    const data = JSON.parse(json);
+    let table = '<table id="log-table">';
+
+    // write table headers from first row
+    table += '<tr>';
+    for (let i = 0; i < data[0].length; i++) {
+        table += '<th>' + data[0][i] + '</th>';
+        if (i == 0) {
+            table += '<th>Host name</th>';
+            table += '<th>Geolocation (courtesy of <a href=https://www.ip-api.com style="color: white">ip-api.com</a>)</th>';
+        }
+    }
+    table += '</tr>';
+
+    // write table rows from remaining rows
+    for (let i = 1; i < data.length; i++) {
+        table += '<tr>';
+        for (let j = 0; j < data[i].length; j++) {
+            if (j == 0) {  // ip address
+                const ip = data[i][j];
+                ips.push(ip);
+                // Add cell for IP address with link to search for ip address
+                table += '<td><a href="?search=' + ip + '">' + ip + '</a></td>';
+                // Add new cell for Host name after the first cell
+                hostnameid = 'hostname-' + ip;
+                table += '<td id="' + hostnameid + '">-</td>';
+                // Add new cell for Geolocation after the first cell
+                geoid = 'geo-' + ip;
+                table += '<td id="' + geoid + '">-</td>';
+            } else if (j == 1) {  // timestamp
+                // remove the timezone from the timestamp
+                const timestamp = data[i][j].replace(/\s.*$/, '');
+                table += '<td>' + timestamp + '</td>';
+            } else if (j == 2) {  // request
+                const rawRequest = data[i][j];
+                // truncate request to 32 characters
+                const truncRequest = rawRequest.length > 32 ? rawRequest.substring(0, 32) + '...' : rawRequest;
+                table += '<td class="request">' + truncRequest + '</td>';
+            } else if (j == 3) {  // status
+                const status = data[i][j];
+                if (status == '200' || status == '304') {
+                    table += '<td class="green">' + data[i][j] + '</td>';
+                } else {
+                    table += '<td class="red">' + data[i][j] + '</td>';
+                }
+            } else {  // anything else
+                table += '<td>' + data[i][j] + '</td>';
+            }
+        }
+        table += '</tr>';
+    }
+    table += '</table>';
+
+    // Get the host names from the IP addresses
+    getHostNames(ips, signal);
+    if (geolocate)
+        getGeoLocations(ips, signal);
+
+    return table;
+}
+
 // plot heatmap of log entries by hour and day
 function plotHeatmap(searchTerm) {
     console.log('plotHeatmap: plotting heatmap');
@@ -297,7 +363,7 @@ function doSearch() {
                     resetButton.id = 'reset-button';
                     resetButton.innerHTML = 'Reset';
                     resetButton.classList.add("toggle-button");
-                    resetButton.classList.add("gray");
+                    // resetButton.classList.add("gray");
                     resetButton.onclick = resetSearch;
                     const searchSpan = document.getElementById('search-span');
                     searchSpan.insertBefore(resetButton, searchSpan.firstChild);
@@ -327,72 +393,7 @@ function resetSearch() {
     searchInput.value = '';
     resetButton.remove();
     pollServer();
-}
-
-// take n x 5 JSON array of strings and convert to HTML table, assuming the
-// first row is table headers. write table to div.
-function jsonToTable(json) {
-    const signal = controller.signal;
-    let ips = [];
-    const data = JSON.parse(json);
-    let table = '<table id="log-table">';
-
-    // write table headers from first row
-    table += '<tr>';
-    for (let i = 0; i < data[0].length; i++) {
-        table += '<th>' + data[0][i] + '</th>';
-        if (i == 0) {
-            table += '<th>Host name</th>';
-            table += '<th>Geolocation (courtesy of <a href=https://www.ip-api.com style="color: white">ip-api.com</a>)</th>';
-        }
-    }
-    table += '</tr>';
-
-    // write table rows from remaining rows
-    for (let i = 1; i < data.length; i++) {
-        table += '<tr>';
-        for (let j = 0; j < data[i].length; j++) {
-            if (j == 0) {  // ip address
-                const ip = data[i][j];
-                ips.push(ip);
-                // Add new cell for IP address after the first cell
-                table += '<td><a href="#" onclick="whois(\'' + ip + '\')">' + ip + '</a></td>';
-                // Add new cell for Host name after the first cell
-                hostnameid = 'hostname-' + ip;
-                table += '<td id="' + hostnameid + '">-</td>';
-                // Add new cell for Geolocation after the first cell
-                geoid = 'geo-' + ip;
-                table += '<td id="' + geoid + '">-</td>';
-            } else if (j == 1) {  // timestamp
-                // remove the timezone from the timestamp
-                const timestamp = data[i][j].replace(/\s.*$/, '');
-                table += '<td>' + timestamp + '</td>';
-            } else if (j == 2) {  // request
-                const rawRequest = data[i][j];
-                // truncate request to 32 characters
-                const truncRequest = rawRequest.length > 32 ? rawRequest.substring(0, 32) + '...' : rawRequest;
-                table += '<td class="request">' + truncRequest + '</td>';
-            } else if (j == 3) {  // status
-                const status = data[i][j];
-                if (status == '200' || status == '304') {
-                    table += '<td class="green">' + data[i][j] + '</td>';
-                } else {
-                    table += '<td class="red">' + data[i][j] + '</td>';
-                }
-            } else {  // anything else
-                table += '<td>' + data[i][j] + '</td>';
-            }
-        }
-        table += '</tr>';
-    }
-    table += '</table>';
-
-    // Get the host names from the IP addresses
-    getHostNames(ips, signal);
-    if (geolocate)
-        getGeoLocations(ips, signal);
-
-    return table;
+    plotHeatmap();
 }
 
 // get host names from IP addresses

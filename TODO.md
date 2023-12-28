@@ -1,7 +1,5 @@
 # TODO
 
-- Clicking on ip address should search for that IP, rather than run whois
-- Reset heatmap when search is reset, or just have heatmap generated whenever log is polled
 - Have heatmap.php return entries for entire data range, with zeros if no data exists given the search term and exclusions
 - Search interface should specify fields as parameter
 - Multiple field searches should AND together
