@@ -1,6 +1,5 @@
 # TODO
 
-- Have heatmap.php return entries for entire data range, with zeros if no data exists given the search term and exclusions
 - Search interface should specify fields as parameter
 - Multiple field searches should AND together
 - Allow heatmap.php to filter with search term (which would happen automatically if the above were implemented)

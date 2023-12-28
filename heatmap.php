@@ -22,19 +22,9 @@ $logSummary = [];
 
 // Read each line of the log file
 while (($line = fgets($logFile)) !== false) {
-    // Skip this log entry if the search term isn't found in $line
-    if ($searchTerm !== null && strpos($line, $searchTerm) === false) {
-        continue;
-    }
-    
-    // Extract the IP from the CLF log entry
+    // Extract the elements from the CLF log entry
     $logEntry = explode(' ', $line);
     $ipAddress = $logEntry[0];
-
-    // Skip this log entry if the IP address is in the excluded list
-    if (in_array($ipAddress, $excludedIPs)) {
-        continue;
-    }
 
     // Extract the timestamp from the CLF log entry
     $timeStamp = $logEntry[3];
@@ -54,13 +44,22 @@ while (($line = fgets($logFile)) !== false) {
         return;
     }
 
-    // Increment the count for the day of the year and hour of the day
-    if (isset($logSummary[$dayOfYear][$hour])) {
-        $logSummary[$dayOfYear][$hour]++;
-    } else {
-        $logSummary[$dayOfYear][$hour] = 1;
-        // echo "Starting new day and hour: ($dayOfYear, $hour) <br>";
+    if (!isset($logSummary[$dayOfYear][$hour])) {
+        $logSummary[$dayOfYear][$hour] = 0;
     }
+
+    // Skip this log entry if the search term isn't found in $line
+    if ($searchTerm !== null && strpos($line, $searchTerm) === false) {
+        continue;
+    }
+
+    // Skip this log entry if the IP address is in the excluded list
+    if (in_array($ipAddress, $excludedIPs)) {
+        continue;
+    }
+
+    // Increment the count for the day of the year and hour of the day
+    $logSummary[$dayOfYear][$hour]++;
 }
 
 // Close the log file
