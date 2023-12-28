@@ -143,21 +143,23 @@ function plotHeatmap(searchTerm) {
     fetch(heatmapURL)
         .then(response => response.json())
         .then(jsonData => {
-
             // Process the data to work with D3 library
             let processedData = [];
-            Object.keys(jsonData).forEach(date => {
+            Object.keys(jsonData).forEach((date) => {
                 for (let hour = 1; hour <= 24; hour++) {
                     processedData.push({
                         date: date,
                         hour: hour,
-                        count: jsonData[date][hour] !== undefined ? jsonData[date][hour] : null
+                        count:
+                            jsonData[date][hour] !== undefined
+                                ? jsonData[date][hour]
+                                : null,
                     });
                 }
             });
 
             // Remove null values from the data
-            processedData = processedData.filter(d => d.count !== null);
+            processedData = processedData.filter((d) => d.count !== null);
 
             // Set dimensions for the heatmap
             const cellSize = 14; // size of each tile
@@ -166,66 +168,79 @@ function plotHeatmap(searchTerm) {
             const width = ratio * Object.keys(jsonData).length * cellSize;
             const height = 24 * cellSize; // 24 hours
 
-            // Color scale
-            const colorScale = d3.scaleSequential(d3.interpolateInferno)
-                .domain([0, d3.max(processedData, d => d.count)]);
-
             // Creating scales for the axes
-            const xScale = d3.scaleBand()
+            const xScale = d3
+                .scaleBand()
                 .domain(Object.keys(jsonData))
                 .range([0, width]);
 
-            const yScale = d3.scaleBand()
+            const yScale = d3
+                .scaleBand()
                 .domain(d3.range(1, 25))
                 .range([0, height]);
 
-            // Check to see if SVG already exists
-            if (d3.select('#heatmap svg')) {
-                d3.select('#heatmap svg').remove();
-            }
+            // Create SVG element if it doesn't exist
+            if (d3.select("#heatmap svg").empty()) {
+                console.log("plotHeatmap: creating SVG element");
+                const svg = d3
+                    .select("#heatmap")
+                    .append("svg")
+                    .attr("class", "responsive-svg") // Add a class for styling
+                    .attr("width", "100%") // Set width to 100%
+                    .attr("height", height + margin.top + margin.bottom)
+                    .attr(
+                        "viewBox",
+                        `0 0 ${width + margin.left + margin.right} ${
+                            height + margin.top + margin.bottom
+                        }`
+                    ) // Add viewBox
+                    .append("g")
+                    .attr(
+                        "transform",
+                        `translate(${margin.left},${margin.top})`
+                    );
 
-            // Create SVG element
-            const svg = d3.select('#heatmap')
-                .append('svg')
-                .attr('class', 'responsive-svg') // Add a class for styling
-                .attr('width', '100%') // Set width to 100%
-                .attr('height', height + margin.top + margin.bottom)
-                .attr('viewBox', `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`) // Add viewBox
-                .append('g')
-                .attr('transform', `translate(${margin.left},${margin.top})`);
-
-            // Function to handle resizing of the SVG element
-            function handleResize() {
-                const containerWidth = d3.select('#heatmap').node().getBoundingClientRect().width;
-                const newWidth = Math.min(containerWidth, width); // Limit the width to the desired width
-                svg.attr('width', newWidth);
+                // Function to handle resizing of the SVG element
+                function handleResize() {
+                    const containerWidth = d3
+                        .select("#heatmap")
+                        .node()
+                        .getBoundingClientRect().width;
+                    const newWidth = Math.min(containerWidth, width); // Limit the width to the desired width
+                    svg.attr("width", newWidth);
+                }
             }
 
             // Call the handleResize function initially and on window resize
             handleResize();
-            window.addEventListener('resize', handleResize);
+            window.addEventListener("resize", handleResize);
+
+            // Color scale
+            const colorScale = d3
+                .scaleSequential(d3.interpolateInferno)
+                .domain([0, d3.max(processedData, (d) => d.count)]);
 
             // Create the tiles
             svg.selectAll()
                 .data(processedData)
                 .enter()
-                .append('rect')
-                .attr('x', d => xScale(d.date))
-                .attr('y', d => yScale(d.hour))
-                .attr('width', xScale.bandwidth() - 1) // create a gap between tiles
-                .attr('height', yScale.bandwidth() - 1) // create a gap between tiles
-                .style('fill', d => colorScale(d.count))
-                .on('click', function(d) {
+                .append("rect")
+                .attr("x", (d) => xScale(d.date))
+                .attr("y", (d) => yScale(d.hour))
+                .attr("width", xScale.bandwidth() - 1) // create a gap between tiles
+                .attr("height", yScale.bandwidth() - 1) // create a gap between tiles
+                .style("fill", (d) => colorScale(d.count))
+                .on("click", function (d) {
                     // get the date and hour from the data
                     const date = d.date;
                     const hour = d.hour;
                     // build a partial date and time string for search
-                    const partial = date + ' ' + hour + ':';
-                    console.log('plotHeatmap: clicked on ' + partial);
+                    const partial = date + " " + hour + ":";
+                    console.log("plotHeatmap: clicked on " + partial);
                     const searchTerm = buildTimestampSearch(date, hour);
-                    console.log('plotHeatmap: searching for ' + searchTerm);
+                    console.log("plotHeatmap: searching for " + searchTerm);
                     // update the search box
-                    const searchInput = document.getElementById('search-input');
+                    const searchInput = document.getElementById("search-input");
                     searchInput.value = searchTerm;
                     // run the search
                     uiSearch();
@@ -235,48 +250,53 @@ function plotHeatmap(searchTerm) {
             svg.selectAll()
                 .data(processedData)
                 .enter()
-                .append('text')
-                .attr('x', d => xScale(d.date) + xScale.bandwidth() / 2) // center text
-                .attr('y', d => yScale(d.hour) + yScale.bandwidth() / 2) // center text
-                .attr('dy', '.35em') // vertically align middle
-                .text(d => d.count)
-                .attr('font-size', '9px')
-                .attr('fill', 'white')
-                .attr('text-anchor', 'middle')
-                .style('pointer-events', 'none')
-                .style('opacity', '0.5');
+                .append("text")
+                .attr("x", (d) => xScale(d.date) + xScale.bandwidth() / 2) // center text
+                .attr("y", (d) => yScale(d.hour) + yScale.bandwidth() / 2) // center text
+                .attr("dy", ".35em") // vertically align middle
+                .text((d) => d.count)
+                .attr("font-size", "9px")
+                .attr("fill", "white")
+                .attr("text-anchor", "middle")
+                .style("pointer-events", "none")
+                .style("opacity", "0.5");
 
             // Add X-axis
-            svg.append('g')
-                .attr('transform', `translate(0,${height})`)
-                .call(d3.axisBottom(xScale).tickValues(xScale.domain().filter(function (d, i) { return !(i % 5); }))); // Adjust the tick interval as needed
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(
+                    d3.axisBottom(xScale).tickValues(
+                        xScale.domain().filter(function (d, i) {
+                            return !(i % 5);
+                        })
+                    )
+                ); // Adjust the tick interval as needed
 
             // Add Y-axis
-            svg.append('g')
-                .call(d3.axisLeft(yScale));
+            svg.append("g").call(d3.axisLeft(yScale));
 
             // Center the chart in the div
-            d3.select('#heatmap')
-                .style('display', 'flex')
-                .style('justify-content', 'center')
-                .style('align-items', 'center');
+            d3.select("#heatmap")
+                .style("display", "flex")
+                .style("justify-content", "center")
+                .style("align-items", "center");
 
             // Add X-axis label
-            svg.append('text')
-                .attr('x', width / 2)
-                .attr('y', height + 40)
-                .attr('text-anchor', 'middle')
-                .style('font-size', '12px')
-                .text('Day of the year');
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height + 40)
+                .attr("text-anchor", "middle")
+                .style("font-size", "12px")
+                .text("Day of the year");
 
             // Add Y-axis label
-            svg.append('text')
-                .attr('x', -(height / 2))
-                .attr('y', -40)
-                .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90)')
-                .style('font-size', '12px')
-                .text('Hour of the day');
+            svg.append("text")
+                .attr("x", -(height / 2))
+                .attr("y", -40)
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .style("font-size", "12px")
+                .text("Hour of the day");
         });
 }
 
