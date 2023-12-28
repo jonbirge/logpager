@@ -1,6 +1,5 @@
 # TODO
 
-- Have table no bigger than a certain size
 - Load exclusion from external function
 - Searches should obey exclusions to match heatmap
 - Generate new heatmap for searches
