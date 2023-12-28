@@ -1,5 +1,9 @@
 <?php
 
+// Get the list of excluded IPs
+include 'exclusions.php';
+$excludedIPs = getExcludedIPs();
+
 // Parameters
 $maxResults = 1024;
 $logFile = "/access.log";
@@ -23,8 +27,10 @@ $logLines[] = $headers;
 // Process each line and add to the array
 foreach ($results as $line) {
     preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) (\S+)/', $line, $matches);
-    // Go through each match and add to the array with htmlspecialchars()
-    $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));
+    // Skip this log entry if the IP address is in the excluded list
+    if (!in_array($matches[1], $excludedIPs)) {
+        $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));
+    }
 }
 
 // Return JSON encoded array

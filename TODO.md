@@ -1,6 +1,5 @@
 # TODO
 
-- Load exclusion from external function
 - Searches should obey exclusions to match heatmap
 - Generate new heatmap for searches
 - Multiple field searches should AND together
