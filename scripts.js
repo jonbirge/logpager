@@ -227,9 +227,10 @@ function plotHeatmap(searchTerm) {
 
             // Create color scale
             const colorScale = d3
-                .scaleLog()
+                .scaleLinear()
+                .interpolate(() => d3.interpolatePlasma)
                 .domain([1, d3.max(processedData, (d) => d.count)])
-                .range(["darkblue", "orange"]);
+                .range([0, 1]);
 
             // Create the tiles
             svg.selectAll()
@@ -270,7 +271,7 @@ function plotHeatmap(searchTerm) {
                 .attr("fill", "white")
                 .attr("text-anchor", "middle")
                 .style("pointer-events", "none")
-                .style("opacity", "0.5");
+                .style("opacity", "0.75");
 
             // Add X-axis
             svg.append("g")
