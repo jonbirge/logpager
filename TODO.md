@@ -6,3 +6,5 @@
 - Search interface should specify fields as parameter
 - Multiple field searches should AND together
 - Make function/object to decide if IP is excluded to abstract out the logic
+- Return CSS to separate file
+
