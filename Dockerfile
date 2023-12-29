@@ -16,6 +16,9 @@ COPY test.log /access.log
 # Copy the Nginx configuration file
 COPY default.conf /etc/nginx/http.d/default.conf
 
+# Copy exclusion configuration file
+COPY exclusions.json /exclusions.json
+
 # Startup script
 COPY entry.sh /entry.sh
 
