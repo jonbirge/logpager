@@ -16,4 +16,5 @@ proxy, such as Traefik. Right now this only work with CLF log files, but will
 eventually but made to work with at least standard auth logs, as well.
 
 ## Screenshot
-![Screenshot 2023-12-22 195331](https://github.com/jonbirge/logpager/assets/660566/e7fba02f-162e-40a1-9db5-1068c20e359c)
+![Screenshot 2023-12-29 032118](https://github.com/jonbirge/logpager/assets/660566/9923051b-8b13-4a74-bdbc-f5c9a46be3c4)
+
