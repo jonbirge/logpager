@@ -1,6 +1,7 @@
 // settings
-const geolocate = true;
+const geolocate = true; // pull IP geolocation from external service
 const apiWait = 250; // ms to wait between external API calls
+const maxRequestLength = 36; // truncation length of HTTP requests
 
 // global variables
 let pollInterval;
@@ -106,7 +107,6 @@ function jsonToTable(json) {
                 const timestamp = data[i][j].replace(/\s.*$/, "");
                 table += "<td>" + timestamp + "</td>";
             } else if (j == 2) {
-                const maxRequestLength = 42;
                 // request
                 const rawRequest = data[i][j];
                 // truncate request to 32 characters
@@ -173,7 +173,7 @@ function plotHeatmap(searchTerm) {
 
             // Set dimensions for the heatmap
             const cellSize = 14; // size of each tile
-            const ratio = 3; // width to height ratio
+            const ratio = 2; // width to height ratio
             const margin = { top: 10, right: 20, bottom: 50, left: 60 };
             const width = ratio * Object.keys(jsonData).length * cellSize;
             const height = 24 * cellSize; // 24 hours
