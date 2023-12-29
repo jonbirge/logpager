@@ -21,7 +21,7 @@ test: build
 	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 $(IMAGE_NAME):$(VERSION)
 
 # Iterate locally for development
-dev:
+dev: build
 	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=.:/var/www/:ro $(IMAGE_NAME):$(VERSION)
 
 # Stop the local test
