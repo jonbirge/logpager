@@ -173,7 +173,7 @@ function plotHeatmap(searchTerm) {
 
             // Set dimensions for the heatmap
             const cellSize = 14; // size of each tile
-            const ratio = 2; // width to height ratio
+            const ratio = 3; // width to height ratio
             const margin = { top: 10, right: 20, bottom: 50, left: 60 };
             const width = ratio * Object.keys(jsonData).length * cellSize;
             const height = 24 * cellSize; // 24 hours
@@ -225,10 +225,11 @@ function plotHeatmap(searchTerm) {
             handleResize();
             window.addEventListener("resize", handleResize);
 
-            // Color scale
+            // Create color scale
             const colorScale = d3
-                .scaleSequential(d3.interpolateInferno)
-                .domain([0, d3.max(processedData, (d) => d.count)]);
+                .scaleLog()
+                .domain([1, d3.max(processedData, (d) => d.count)])
+                .range(["darkblue", "orange"]);
 
             // Create the tiles
             svg.selectAll()
