@@ -1,6 +1,6 @@
 // settings
 const geolocate = true; // pull IP geolocation from external service
-const tileLabels = true; // show tile labels on heatmap
+const tileLabels = false; // show tile labels on heatmap
 const apiWait = 250; // ms to wait between external API calls
 const maxRequestLength = 36; // truncation length of HTTP requests
 
@@ -191,7 +191,6 @@ function plotHeatmap(searchTerm) {
             for (let i = 0; i < 24; i++) {
                 hours.push(i.toString().padStart(2, "0"));
             }
-            console.log(hours);
 
             // Create d3 scale for hour axis as string categories from hours array
             const yScale = d3
@@ -209,6 +208,7 @@ function plotHeatmap(searchTerm) {
             const svg = d3
                 .select("#heatmap")
                 .append("svg")
+                .attr("font-size", "12px")
                 .attr("class", "responsive-svg") // Add a class for styling
                 .attr("width", "100%") // Set width to 100%
                 .style("height", height + margin.top + margin.bottom + "px") // Set height using CSS
@@ -230,8 +230,6 @@ function plotHeatmap(searchTerm) {
                 const newWidth = Math.min(containerWidth, width); // Limit the width to the desired width
                 svg.attr("width", newWidth);
             }
-
-            // Call the handleResize function initially and on window resize
             handleResize();
             window.addEventListener("resize", handleResize);
 
@@ -268,20 +266,50 @@ function plotHeatmap(searchTerm) {
                     uiSearch();
                 });
 
+            // Show tooltip on mouseover
+            // svg.selectAll("rect")
+            //     .on("mouseover", function (d) {
+            //         // get the date and hour from the data
+            //         const date = d.date;
+            //         const hour = d.hour;
+            //         // build a partial date and time string for search
+            //         const partial = date + " " + hour + ":";
+            //         // get the count from the data
+            //         const count = d.count;
+            //         // get the x and y coordinates of the mouse
+            //         const x = d3.event.pageX;
+            //         const y = d3.event.pageY;
+            //         // create the tooltip
+            //         const tooltip = d3
+            //             .select("#heatmap")
+            //             .append("div")
+            //             .attr("class", "tooltip")
+            //             .style("left", x + "px")
+            //             .style("top", y + "px");
+            //         // add the partial date and count to the tooltip
+            //         tooltip.html(partial + "<br>" + count + " hits");
+            //     })
+            //     .on("mouseout", function () {
+            //         // remove the tooltip
+            //         d3.select(".tooltip").remove();
+            //     });           
+
             // Add text labels to each tile
-            svg.selectAll()
-                .data(processedData)
-                .enter()
-                .append("text")
-                .attr("x", (d) => xScale(d.date) + xScale.bandwidth() / 2) // center text
-                .attr("y", (d) => yScale(d.hour) + yScale.bandwidth() / 2) // center text
-                .attr("dy", ".35em") // vertically align middle
-                .text((d) => d.count)
-                .attr("font-size", "9px")
-                .attr("fill", "white")
-                .attr("text-anchor", "middle")
-                .style("pointer-events", "none")
-                .style("opacity", "0.75");
+            if (tileLabels) {
+                svg.selectAll()
+                    .data(processedData)
+                    .enter()
+                    .append("text")
+                    .attr("x", (d) => xScale(d.date) + xScale.bandwidth() / 2) // center text
+                    .attr("y", (d) => yScale(d.hour) + yScale.bandwidth() / 2) // center text
+                    .attr("dy", ".35em") // vertically align middle
+                    .text((d) => d.count)
+                    .attr("font-size", "8px")
+                    .attr("fill", "white")
+                    .attr("text-anchor", "middle")
+                    .style("pointer-events", "none")
+                    .style("opacity", "0.75");
+            }
 
             // Add X-axis
             svg.append("g")
@@ -308,7 +336,7 @@ function plotHeatmap(searchTerm) {
                 .attr("x", width / 2)
                 .attr("y", height + 40)
                 .attr("text-anchor", "middle")
-                .style("font-size", "12px")
+                .style("font-size", "14px")
                 .text("Day of the year");
 
             // Add Y-axis label
@@ -317,7 +345,7 @@ function plotHeatmap(searchTerm) {
                 .attr("y", -40)
                 .attr("text-anchor", "middle")
                 .attr("transform", "rotate(-90)")
-                .style("font-size", "12px")
+                .style("font-size", "14px")
                 .text("Hour of the day");
         });
 }
