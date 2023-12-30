@@ -1,18 +1,25 @@
 <?php
 
+// Get search term from URL
+$searchTerm = $_GET['term'] ?? '';
+if ($searchTerm == '') {
+    echo json_encode([]);
+}
+
 // Get the list of excluded IPs
-include 'exclusions.php';
+include 'exclude.php';
 $excludedIPs = getExcludedIPs();
 
 // Parameters
 $maxResults = 1024;
 $logFile = "/access.log";
 
-// Get search term from URL
-$searchTerm = $_GET['term'];
-
-// Build UNIX command
-$command = "grep $searchTerm $logFile | tail -n $maxResults";
+// Build UNIX tool command
+$sedCmd = '';
+foreach ($excludedIPs as $ip) {
+    $sedCmd .= "sed '/$ip/d' | ";
+}
+$command = "grep '$searchTerm' $logFile | " . $sedCmd . "tail -n $maxResults";
 
 // Run command and store results in array
 exec($command, $results);
