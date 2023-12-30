@@ -13,6 +13,8 @@ build:
 
 # Push the Docker image to Docker Hub
 push: build
+	docker tag $(FULL_IMAGE_NAME) $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
+	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
 	docker push $(FULL_IMAGE_NAME)
 
 # No cache build (a clear abuse of 'make clean')
