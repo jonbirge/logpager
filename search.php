@@ -1,28 +1,37 @@
 <?php
 
+// Parameters
+$maxResults = 1024;
+$logFilePath = "/access.log";
+
 // Get search term from URL
 $searchTerm = $_GET['term'] ?? '';
 if ($searchTerm == '') {
     echo json_encode([]);
+    exit;
 }
 
 // Get the list of excluded IPs
 include 'exclude.php';
 $excludedIPs = getExcludedIPs();
 
-// Parameters
-$maxResults = 1024;
-$logFile = "/access.log";
+// generate grep command for main search
+$escFilePath = escapeshellarg($logFilePath);
+$grepInclude = "grep '$searchTerm' $escFilePath";
 
-// Build UNIX tool command
-$sedCmd = '';
+// generate UNIX grep command line arguments to exclude IP addresses
+$grepArgs = '';
 foreach ($excludedIPs as $ip) {
-    $sedCmd .= "sed '/$ip/d' | ";
+    $grepArgs .= " -e $ip";
 }
-$command = "grep '$searchTerm' $logFile | " . $sedCmd . "tail -n $maxResults";
+$grepExclude = "grep -v $grepArgs";
+
+// build UNIX command to perform search with exclusions
+$cmd = "$grepInclude | $grepExclude | tail -n $maxResults";
+echo "<p>$cmd</p>";
 
 // Run command and store results in array
-exec($command, $results);
+exec($cmd, $results);
 
 // Read in CLF header name array from clfhead.json
 $headers = json_decode(file_get_contents('clfhead.json'));

@@ -1,11 +1,11 @@
 <?php
 
+// Path to the CLF log file
+$logFilePath = '/access.log';
+
 // Get parameters from URL
 $page = $_GET['page'] ?? 0;
 $linesPerPage = $_GET['n'] ?? 20;
-
-// Path to the CLF log file
-$logFilePath = '/access.log';
 
 // IP addresses to exclude from counts
 include 'exclude.php';
@@ -15,21 +15,21 @@ $excludedIPs = getExcludedIPs();
 $firstLine = $page * $linesPerPage + 1;
 $lastLine = $firstLine + ($linesPerPage - 1);
 
-// generate UNIX sed command to remove all lines containing any of the excluded IPs
-$sedCmd = '';
-foreach ($excludedIPs as $ip) {
-    $sedCmd .= "sed '/$ip/d' | ";
-}
-
-// read the file in reverse using fast unix tools
+// generate UNIX grep command line arguments to exclude IP addresses
 $escFilePath = escapeshellarg($logFilePath);
-$tailCmd = "tail -n $lastLine | head -n $linesPerPage";
+$grepArgs = '';
+foreach ($excludedIPs as $ip) {
+    $grepArgs .= " -e $ip";
+}
+$grepCmd = "grep -v $grepArgs $escFilePath";
 
-// put everything together into a single command
-$cmd = "cat $escFilePath | $sedCmd $tailCmd";
+// build UNIX command to get the last $linesPerPage lines
+$cmd = "$grepCmd | tail -n $lastLine | head -n $linesPerPage";
+
+// execute UNIX command
 $fp = popen($cmd, 'r');
 
-// read the lines from the pipe
+// read the lines from UNIX pipe
 $lines = [];
 while ($line = fgets($fp)) {
     $lines[] = $line;
