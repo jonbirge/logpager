@@ -1,6 +1,6 @@
 <?php
 
-$exclusionFileName = "/exclusions.json";
+$exclusionFileName = "/excludes.json";
 
 function getExcludedIPs() {
     global $exclusionFileName;
