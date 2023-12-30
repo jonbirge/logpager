@@ -10,20 +10,20 @@ RUN rm -rf /var/www
 RUN mkdir -p /var/www
 RUN chown -R nginx:nginx /var/www
 
-# Copy test log file so this runs even if there is no volume mounted
-COPY test.log /access.log
-
 # Copy the Nginx configuration file
 COPY default.conf /etc/nginx/http.d/default.conf
 
-# Copy exclusion configuration file
-COPY exclusions.json /exclusions.json
+# Copy test log file so this runs even if there is no volume mounted
+COPY test.log /access.log
+
+# Copy test exclusion file
+COPY excludes.json /excludes.json
 
 # Startup script
 COPY entry.sh /entry.sh
 
 # Copy the files to the Nginx web root
-COPY *.html *.php *.js *.css /var/www/
+COPY *.html *.php *.js *.css *.json /var/www/
 
 # Expose standard HTTP port 
 EXPOSE 80

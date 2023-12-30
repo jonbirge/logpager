@@ -4,7 +4,7 @@
 $searchTerm = $_GET['search'] ?? null;
 
 // IP addresses to exclude from counts
-include 'exclusions.php';
+include 'exclude.php';
 $excludedIPs = getExcludedIPs();
 
 // Log file to read

@@ -1,43 +1,49 @@
 <?php
 
+// Path to the CLF log file
+$logFilePath = '/access.log';
+
 // Get parameters from URL
 $page = $_GET['page'] ?? 0;
 $linesPerPage = $_GET['n'] ?? 20;
 
-// Path to the CLF log file
-$logFilePath = '/access.log';
+// IP addresses to exclude from counts
+include 'exclude.php';
+$excludedIPs = getExcludedIPs();
 
-// Function to read the nth page from the end of the file
-function getTailPage($filePath, $linesPerPage, $page = 0) {
-    // compute the first and last line numbers
-    $firstLine = $page * $linesPerPage + 1;
-    $lastLine = $firstLine + ($linesPerPage - 1);
+// compute the first and last line numbers
+$firstLine = $page * $linesPerPage + 1;
+$lastLine = $firstLine + ($linesPerPage - 1);
 
-    // use popen to read the file in reverse using fast unix tools
-    $cmd = sprintf('tail -n %d %s | head -n %d', $lastLine, escapeshellarg($filePath), $linesPerPage);
-    $fp = popen($cmd, 'r');
+// generate UNIX grep command line arguments to exclude IP addresses
+$escFilePath = escapeshellarg($logFilePath);
+$grepArgs = '';
+foreach ($excludedIPs as $ip) {
+    $grepArgs .= " -e $ip";
+}
+$grepCmd = "grep -v $grepArgs $escFilePath";
 
-    // read the lines from the pipe
-    $lines = [];
-    while ($line = fgets($fp)) {
-        $lines[] = $line;
-    }
+// build UNIX command to get the last $linesPerPage lines
+$cmd = "$grepCmd | tail -n $lastLine | head -n $linesPerPage";
 
-    return $lines;
+// execute UNIX command
+$fp = popen($cmd, 'r');
+
+// read the lines from UNIX pipe
+$lines = [];
+while ($line = fgets($fp)) {
+    $lines[] = $line;
 }
 
-// Read the last n lines from the file
-$lastPageLines = getTailPage($logFilePath, $linesPerPage, $page);
-
-// Make array of CLF log headers: IP Address, Timestamp, Request, Status, Size
-$headers = ['IP Address', 'Timestamp', 'Request', 'Status', 'Size'];
+// Read in CLF header name array from clfhead.json
+$headers = json_decode(file_get_contents('clfhead.json'));
 
 // Create array of CLF log lines
 $logLines = [];
 $logLines[] = $headers;
 
 // Process each line and add to the array
-foreach ($lastPageLines as $line) {
+foreach ($lines as $line) {
     preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) (\S+)/', $line, $matches);
     // Go through each match and add to the array with htmlspecialchars()
     $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));

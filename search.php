@@ -1,24 +1,39 @@
 <?php
 
-// Get the list of excluded IPs
-include 'exclusions.php';
-$excludedIPs = getExcludedIPs();
-
 // Parameters
 $maxResults = 1024;
-$logFile = "/access.log";
+$logFilePath = "/access.log";
 
 // Get search term from URL
-$searchTerm = $_GET['term'];
+$searchTerm = $_GET['term'] ?? '';
+if ($searchTerm == '') {
+    echo json_encode([]);
+    exit;
+}
 
-// Build UNIX command
-$command = "grep $searchTerm $logFile | tail -n $maxResults";
+// Get the list of excluded IPs
+include 'exclude.php';
+$excludedIPs = getExcludedIPs();
+
+// generate grep command for main search
+$escFilePath = escapeshellarg($logFilePath);
+$grepInclude = "grep '$searchTerm' $escFilePath";
+
+// generate UNIX grep command line arguments to exclude IP addresses
+$grepArgs = '';
+foreach ($excludedIPs as $ip) {
+    $grepArgs .= " -e $ip";
+}
+$grepExclude = "grep -v $grepArgs";
+
+// build UNIX command to perform search with exclusions
+$cmd = "$grepInclude | $grepExclude | tail -n $maxResults";
 
 // Run command and store results in array
-exec($command, $results);
+exec($cmd, $results);
 
-// Make array of CLF log headers: IP Address, Timestamp, Request, Status, Size
-$headers = ['IP Address', 'Timestamp', 'Request', 'Status', 'Size'];
+// Read in CLF header name array from clfhead.json
+$headers = json_decode(file_get_contents('clfhead.json'));
 
 // Create array of CLF log lines
 $logLines = [];
