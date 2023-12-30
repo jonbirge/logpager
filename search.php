@@ -24,8 +24,8 @@ $command = "grep '$searchTerm' $logFile | " . $sedCmd . "tail -n $maxResults";
 // Run command and store results in array
 exec($command, $results);
 
-// Make array of CLF log headers: IP Address, Timestamp, Request, Status, Size
-$headers = ['IP Address', 'Timestamp', 'Request', 'Status', 'Size'];
+// Read in CLF header name array from clfhead.json
+$headers = json_decode(file_get_contents('clfhead.json'));
 
 // Create array of CLF log lines
 $logLines = [];

@@ -1,6 +1,5 @@
 # TODO
 
-- External PHP function to create table header array
 - Separate link next to IP for running whois on IP address
 - Search interface should specify fields as parameter
 - Multiple field searches should AND together
