@@ -28,7 +28,6 @@ $grepExclude = "grep -v $grepArgs";
 
 // build UNIX command to perform search with exclusions
 $cmd = "$grepInclude | $grepExclude | tail -n $maxResults";
-echo "<p>$cmd</p>";
 
 // Run command and store results in array
 exec($cmd, $results);
