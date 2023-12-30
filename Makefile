@@ -1,28 +1,31 @@
 # Define variables
 IMAGE_NAME=logpager
-VERSION=latest
+VERSION=1.3b
 DOCKER_HUB_USER=jonbirge
+
+
+# Derived variables
+FULL_IMAGE_NAME=$(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
 
 # Build the Docker image
 build:
-	docker build -t $(IMAGE_NAME):$(VERSION) .
+	docker build -t $(FULL_IMAGE_NAME) .
 
 # Push the Docker image to Docker Hub
 push: build
-	docker tag $(IMAGE_NAME):$(VERSION) $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
-	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
+	docker push $(FULL_IMAGE_NAME)
 
 # No cache build (a clear abuse of 'make clean')
 no-cache:
-	docker build --no-cache .
+	docker build -t $(FULL_IMAGE_NAME) --no-cache .
 
 # Run locally for final testing
 test: build
-	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 $(IMAGE_NAME):$(VERSION)
+	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 $(FULL_IMAGE_NAME)
 
 # Iterate locally for development
 dev: build
-	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=.:/var/www/:ro $(IMAGE_NAME):$(VERSION)
+	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=.:/var/www/:ro $(FULL_IMAGE_NAME)
 
 # Stop the local test
 stop:

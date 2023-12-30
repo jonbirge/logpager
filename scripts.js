@@ -1,5 +1,6 @@
 // settings
 const geolocate = true; // pull IP geolocation from external service
+const tileLabels = true; // show tile labels on heatmap
 const apiWait = 250; // ms to wait between external API calls
 const maxRequestLength = 36; // truncation length of HTTP requests
 
@@ -156,13 +157,14 @@ function plotHeatmap(searchTerm) {
             // Process the data to work with D3 library
             let processedData = [];
             Object.keys(jsonData).forEach((date) => {
-                for (let hour = 1; hour <= 24; hour++) {
+                for (let hour = 0; hour < 24; hour++) {
+                    const hourStr = hour.toString().padStart(2, "0");
                     processedData.push({
                         date: date,
-                        hour: hour,
+                        hour: hourStr,
                         count:
-                            jsonData[date][hour] !== undefined
-                                ? jsonData[date][hour]
+                            jsonData[date][hourStr] !== undefined
+                                ? jsonData[date][hourStr]
                                 : null,
                     });
                 }
@@ -178,15 +180,23 @@ function plotHeatmap(searchTerm) {
             const width = ratio * Object.keys(jsonData).length * cellSize;
             const height = 24 * cellSize; // 24 hours
 
-            // Creating scales for the axes
+            // Creating scales for date axes
             const xScale = d3
                 .scaleBand()
                 .domain(Object.keys(jsonData))
                 .range([0, width]);
 
+            // Create array of hour label strings with leading zeros
+            const hours = [];
+            for (let i = 0; i < 24; i++) {
+                hours.push(i.toString().padStart(2, "0"));
+            }
+            console.log(hours);
+
+            // Create d3 scale for hour axis as string categories from hours array
             const yScale = d3
                 .scaleBand()
-                .domain(d3.range(1, 25))
+                .domain(hours)
                 .range([0, height]);
 
             // Check if SVG element already exists and remove if so
@@ -201,7 +211,7 @@ function plotHeatmap(searchTerm) {
                 .append("svg")
                 .attr("class", "responsive-svg") // Add a class for styling
                 .attr("width", "100%") // Set width to 100%
-                .attr("height", height + margin.top + margin.bottom)
+                .style("height", height + margin.top + margin.bottom + "px") // Set height using CSS
                 .attr(
                     "viewBox",
                     `0 0 ${width + margin.left + margin.right} ${

@@ -32,6 +32,11 @@
             width: calc(min(100%, 1440px) - 48pt); /* Responsive width */
         }
 
+        .header {
+            display: flex;
+            justify-content: space-between;
+        }
+
         /* Style the log table to responsively fit all screen sizes, and wrap text to avoid scrolling if possible */
         table {
             width: 100%;
@@ -43,23 +48,20 @@
 
         table, th, td {
             border: 1px solid black;
-            /* border: 3px solid white; */
             margin-bottom: 20px;
             padding: 6px;
         }
 
         th {
-            /* background-color: #36373ccc; */
-            background-color: #454545;
+            background-color: #777777;
             color: white;
             font-weight: bold;
         }
 
-        /* Console font for HTTP request column */
+        /* Monospace font for HTTP request column */
         .code {
-            font-family: 'Consolas', monospace;
+            font-family: Cascadia, Consolas, monospace;
             font-weight: lighter;
-            font-size: 13px;
             text-align: left;
             padding-left: 9pt;
         }
@@ -79,11 +81,6 @@
         /* Style alternating rows */
         tr:nth-child(even) {
             background-color: #f0f0f0;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
         }
 
         /* Text box with 16pt font and wide left and right margins */
@@ -192,7 +189,7 @@
     </div>
 
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="scripts.js?version=42"></script>
+    <script src="scripts.js?version=43"></script>
 </body>
 
 </html>
