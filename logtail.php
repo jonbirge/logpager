@@ -1,7 +1,10 @@
 <?php
 
 // Path to the CLF log file
-$logFilePath = '/access.log';
+// $logFilePath = '/access.log';
+$logFilePath = '/auth.log';
+// $logType = 'CLF';
+$logType = 'auth';
 
 // Get parameters from URL
 $page = $_GET['page'] ?? 0;
@@ -36,17 +39,32 @@ while ($line = fgets($fp)) {
 }
 
 // Read in CLF header name array from clfhead.json
-$headers = json_decode(file_get_contents('clfhead.json'));
+$headers = json_decode(file_get_contents('loghead.json'));
+if ($logType == 'CLF') {
 
-// Create array of CLF log lines
-$logLines = [];
-$logLines[] = $headers;
+    // Create array of CLF log lines
+    $logLines = [];
+    $logLines[] = $headers;
 
-// Process each line and add to the array
-foreach ($lines as $line) {
-    preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) (\S+)/', $line, $matches);
-    // Go through each match and add to the array with htmlspecialchars()
-    $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));
+    // Process each line and add to the array
+    foreach ($lines as $line) {
+        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $matches);
+        // Go through each match and add to the array with htmlspecialchars()
+        $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));
+    }
+} else {
+    // Create array of auth log lines
+    $logLines = [];
+    $logLines[] = $headers;
+
+    // Process each line and add to the array
+    foreach ($lines as $line) {
+        preg_match('/(\S+) (\S+) (\S+): (.*)/', $line, $matches);
+        $authDate = date('M d H:i:s', strtotime($matches[1] . ' ' . $matches[2] . ' ' . $matches[3]));
+        
+        // Go through each match and add to the array with htmlspecialchars()
+        $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));
+    }
 }
 
 // Output the array as JSON
