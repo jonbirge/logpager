@@ -267,6 +267,7 @@ function plotHeatmap(searchTerm) {
                 });  
 
             // Create legend
+            const legendWidth = 15;
             const legend = svg
                 .selectAll(".legend")
                 .data(colorScale.ticks(15))
@@ -274,19 +275,19 @@ function plotHeatmap(searchTerm) {
                 .append("g")
                 .attr("class", "legend")
                 .attr("transform", (d, i) => {
-                    return `translate(${width + 20}, ${i * 15})`;
+                    return `translate(${width + 20}, ${i * legendWidth})`;
                 });
             
             // Add rectangles to the legend elements
             legend.append("rect")
-                .attr("width", 15)
-                .attr("height", 15)
+                .attr("width", legendWidth)
+                .attr("height", legendWidth)
                 .style("fill", colorScale);
             
             // Add text to the legend elements
             legend.append("text")
                 .attr("x", 24)
-                .attr("y", 0)
+                .attr("y", 12)
                 .text((d) => d);
 
             // Add text labels to each tile
