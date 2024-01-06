@@ -1,8 +1,8 @@
 // settings
 const geolocate = true; // pull IP geolocation from external service
 const tileLabels = false; // show tile labels on heatmap
-const apiWait = 250; // ms to wait between external API calls
-const maxRequestLength = 36; // truncation length of HTTP requests
+const apiWait = 200; // ms to wait between external API calls
+const maxRequestLength = 42; // truncation length of HTTP requests
 
 // global variables
 let pollInterval;
@@ -21,7 +21,7 @@ if (search !== null) {
 } else {
     console.log("on page load: loading logs...");
 
-    // on window load run pollServer and plotHeatmap
+    // on window load run pollServer() and plotHeatmap()
     window.onload = () => {
         pollServer();
         plotHeatmap();
@@ -165,7 +165,7 @@ function plotHeatmap(searchTerm) {
                         count:
                             jsonData[date][hourStr] !== undefined
                                 ? jsonData[date][hourStr]
-                                : null,
+                                : 0,
                     });
                 }
             });
@@ -174,8 +174,8 @@ function plotHeatmap(searchTerm) {
             processedData = processedData.filter((d) => d.count !== null);
 
             // Set dimensions for the heatmap
-            const cellSize = 14; // size of each tile
-            const ratio = 2; // width to height ratio
+            const cellSize = 12; // size of each tile
+            const ratio = 1; // width to height ratio
             const margin = { top: 10, right: 20, bottom: 50, left: 60 };
             const width = ratio * Object.keys(jsonData).length * cellSize;
             const height = 24 * cellSize; // 24 hours
@@ -235,7 +235,7 @@ function plotHeatmap(searchTerm) {
 
             // Create color scale
             const colorScale = d3
-                .scaleLinear()
+                .scaleSqrt()
                 .interpolate(() => d3.interpolatePlasma)
                 .domain([1, d3.max(processedData, (d) => d.count)])
                 .range([0, 1]);
@@ -264,35 +264,30 @@ function plotHeatmap(searchTerm) {
                     searchInput.value = searchTerm;
                     // run the search
                     uiSearch();
-                });
+                });  
 
-            // Show tooltip on mouseover
-            // svg.selectAll("rect")
-            //     .on("mouseover", function (d) {
-            //         // get the date and hour from the data
-            //         const date = d.date;
-            //         const hour = d.hour;
-            //         // build a partial date and time string for search
-            //         const partial = date + " " + hour + ":";
-            //         // get the count from the data
-            //         const count = d.count;
-            //         // get the x and y coordinates of the mouse
-            //         const x = d3.event.pageX;
-            //         const y = d3.event.pageY;
-            //         // create the tooltip
-            //         const tooltip = d3
-            //             .select("#heatmap")
-            //             .append("div")
-            //             .attr("class", "tooltip")
-            //             .style("left", x + "px")
-            //             .style("top", y + "px");
-            //         // add the partial date and count to the tooltip
-            //         tooltip.html(partial + "<br>" + count + " hits");
-            //     })
-            //     .on("mouseout", function () {
-            //         // remove the tooltip
-            //         d3.select(".tooltip").remove();
-            //     });           
+            // Create legend
+            const legend = svg
+                .selectAll(".legend")
+                .data(colorScale.ticks(15))
+                .enter()
+                .append("g")
+                .attr("class", "legend")
+                .attr("transform", (d, i) => {
+                    return `translate(${width + 20}, ${i * 15})`;
+                });
+            
+            // Add rectangles to the legend elements
+            legend.append("rect")
+                .attr("width", 15)
+                .attr("height", 15)
+                .style("fill", colorScale);
+            
+            // Add text to the legend elements
+            legend.append("text")
+                .attr("x", 24)
+                .attr("y", 0)
+                .text((d) => d);
 
             // Add text labels to each tile
             if (tileLabels) {
@@ -300,8 +295,8 @@ function plotHeatmap(searchTerm) {
                     .data(processedData)
                     .enter()
                     .append("text")
-                    .attr("x", (d) => xScale(d.date) + xScale.bandwidth() / 2) // center text
-                    .attr("y", (d) => yScale(d.hour) + yScale.bandwidth() / 2) // center text
+                    .attr("x", (d) => xScale(d.date) + xScale.bandwidth()/2) // center text
+                    .attr("y", (d) => yScale(d.hour) + yScale.bandwidth()/2) // center text
                     .attr("dy", ".35em") // vertically align middle
                     .text((d) => d.count)
                     .attr("font-size", "8px")
@@ -310,6 +305,13 @@ function plotHeatmap(searchTerm) {
                     .style("pointer-events", "none")
                     .style("opacity", "0.75");
             }
+            else  // add tooltips to each tile
+            {
+                svg.selectAll("rect")
+                    .data(processedData)
+                    .append("title")
+                    .text((d) => d.count);
+            } 
 
             // Add X-axis
             svg.append("g")
@@ -445,7 +447,6 @@ function doSearch() {
                     resetButton.id = "reset-button";
                     resetButton.innerHTML = "Reset";
                     resetButton.classList.add("toggle-button");
-                    // resetButton.classList.add("gray");
                     resetButton.onclick = resetSearch;
                     const searchSpan = document.getElementById("search-span");
                     searchSpan.insertBefore(resetButton, searchSpan.firstChild);
@@ -471,7 +472,6 @@ function resetSearch() {
         button.classList.remove("disabled");
     });
     searchButton.innerHTML = "Search";
-    // searchButton.onclick = uiSearch;
     searchInput.value = "";
     resetButton.remove();
     pollServer();
