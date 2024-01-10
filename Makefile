@@ -1,6 +1,6 @@
 # Define variables
 IMAGE_NAME=logpager
-VERSION=1.3
+VERSION=dev
 DOCKER_HUB_USER=jonbirge
 
 
@@ -15,6 +15,8 @@ build:
 push: build
 	docker tag $(FULL_IMAGE_NAME) $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
 	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
+
+release: push
 	docker push $(FULL_IMAGE_NAME)
 
 # No cache build (a clear abuse of 'make clean')
