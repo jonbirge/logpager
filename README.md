@@ -1,11 +1,18 @@
 # logpager
 
 ## About
-Common Log Format web interface written using PHP and JS. Displays log events
-as heatmap using tile plot generated with D3, allowing user to click on a given
-period to drill down into the log. Performs asynchronous reverse-DNS
-hostname resolution. User can click on IP address in log and see all events
+Lightweight log file web interface written using PHP and JS, intended to provide a dashboard for security
+threats. Displays log events as heatmap using tile plot generated with D3, allowing
+user to click on a given period to drill down into the log. Performs asynchronous
+reverse-DNS hostname resolution. User can click on IP address in log and see all events
 from that IP, with a new heatmap showing counts over time just for that IP.
+
+Currently under development, the long-term goal is to provide two things:
+
+- An intuitive highlevel understanding of attacks over time and where they are coming from.
+- An efficient interface to proactively identify entire IP ranges that should be black-listed and do so,
+supplementing simple "fail to ban" automation that only works with single IP addresses and only
+temporarily. While much more effective than automated banning, a human should probably be involved.
 
 ## Screenshot
 ![Screenshot 2024-01-08 195757](https://github.com/jonbirge/logpager/assets/660566/1008eb11-232c-444f-b286-216dd362da30)
