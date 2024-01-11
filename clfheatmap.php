@@ -9,7 +9,6 @@ $excludedIPs = getExcludedIPs();
 
 // Log file to read
 $logFilePath = '/access.log';
-// $logFilePath = '/auth.log';
 
 // Open the log file for reading
 $logFile = fopen($logFilePath, 'r');

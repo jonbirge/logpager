@@ -24,13 +24,13 @@ if (search !== null) {
 
     // on window load run pollServer() and plotHeatmap()
     window.onload = () => {
-        pollServer();
+        pollLog();
         plotHeatmap();
     };
 }
 
 // pull the relevent log data from the server
-function pollServer() {
+function pollLog() {
     console.log("pollServer: fetching page " + page + "of type " + logType);
 
     // abort any pending fetches
@@ -157,7 +157,12 @@ function plotHeatmap(searchTerm) {
     console.log("plotHeatmap: plotting heatmap");
 
     // Build data query URL
-    let heatmapURL = "heatmap.php";
+    let heatmapURL;
+    if (logType == "clf") {
+        heatmapURL = "clfheatmap.php";
+    } else {
+        heatmapURL = "authheatmap.php";
+    }
     if (searchTerm) {
         heatmapURL += "?search=" + encodeURIComponent(searchTerm);
     }
@@ -487,7 +492,7 @@ function resetSearch() {
     searchButton.innerHTML = "Search";
     searchInput.value = "";
     resetButton.remove();
-    pollServer();
+    pollLog();
     plotHeatmap();
 }
 
@@ -605,11 +610,11 @@ function runWatch() {
             uielement.disabled = false;
             uielement.classList.remove("disabled");
         });
-        pollServer();
+        pollLog();
     } else {
-        pollServer();
+        pollLog();
         polling = true;
-        pollInterval = setInterval(pollServer, 10000);
+        pollInterval = setInterval(pollLog, 10000);
         // disable all other ui elements
         uielements.forEach((uielement) => {
             uielement.disabled = true;
