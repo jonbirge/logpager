@@ -73,17 +73,15 @@ echo json_encode($logLines);
 
 // Function to take a line of an auth log of the form "Dec 24 02:28:16 host
 // sshd[441056]: Received disconnect from 173.48.140.140 port..." and transform
-// to an array of the form [IP, 2024/12/24:02:28:16, host, sshd: Received
-// disconnect from...] where IP is any IP address that occurs in the line, and
-// the year is assumed to be the current year. If there is no IP, the first
-// element of the array is null.
+// to an array of the form [IP, 12/24:02:28:16, host, sshd: Received
+// disconnect from...] where IP is any IP address that occurs in the line.
 function parseAuthLogLine($line) {
-    // Get the current year
+    // Current year
     $year = date('Y');
 
     // Extract the month, day, and time from the line
-    if (!preg_match('/(\S+) (\d+) (\d+):(\d+):(\d+)/', $line, $matches)) {
-        return false; // or handle error as appropriate
+    if (!preg_match('/(\S+)\s+(\d+) (\d+):(\d+):(\d+)/', $line, $matches)) {
+        return false; // handle error as appropriate
     }
     $month = $matches[1];
     $day = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
@@ -93,11 +91,16 @@ function parseAuthLogLine($line) {
 
     // Convert the month to a number
     $dateInfo = date_parse($month);
-    if (!isset($dateInfo['month'])) {
-        return false; // or handle error as appropriate
-    }
+    // if (!isset($dateInfo['month'])) {
+    //     return false; // or handle error as appropriate
+    // }
     $monthNum = $dateInfo['month'];
     $monthStr = str_pad($monthNum, 2, '0', STR_PAD_LEFT);
+
+    // Infer the year from the month
+    if ($monthNum > date('n')) {
+        $year--;
+    }
 
     // Extract the IP address from the line
     if (!preg_match('/(\d+\.\d+\.\d+\.\d+)/', $line, $matches)) {
@@ -114,9 +117,10 @@ function parseAuthLogLine($line) {
 
     // Extract the message from the line
     if (!preg_match('/\S+ \S+ \S+ \S+ (.+)/', $line, $matches)) {
-        return false; // or handle error as appropriate
+        $message = '';
+    } else {
+        $message = $matches[1];
     }
-    $message = $matches[1];
 
     // Return the array
     return [$ip, "$year/$monthStr/$day:$hour:$minute:$second", $message];
