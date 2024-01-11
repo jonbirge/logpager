@@ -1,6 +1,6 @@
 [
-    "IP Address",
+    "IP",
     "Timestamp",
-    "Request",
-    "Status"
+    "Details",
+    "Stat"
 ]

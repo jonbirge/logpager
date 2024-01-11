@@ -1,8 +1,8 @@
 // settings
-const geolocate = true; // pull IP geolocation from external service
+const geolocate = false; // pull IP geolocation from external service
 const tileLabels = false; // show tile labels on heatmap
 const apiWait = 200; // ms to wait between external API calls
-const maxRequestLength = 42; // truncation length of HTTP requests
+const maxRequestLength = 128; // truncation length of log details
 
 // global variables
 let pollInterval;
@@ -12,6 +12,7 @@ let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
+let logType = "auth";  // "clf" or "auth"
 
 // decide what to do on page load
 if (search !== null) {
@@ -28,9 +29,9 @@ if (search !== null) {
     };
 }
 
-// pull the log in JSON form from the server
+// pull the relevent log data from the server
 function pollServer() {
-    console.log("pollServer: fetching page " + page);
+    console.log("pollServer: fetching page " + page + "of type " + logType);
 
     // abort any pending fetches
     if (fetchCount > 0) {
@@ -43,16 +44,24 @@ function pollServer() {
         page = 0; // reset page
     }
 
-    // remove search term from URL and update page numbers
+    // reset the URL
     const url = new URL(window.location.href);
     url.searchParams.delete("search");
     url.searchParams.set("page", page);
     window.history.replaceState({}, "", url);
 
-    // get the log from the server
+    // clear whois div
     const whoisDiv = document.getElementById("whois");
     whoisDiv.innerHTML = "";
-    fetch("logtail.php?page=" + page)
+
+    // get the log from the server
+    let logURL;
+    if (logType == "clf") {
+        logURL = "clftail.php";
+    } else {
+        logURL = "authtail.php";
+    }
+    fetch(logURL + "?page=" + page)
         .then((response) => response.text())
         .then((data) => {
             const logDiv = document.getElementById("log");
@@ -66,8 +75,8 @@ function pollServer() {
         });
 }
 
-// take n x 5 JSON array of strings and convert to HTML table, assuming the
-// first row is table headers. write table to div.
+// Take JSON array of commond log data and write HTML table, assuming the
+// first row is table headers.
 function jsonToTable(json) {
     const signal = controller.signal;
     let ips = [];
@@ -80,8 +89,10 @@ function jsonToTable(json) {
         table += "<th>" + data[0][i] + "</th>";
         if (i == 0) {
             table += "<th>Host name</th>";
-            table +=
+            if (geolocate) {
+                table +=
                 '<th>Geolocation (courtesy of <a href=https://www.ip-api.com style="color: white">ip-api.com</a>)</th>';
+            }
         }
     }
     table += "</tr>";
@@ -100,10 +111,11 @@ function jsonToTable(json) {
                 hostnameid = "hostname-" + ip;
                 table += '<td id="' + hostnameid + '">-</td>';
                 // Add new cell for Geolocation after the first cell
-                geoid = "geo-" + ip;
-                table += '<td id="' + geoid + '">-</td>';
+                if (geolocate) {
+                    geoid = "geo-" + ip;
+                    table += '<td id="' + geoid + '">-</td>';
+                }
             } else if (j == 1) {
-                // timestamp
                 // remove the timezone from the timestamp
                 const timestamp = data[i][j].replace(/\s.*$/, "");
                 table += "<td>" + timestamp + "</td>";
@@ -117,9 +129,9 @@ function jsonToTable(json) {
                         : rawRequest;
                 table += '<td class="code">' + truncRequest + "</td>";
             } else if (j == 3) {
-                // status
+                // generalized status handling
                 const status = data[i][j];
-                if (status == "200" || status == "304") {
+                if (status == "200" || status == "304" || status == "OK") {
                     table += '<td class="green">' + data[i][j] + "</td>";
                 } else {
                     table += '<td class="red">' + data[i][j] + "</td>";

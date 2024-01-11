@@ -13,13 +13,12 @@
 <body>
     <div class="container">
         <span id="log-list" class="header">
-        <h1><a>access.log</a></h1>|<h1><a>auth.log</a></h1>
+        <h1><a href="?page=0">access.log</a> | <a href="?page=0">auth.log</a></h1>
         </span>
         <hr>
 
-        <div id="heatmap">
-            <!-- summary chart will go here -->
-        </div>
+        <!-- summary chart(s) -->
+        <div id="heatmap"></div>
 
         <!-- search form -->
         <span id="search-span" class="search-header">
@@ -29,31 +28,29 @@
             </form>
         </span>
 
-        <div id="log">
-            <!-- log file will go here -->
-        </div>
+        <!-- log file -->
+        <div id="log"></div>
  
         <!-- paging buttons -->
         <div class="button-set" id="buttons">
             <button class="toggle-button gray" onclick="page = page + 100; pollServer();">&lt;&lt;&lt;</button>
-            <button class="toggle-button gray" onclick="page = page + 10; pollServer();">&lt;&lt;</button>
+            <button class="toggle-button gray" onclick="page += 10; pollServer();">&lt;&lt;</button>
             <button class="toggle-button gray" onclick="page = page + 1; pollServer();">&lt;</button>
-            <span id="page" style="margin: 12px">Loading...</span>
+            <span id="page" style="margin: 12px; font-size: 14pt;">Loading...</span>
             <button class="toggle-button gray" onclick="page = page - 1; pollServer();">&gt;</button>
             <button class="toggle-button gray" onclick="page = 0; pollServer();">Current</button>
             <button class="toggle-button" id="watch-button" onclick="runWatch()">Live</button>
         </div>
 
+        <!-- whois info -->
         <pre>
-            <div id="whois">
-                <!-- whois info will go here -->
-            </div>
+            <div id="whois"></div>
         </pre>
 
     </div>
 
-    <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="scripts.js?version=7"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
 </body>
 
 </html>
