@@ -14,6 +14,12 @@ Currently under development, the long-term goal is to provide two things:
 supplementing simple "fail to ban" automation that only works with single IP addresses and only
 temporarily. While much more effective than automated banning, a human should probably be involved.
 
+## Approach
+The approach is to treat the log file itself as truth (rather than have a separate process and database)
+and run UNIX tool commands on the host (within the container) to rapidly extract data from the log file
+directly, essentially running the kinds of forensic commands a sysadmin would, formatting the results
+in a nice user interface and graphical form on the local browser.
+
 ## Screenshot
 ![Screenshot 2024-01-08 195757](https://github.com/jonbirge/logpager/assets/660566/1008eb11-232c-444f-b286-216dd362da30)
 
@@ -25,7 +31,7 @@ container to be integrated with other containers and hosted behind a reverse
 proxy, such as Traefik. Right now this only work with CLF log files, but will
 eventually be made to work with at least standard auth logs, as well.
 
-## Using with docker-compose
+## With docker-compose
 Here is an example docker-compose.yml file showing how to integrate with a
 reverse proxy (Traefik) to access logs for all proxy traffic.
 ```
