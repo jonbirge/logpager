@@ -12,16 +12,14 @@ let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
-let logType = "auth";  // "clf" or "auth"
+let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
 
 // decide what to do on page load
-if (search !== null) {
-    // search beats page
-    console.log("on page load: searching for " + search + "...");
+if (search !== null) {  // search beats page
+    console.log("page load: searching for " + search + "...");
     window.onload = doSearch;
 } else {
-    console.log("on page load: loading logs...");
-
+    console.log("page load: loading " + logType + " log...");
     // on window load run pollServer() and plotHeatmap()
     window.onload = () => {
         pollLog();
@@ -31,7 +29,7 @@ if (search !== null) {
 
 // pull the relevent log data from the server
 function pollLog() {
-    console.log("pollServer: fetching page " + page + " of type " + logType);
+    console.log("pollLog: fetching page " + page + " of type " + logType);
 
     // abort any pending fetches
     if (fetchCount > 0) {
@@ -47,6 +45,7 @@ function pollLog() {
     // reset the URL
     const url = new URL(window.location.href);
     url.searchParams.delete("search");
+    url.searchParams.set("type", logType);
     url.searchParams.set("page", page);
     window.history.replaceState({}, "", url);
 
