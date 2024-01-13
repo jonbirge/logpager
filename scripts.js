@@ -31,7 +31,7 @@ if (search !== null) {
 
 // pull the relevent log data from the server
 function pollLog() {
-    console.log("pollServer: fetching page " + page + "of type " + logType);
+    console.log("pollServer: fetching page " + page + " of type " + logType);
 
     // abort any pending fetches
     if (fetchCount > 0) {
@@ -371,8 +371,8 @@ function plotHeatmap(searchTerm) {
 }
 
 // take date of the form YYYY-MM-DD as one parameter, and the hour of the day as another parameter,
-// and return a search string for the beginning of the corresponding Common Log Format timestamp.
-// example: buildSearch('2020-01-01', '12') would return '[01/Jan/2020:12:'
+// and return a search string for the beginning of the corresponding common timestamp.
+// example: buildSearch('2020-01-01', '12') would return '01/Jan/2020:12:'
 function buildTimestampSearch(date, hour) {
     const monthnum = date.substring(5, 7);
     // convert month number to month name
@@ -438,7 +438,13 @@ function doSearch() {
     if (search == "") {
         console.log("search is empty");
     } else {
-        fetch("search.php?term=" + search)
+        let searchURL;
+        if (logType == "clf") {
+            searchURL = "clfsearch.php";
+        } else {
+            searchURL = "authsearch.php";
+        }
+        fetch(searchURL + "?term=" + search)
             .then((response) => response.text())
             .then((data) => {
                 // write the search results to the log div

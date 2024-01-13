@@ -55,9 +55,6 @@ while (($line = fgets($fp)) !== false) {
 
     $data = parseAuthLogLine($line);
 
-    // TODO: The rest of this is essentially common to both authheatmap.php and
-    // clfheatmap.php, and should eventually be put into a single function.
-
     // Extract the timestamp from the auth log entry
     $timeStamp = $data[1];
 
