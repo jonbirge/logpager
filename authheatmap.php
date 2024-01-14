@@ -6,8 +6,15 @@ include 'authparse.php';
 // Get an optional 'ip' query string parameter
 $searchTerm = $_GET['search'] ?? null;
 
-// Log file to read
-$logFilePath = '/auth.log';
+// Log files to read
+$logFilePaths = ['auth.log.1', '/auth.log'];
+
+// Remove any log files that don't exist
+foreach ($logFilePaths as $key => $logFilePath) {
+    if (!file_exists($logFilePath)) {
+        unset($logFilePaths[$key]);
+    }
+}
 
 // generate UNIX grep command line argument to only include lines containing IP addresses
 $escFilePath = escapeshellarg($logFilePath);
@@ -19,11 +26,13 @@ $grepArgs = '';
 foreach ($services as $service) {
     $grepArgs .= " -e $service";
 }
-$escFilePath = escapeshellarg($logFilePath);
-$grepSrvCmd = "grep $grepArgs $escFilePath";
+$grepSrvCmd = "grep $grepArgs";
 
-// build UNIX command to get the last $linesPerPage lines
-$cmd = "$grepSrvCmd | $grepIPCmd";
+// generate cat command to concatenate all log files
+$catCmd = 'cat ' . implode(' ', $logFilePaths);
+
+// build UNIX command to get lines
+$cmd = "$catCmd | $grepSrvCmd | $grepIPCmd";
 
 // execute the UNIX command
 $fp = popen($cmd, 'r');

@@ -3,8 +3,15 @@
 // Include the authparse.php file
 include 'authparse.php';
 
-// Path to the auth log file
-$logFilePath = '/auth.log';
+// Path to the auth lo[g file
+$logFilePaths = ['/auth.log.1', '/auth.log'];
+
+// Remove any log files that don't exist
+foreach ($logFilePaths as $key => $logFilePath) {
+    if (!file_exists($logFilePath)) {
+        unset($logFilePaths[$key]);
+    }
+}
 
 // Get parameters from URL
 $search = $_GET['search'] ?? null;
@@ -21,19 +28,21 @@ $grepArgs = '';
 foreach ($services as $service) {
     $grepArgs .= " -e $service";
 }
-$escFilePath = escapeshellarg($logFilePath);
-$grepSrvCmd = "grep $grepArgs $escFilePath";
+$grepSrvCmd = "grep $grepArgs";
+
+// generate cat command to concatenate all log files
+$catCmd = 'cat ' . implode(' ', $logFilePaths);
 
 // build UNIX command
 if ($search) {
     $escSearch = escapeshellarg($search);
     $srchCmd .= "grep $escSearch";
-    $cmd = "$grepSrvCmd | $grepIPCmd | $srchCmd | tail -n $linesPerPage | tac";
+    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | $srchCmd | tail -n $linesPerPage | tac";
 } else {
     // compute the first and last line numbers
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "$grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage | tac";
+    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage | tac";
 }
 
 // execute the UNIX command

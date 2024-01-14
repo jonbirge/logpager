@@ -1,5 +1,5 @@
 // settings
-const geolocate = false; // pull IP geolocation from external service
+const geolocate = true; // pull IP geolocation from external service
 const tileLabels = false; // show tile labels on heatmap
 const apiWait = 200; // ms to wait between external API calls
 const maxRequestLength = 128; // truncation length of log details
