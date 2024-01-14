@@ -24,12 +24,12 @@ $grepCmd = "grep -v $grepArgs $escFilePath";
 if ($search) {
     $escSearch = escapeshellarg($search);
     $srchCmd .= "grep $escSearch";
-    $cmd = "$grepCmd | $srchCmd | tail -n $linesPerPage";
+    $cmd = "$grepCmd | $srchCmd | tail -n $linesPerPage | tac";
 } else {
     // compute the first and last line numbers
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "$grepCmd | tail -n $lastLine | head -n $linesPerPage";
+    $cmd = "$grepCmd | tail -n $lastLine | head -n $linesPerPage | tac";
 }
 
 // execute UNIX command

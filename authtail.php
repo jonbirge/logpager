@@ -28,12 +28,12 @@ $grepSrvCmd = "grep $grepArgs $escFilePath";
 if ($search) {
     $escSearch = escapeshellarg($search);
     $srchCmd .= "grep $escSearch";
-    $cmd = "$grepSrvCmd | $grepIPCmd | $srchCmd | tail -n $linesPerPage";
+    $cmd = "$grepSrvCmd | $grepIPCmd | $srchCmd | tail -n $linesPerPage | tac";
 } else {
     // compute the first and last line numbers
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "$grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage";
+    $cmd = "$grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage | tac";
 }
 
 // execute the UNIX command
