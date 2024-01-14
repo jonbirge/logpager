@@ -105,11 +105,12 @@ function jsonToTable(json) {
                 const ip = data[i][j];
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
-                table += '<td><a href="?search=' + ip + '">' + ip + "</a></td>";
+                const srchlink = "?type=" + logType + "&search=" + ip;
+                table += "<td><a href=" + srchlink + ">" + ip + "</a></td>";
                 // Add new cell for Host name after the first cell
                 hostnameid = "hostname-" + ip;
                 table += '<td id="' + hostnameid + '">-</td>';
-                // Add new cell for Geolocation after the first cell
+                // Add new cell for Geolocation after the first cell (maybe)
                 if (geolocate) {
                     geoid = "geo-" + ip;
                     table += '<td id="' + geoid + '">-</td>';
@@ -417,8 +418,6 @@ function uiSearch() {
 function doSearch() {
     const searchInput = document.getElementById("search-input");
     searchInput.value = search; // handle case where search is set by URL
-    const logDiv = document.getElementById("log");
-
     console.log("doSearch: searching for " + search);
 
     // abort any pending fetches
@@ -434,19 +433,21 @@ function doSearch() {
     url.searchParams.delete("page");
     window.history.replaceState({}, "", url);
 
+    // run remote search
     if (search == "") {
         console.log("search is empty");
     } else {
         let searchURL;
         if (logType == "clf") {
-            searchURL = "clfsearch.php";
+            searchURL = "clftail.php";
         } else {
-            searchURL = "authsearch.php";
+            searchURL = "authtail.php";
         }
-        fetch(searchURL + "?term=" + search)
+        fetch(searchURL + "?search=" + search + "&n=" + 2500)
             .then((response) => response.text())
             .then((data) => {
                 // write the search results to the log div
+                const logDiv = document.getElementById("log");
                 const pageSpan = document.getElementById("page");
                 logDiv.innerHTML = jsonToTable(data);
                 pageSpan.innerHTML = "<b>Search results for " + search + "</b>";

@@ -7,12 +7,9 @@ include 'authparse.php';
 $logFilePath = '/auth.log';
 
 // Get parameters from URL
-$page = $_GET['page'] ?? 0;
-$linesPerPage = $_GET['n'] ?? 20;
-
-// compute the first and last line numbers
-$firstLine = $page * $linesPerPage + 1;
-$lastLine = $firstLine + ($linesPerPage - 1);
+$search = $_GET['search'] ?? null;
+$page = $_GET['page'] ?? 0;  // ignored for search
+$linesPerPage = $_GET['n'] ?? 16;
 
 // generate UNIX grep command line argument to only include lines containing IP addresses
 $escFilePath = escapeshellarg($logFilePath);
@@ -27,8 +24,17 @@ foreach ($services as $service) {
 $escFilePath = escapeshellarg($logFilePath);
 $grepSrvCmd = "grep $grepArgs $escFilePath";
 
-// build UNIX command to get the last $linesPerPage lines
-$cmd = "$grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage";
+// build UNIX command
+if ($search) {
+    $escSearch = escapeshellarg($search);
+    $srchCmd .= "grep $escSearch";
+    $cmd = "$grepSrvCmd | $grepIPCmd | $srchCmd | tail -n $linesPerPage";
+} else {
+    // compute the first and last line numbers
+    $firstLine = $page * $linesPerPage + 1;
+    $lastLine = $firstLine + ($linesPerPage - 1);
+    $cmd = "$grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage";
+}
 
 // execute the UNIX command
 $fp = popen($cmd, 'r');

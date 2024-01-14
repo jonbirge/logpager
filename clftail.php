@@ -4,16 +4,13 @@
 $logFilePath = '/access.log';
 
 // Get parameters from URL
-$page = $_GET['page'] ?? 0;
-$linesPerPage = $_GET['n'] ?? 20;
+$search = $_GET['search'] ?? null;
+$page = $_GET['page'] ?? 0;  // ignored for search
+$linesPerPage = $_GET['n'] ?? 16;
 
 // IP addresses to exclude from counts
 include 'exclude.php';
 $excludedIPs = getExcludedIPs();
-
-// compute the first and last line numbers
-$firstLine = $page * $linesPerPage + 1;
-$lastLine = $firstLine + ($linesPerPage - 1);
 
 // generate UNIX grep command line arguments to exclude IP addresses
 $escFilePath = escapeshellarg($logFilePath);
@@ -23,8 +20,17 @@ foreach ($excludedIPs as $ip) {
 }
 $grepCmd = "grep -v $grepArgs $escFilePath";
 
-// build UNIX command to get the last $linesPerPage lines
-$cmd = "$grepCmd | tail -n $lastLine | head -n $linesPerPage";
+// build UNIX command
+if ($search) {
+    $escSearch = escapeshellarg($search);
+    $srchCmd .= "grep $escSearch";
+    $cmd = "$grepCmd | $srchCmd | tail -n $linesPerPage";
+} else {
+    // compute the first and last line numbers
+    $firstLine = $page * $linesPerPage + 1;
+    $lastLine = $firstLine + ($linesPerPage - 1);
+    $cmd = "$grepCmd | tail -n $lastLine | head -n $linesPerPage";
+}
 
 // execute UNIX command
 $fp = popen($cmd, 'r');
