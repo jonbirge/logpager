@@ -12,12 +12,13 @@
 
 <body>
     <div class="container">
+        <span id="log-list" class="header">
+        <h1><a href='./?type=clf&page=0'>access</a> | <a href="./?type=auth&page=0">auth</a></h1>
+        </span>
+        <hr>
 
-        <h1>access.log</h1>
-        
-        <div id="heatmap">
-            <!-- summary chart will go here -->
-        </div>
+        <!-- summary chart(s) -->
+        <div id="heatmap"></div>
 
         <!-- search form -->
         <span id="search-span" class="search-header">
@@ -27,31 +28,29 @@
             </form>
         </span>
 
-        <div id="log">
-            <!-- log file will go here -->
-        </div>
+        <!-- log file -->
+        <div id="log"></div>
  
         <!-- paging buttons -->
         <div class="button-set" id="buttons">
-            <button class="toggle-button gray" onclick="page = page + 100; pollServer();">&lt;&lt;&lt;</button>
-            <button class="toggle-button gray" onclick="page = page + 10; pollServer();">&lt;&lt;</button>
-            <button class="toggle-button gray" onclick="page = page + 1; pollServer();">&lt;</button>
-            <span id="page" style="margin: 12px">Loading...</span>
-            <button class="toggle-button gray" onclick="page = page - 1; pollServer();">&gt;</button>
-            <button class="toggle-button gray" onclick="page = 0; pollServer();">Current</button>
+            <button class="toggle-button gray" onclick="page += 100; pollLog();">&lt;&lt;&lt;</button>
+            <button class="toggle-button gray" onclick="page += 10; pollLog();">&lt;&lt;</button>
+            <button class="toggle-button gray" onclick="page += 1; pollLog();">&lt;</button>
+            <span id="page" style="margin: 12px; font-size: 14pt;">Loading...</span>
+            <button class="toggle-button gray" onclick="page += -1; polllog();">&gt;</button>
+            <button class="toggle-button gray" onclick="page = 0; pollLog();">Current</button>
             <button class="toggle-button" id="watch-button" onclick="runWatch()">Live</button>
         </div>
 
+        <!-- whois info -->
         <pre>
-            <div id="whois">
-                <!-- whois info will go here -->
-            </div>
+            <div id="whois"></div>
         </pre>
 
     </div>
 
+    <script src="scripts.js?version=9"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="scripts.js?version=7"></script>
 </body>
 
 </html>

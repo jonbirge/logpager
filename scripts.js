@@ -1,8 +1,8 @@
 // settings
-const geolocate = true; // pull IP geolocation from external service
+const geolocate = false; // pull IP geolocation from external service
 const tileLabels = false; // show tile labels on heatmap
 const apiWait = 200; // ms to wait between external API calls
-const maxRequestLength = 42; // truncation length of HTTP requests
+const maxRequestLength = 128; // truncation length of log details
 
 // global variables
 let pollInterval;
@@ -12,25 +12,24 @@ let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
+let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
 
 // decide what to do on page load
-if (search !== null) {
-    // search beats page
-    console.log("on page load: searching for " + search + "...");
+if (search !== null) {  // search beats page
+    console.log("page load: searching for " + search + "...");
     window.onload = doSearch;
 } else {
-    console.log("on page load: loading logs...");
-
+    console.log("page load: loading " + logType + " log...");
     // on window load run pollServer() and plotHeatmap()
     window.onload = () => {
-        pollServer();
+        pollLog();
         plotHeatmap();
     };
 }
 
-// pull the log in JSON form from the server
-function pollServer() {
-    console.log("pollServer: fetching page " + page);
+// pull the relevent log data from the server
+function pollLog() {
+    console.log("pollLog: fetching page " + page + " of type " + logType);
 
     // abort any pending fetches
     if (fetchCount > 0) {
@@ -43,16 +42,25 @@ function pollServer() {
         page = 0; // reset page
     }
 
-    // remove search term from URL and update page numbers
+    // reset the URL
     const url = new URL(window.location.href);
     url.searchParams.delete("search");
+    url.searchParams.set("type", logType);
     url.searchParams.set("page", page);
     window.history.replaceState({}, "", url);
 
-    // get the log from the server
+    // clear whois div
     const whoisDiv = document.getElementById("whois");
     whoisDiv.innerHTML = "";
-    fetch("logtail.php?page=" + page)
+
+    // get the log from the server
+    let logURL;
+    if (logType == "clf") {
+        logURL = "clftail.php";
+    } else {
+        logURL = "authtail.php";
+    }
+    fetch(logURL + "?page=" + page)
         .then((response) => response.text())
         .then((data) => {
             const logDiv = document.getElementById("log");
@@ -66,8 +74,8 @@ function pollServer() {
         });
 }
 
-// take n x 5 JSON array of strings and convert to HTML table, assuming the
-// first row is table headers. write table to div.
+// Take JSON array of commond log data and write HTML table, assuming the
+// first row is table headers.
 function jsonToTable(json) {
     const signal = controller.signal;
     let ips = [];
@@ -80,8 +88,10 @@ function jsonToTable(json) {
         table += "<th>" + data[0][i] + "</th>";
         if (i == 0) {
             table += "<th>Host name</th>";
-            table +=
+            if (geolocate) {
+                table +=
                 '<th>Geolocation (courtesy of <a href=https://www.ip-api.com style="color: white">ip-api.com</a>)</th>';
+            }
         }
     }
     table += "</tr>";
@@ -95,15 +105,17 @@ function jsonToTable(json) {
                 const ip = data[i][j];
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
-                table += '<td><a href="?search=' + ip + '">' + ip + "</a></td>";
+                const srchlink = "?type=" + logType + "&search=" + ip;
+                table += "<td><a href=" + srchlink + ">" + ip + "</a></td>";
                 // Add new cell for Host name after the first cell
                 hostnameid = "hostname-" + ip;
                 table += '<td id="' + hostnameid + '">-</td>';
-                // Add new cell for Geolocation after the first cell
-                geoid = "geo-" + ip;
-                table += '<td id="' + geoid + '">-</td>';
+                // Add new cell for Geolocation after the first cell (maybe)
+                if (geolocate) {
+                    geoid = "geo-" + ip;
+                    table += '<td id="' + geoid + '">-</td>';
+                }
             } else if (j == 1) {
-                // timestamp
                 // remove the timezone from the timestamp
                 const timestamp = data[i][j].replace(/\s.*$/, "");
                 table += "<td>" + timestamp + "</td>";
@@ -117,9 +129,9 @@ function jsonToTable(json) {
                         : rawRequest;
                 table += '<td class="code">' + truncRequest + "</td>";
             } else if (j == 3) {
-                // status
+                // generalized status handling
                 const status = data[i][j];
-                if (status == "200" || status == "304") {
+                if (status == "200" || status == "304" || status == "OK") {
                     table += '<td class="green">' + data[i][j] + "</td>";
                 } else {
                     table += '<td class="red">' + data[i][j] + "</td>";
@@ -145,7 +157,12 @@ function plotHeatmap(searchTerm) {
     console.log("plotHeatmap: plotting heatmap");
 
     // Build data query URL
-    let heatmapURL = "heatmap.php";
+    let heatmapURL;
+    if (logType == "clf") {
+        heatmapURL = "clfheatmap.php";
+    } else {
+        heatmapURL = "authheatmap.php";
+    }
     if (searchTerm) {
         heatmapURL += "?search=" + encodeURIComponent(searchTerm);
     }
@@ -354,8 +371,8 @@ function plotHeatmap(searchTerm) {
 }
 
 // take date of the form YYYY-MM-DD as one parameter, and the hour of the day as another parameter,
-// and return a search string for the beginning of the corresponding Common Log Format timestamp.
-// example: buildSearch('2020-01-01', '12') would return '[01/Jan/2020:12:'
+// and return a search string for the beginning of the corresponding common timestamp.
+// example: buildSearch('2020-01-01', '12') would return '01/Jan/2020:12:'
 function buildTimestampSearch(date, hour) {
     const monthnum = date.substring(5, 7);
     // convert month number to month name
@@ -401,8 +418,6 @@ function uiSearch() {
 function doSearch() {
     const searchInput = document.getElementById("search-input");
     searchInput.value = search; // handle case where search is set by URL
-    const logDiv = document.getElementById("log");
-
     console.log("doSearch: searching for " + search);
 
     // abort any pending fetches
@@ -418,13 +433,21 @@ function doSearch() {
     url.searchParams.delete("page");
     window.history.replaceState({}, "", url);
 
+    // run remote search
     if (search == "") {
         console.log("search is empty");
     } else {
-        fetch("search.php?term=" + search)
+        let searchURL;
+        if (logType == "clf") {
+            searchURL = "clftail.php";
+        } else {
+            searchURL = "authtail.php";
+        }
+        fetch(searchURL + "?search=" + search + "&n=" + 2500)
             .then((response) => response.text())
             .then((data) => {
                 // write the search results to the log div
+                const logDiv = document.getElementById("log");
                 const pageSpan = document.getElementById("page");
                 logDiv.innerHTML = jsonToTable(data);
                 pageSpan.innerHTML = "<b>Search results for " + search + "</b>";
@@ -475,7 +498,7 @@ function resetSearch() {
     searchButton.innerHTML = "Search";
     searchInput.value = "";
     resetButton.remove();
-    pollServer();
+    pollLog();
     plotHeatmap();
 }
 
@@ -593,11 +616,11 @@ function runWatch() {
             uielement.disabled = false;
             uielement.classList.remove("disabled");
         });
-        pollServer();
+        pollLog();
     } else {
-        pollServer();
+        pollLog();
         polling = true;
-        pollInterval = setInterval(pollServer, 10000);
+        pollInterval = setInterval(pollLog, 10000);
         // disable all other ui elements
         uielements.forEach((uielement) => {
             uielement.disabled = true;
