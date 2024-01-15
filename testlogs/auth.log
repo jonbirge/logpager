@@ -1,0 +1,97 @@
+2024-01-14T00:17:01.889656+00:00 nyc3-1 CRON[58209]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T00:25:27.138362+00:00 nyc3-1 CRON[58209]: pam_unix(cron:session): session closed for user root
+2024-01-14T01:17:01.158218+00:00 nyc3-1 CRON[60897]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T01:19:31.391640+00:00 nyc3-1 CRON[60897]: pam_unix(cron:session): session closed for user root
+2024-01-14T02:00:59.188254+00:00 nyc3-1 sshd[62777]: Accepted publickey for birge from 173.48.140.140 port 60891 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-14T02:00:59.204898+00:00 nyc3-1 sshd[62777]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-14T02:00:59.244029+00:00 nyc3-1 systemd-logind[684]: New session 28 of user birge.
+2024-01-14T02:00:59.264785+00:00 nyc3-1 (systemd): pam_unix(systemd-user:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-14T02:01:00.239085+00:00 nyc3-1 sshd[62777]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-14T02:01:20.320040+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/apt update
+2024-01-14T02:01:20.321173+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T02:01:26.022455+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T02:08:40.835381+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge/src/lzip-1.23 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-14T02:08:40.838518+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T02:08:40.865554+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T02:09:02.433322+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge/src/lzlib-1.9 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-14T02:09:02.434677+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T02:09:02.461457+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T02:09:42.570977+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge/src/plzip-1.9 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-14T02:09:42.573351+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T02:09:42.593705+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T02:11:20.053997+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge/src/gzip-1.12 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-14T02:11:20.055047+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T02:11:20.453146+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T02:11:38.295653+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge/src/bzip2-1.0.8 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-14T02:11:38.297105+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T02:11:38.363845+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T02:17:01.410905+00:00 nyc3-1 CRON[68700]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T02:30:52.641468+00:00 nyc3-1 CRON[68700]: pam_unix(cron:session): session closed for user root
+2024-01-14T03:10:01.672070+00:00 nyc3-1 CRON[71577]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T03:10:01.676846+00:00 nyc3-1 CRON[71577]: pam_unix(cron:session): session closed for user root
+2024-01-14T03:17:01.682190+00:00 nyc3-1 CRON[71871]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T03:30:01.686903+00:00 nyc3-1 CRON[72403]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T03:30:01.691657+00:00 nyc3-1 CRON[72403]: pam_unix(cron:session): session closed for user root
+2024-01-14T03:31:17.897189+00:00 nyc3-1 CRON[71871]: pam_unix(cron:session): session closed for user root
+2024-01-14T04:17:01.912324+00:00 nyc3-1 CRON[74400]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T04:17:55.119354+00:00 nyc3-1 CRON[74400]: pam_unix(cron:session): session closed for user root
+2024-01-14T04:25:11.541880+00:00 nyc3-1 sshd[62777]: pam_unix(sshd:session): session closed for user birge
+2024-01-14T04:25:11.550378+00:00 nyc3-1 systemd-logind[684]: Session 28 logged out. Waiting for processes to exit.
+2024-01-14T04:25:11.551049+00:00 nyc3-1 systemd-logind[684]: Removed session 28.
+2024-01-14T05:03:16.095534+00:00 nyc3-1 sshd[76774]: Accepted publickey for birge from 173.48.140.140 port 57708 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-14T05:03:16.098965+00:00 nyc3-1 sshd[76774]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-14T05:03:16.128879+00:00 nyc3-1 systemd-logind[684]: New session 35 of user birge.
+2024-01-14T05:03:16.154023+00:00 nyc3-1 (systemd): pam_unix(systemd-user:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-14T05:03:17.071571+00:00 nyc3-1 sshd[76774]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-14T05:04:13.122952+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/apt update
+2024-01-14T05:04:13.124496+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T05:04:17.224149+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T05:17:01.177107+00:00 nyc3-1 CRON[81186]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T05:28:57.498760+00:00 nyc3-1 CRON[81186]: pam_unix(cron:session): session closed for user root
+2024-01-14T06:17:01.535696+00:00 nyc3-1 CRON[84939]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T06:25:01.522449+00:00 nyc3-1 CRON[85403]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T06:29:51.940713+00:00 nyc3-1 CRON[85403]: pam_unix(cron:session): session closed for user root
+2024-01-14T06:30:12.765828+00:00 nyc3-1 CRON[84939]: pam_unix(cron:session): session closed for user root
+2024-01-14T06:47:01.779493+00:00 nyc3-1 CRON[86510]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T06:47:01.785695+00:00 nyc3-1 CRON[86510]: pam_unix(cron:session): session closed for user root
+2024-01-14T07:02:17.157068+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/var/log ; USER=root ; COMMAND=/usr/local/bin/rm auth.log.2.gz auth.log.3.gz auth.log.4.gz
+2024-01-14T07:02:17.175645+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T07:02:17.176722+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T07:02:57.689372+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/var/log ; USER=root ; COMMAND=/usr/local/bin/rm syslog.2.gz syslog.3.gz syslog.4.gz
+2024-01-14T07:02:57.691206+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T07:02:57.694474+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T07:03:15.375608+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/var/log ; USER=root ; COMMAND=/usr/local/bin/rm kern.log.2.gz kern.log.3.gz kern.log.4.gz
+2024-01-14T07:03:15.377590+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T07:03:15.383159+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T07:03:35.688621+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/var/log ; USER=root ; COMMAND=/usr/bin/less ufw.log
+2024-01-14T07:03:35.689727+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T07:04:10.345051+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T07:04:35.097276+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/var/log ; USER=root ; COMMAND=/usr/sbin/ufw status
+2024-01-14T07:04:35.098725+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T07:04:35.179152+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T07:05:45.502902+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/var/log ; USER=root ; COMMAND=/usr/bin/less ufw.log
+2024-01-14T07:05:45.504940+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T07:06:33.369449+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T07:06:38.490743+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/var/log ; USER=root ; COMMAND=/usr/sbin/ufw status
+2024-01-14T07:06:38.491801+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T07:06:38.559511+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T07:17:01.807953+00:00 nyc3-1 CRON[88221]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-14T07:21:56.040453+00:00 nyc3-1 CRON[88221]: pam_unix(cron:session): session closed for user root
+2024-01-14T07:28:40.451681+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/var/log ; USER=root ; COMMAND=/bin/bash
+2024-01-14T07:28:40.453885+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T07:44:42.772424+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T07:44:55.679600+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/local/bin/chown birge auth.log
+2024-01-14T07:44:55.681769+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-14T07:44:55.686971+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-14T07:47:01.476271+00:00 nyc3-1 sshd[76859]: Received disconnect from 173.48.140.140 port 57708:11: disconnected by user
+2024-01-14T07:47:01.481663+00:00 nyc3-1 sshd[76859]: Disconnected from user birge 173.48.140.140 port 57708
+2024-01-14T07:47:01.488046+00:00 nyc3-1 sshd[76774]: pam_unix(sshd:session): session closed for user birge
+2024-01-14T07:47:01.510898+00:00 nyc3-1 systemd-logind[684]: Session 35 logged out. Waiting for processes to exit.
+2024-01-14T07:47:01.511102+00:00 nyc3-1 systemd-logind[684]: Removed session 35.
+2024-01-14T07:47:35.354019+00:00 nyc3-1 sshd[89906]: Accepted publickey for birge from 173.48.140.140 port 59294 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-14T07:47:35.373271+00:00 nyc3-1 sshd[89906]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-14T07:47:35.417857+00:00 nyc3-1 systemd-logind[684]: New session 42 of user birge.
+2024-01-14T07:47:35.451760+00:00 nyc3-1 (systemd): pam_unix(systemd-user:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-14T07:47:36.465817+00:00 nyc3-1 sshd[89906]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-14T07:47:42.360102+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge ; USER=root ; COMMAND=/bin/bash
+2024-01-14T07:47:42.360941+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)

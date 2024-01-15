@@ -14,7 +14,7 @@ RUN chown -R nginx:nginx /var/www
 COPY default.conf /etc/nginx/http.d/default.conf
 
 # Copy test log files so this runs even if there is no volume mounted
-COPY *.log /
+COPY testlogs/* /
 
 # Copy test exclusion file
 COPY excludes.json /excludes.json
@@ -30,4 +30,3 @@ EXPOSE 80
 
 # Start nginx and PHP-FPM
 CMD ["/entry.sh"]
-

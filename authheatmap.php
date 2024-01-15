@@ -2,16 +2,25 @@
 
 // Include the authparse.php file
 include 'authparse.php';
+include 'searchparse.php';
 
 // Get an optional 'ip' query string parameter
-$searchTerm = $_GET['search'] ?? null;
+$search = $_GET['search'] ?? null;
 
-// Log file to read
-$logFilePath = '/auth.log';
+// Log files to read
+$logFilePaths = ['/auth.log.1', '/auth.log'];
+
+// Remove any log files that don't exist
+foreach ($logFilePaths as $key => $logFilePath) {
+    if (!file_exists($logFilePath)) {
+        unset($logFilePaths[$key]);
+    }
+}
+
+[$ip, $dateStr] = parseSearch($search);
 
 // generate UNIX grep command line argument to only include lines containing IP addresses
-$escFilePath = escapeshellarg($logFilePath);
-$grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' $escFilePath";
+$grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
 
 // generate UNIX grep command line arguments to include services we care about
 $services = ['sshd', 'sudo'];
@@ -19,34 +28,22 @@ $grepArgs = '';
 foreach ($services as $service) {
     $grepArgs .= " -e $service";
 }
-$escFilePath = escapeshellarg($logFilePath);
-$grepSrvCmd = "grep $grepArgs $escFilePath";
+$grepSrvCmd = "grep $grepArgs";
 
-// build UNIX command to get the last $linesPerPage lines
-$cmd = "$grepSrvCmd | $grepIPCmd";
+// generate cat command to concatenate all log files
+$catCmd = 'cat ' . implode(' ', $logFilePaths);
+
+// build UNIX command to get lines
+$cmd = "$catCmd | $grepSrvCmd | $grepIPCmd";
 
 // execute the UNIX command
 $fp = popen($cmd, 'r');
 
-// Hour integer to string conversion function
-function hourStr($hour) {
-    if ($hour < 10) {
-        return "0$hour";
-    } else {
-        return "$hour";
-    }
-}
-
 // Initialize an empty array to store the log summary data
 $logSummary = [];
 
-// Read each line of the log file
+// Add each failed login attempt to the log summary
 while (($line = fgets($fp)) !== false) {
-    // Skip this log entry if the search term isn't found in $line
-    if ($searchTerm !== null && strpos($line, $searchTerm) === false) {
-        continue;
-    }
-
     $status = getAuthLogStatus($line);
 
     if ($status !== 'FAIL') {
@@ -60,6 +57,20 @@ while (($line = fgets($fp)) !== false) {
 
     // Convert the timestamp to a DateTime object
     $date = DateTime::createFromFormat('d/M/Y:H:i:s', $timeStamp);
+
+    // If $ip is set, check if $data[0] contains $ip
+    if ($ip) {
+        if (strpos($data[0], $ip) === false) {
+            continue;
+        }
+    }
+
+    // If $date is set, check if $data[1] contains $date
+    if ($date) {
+        if (strpos($data[1], $dateStr) === false) {
+            continue;
+        }
+    }
 
     // Check if the DateTime object was created successfully
     if ($date !== false) {
@@ -85,5 +96,14 @@ pclose($fp);
 
 // Echo the log summary data as JSON
 echo json_encode($logSummary);
+
+// Hour integer to string conversion function
+function hourStr($hour) {
+    if ($hour < 10) {
+        return "0$hour";
+    } else {
+        return "$hour";
+    }
+}
 
 ?>

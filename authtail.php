@@ -3,17 +3,23 @@
 // Include the authparse.php file
 include 'authparse.php';
 
-// Path to the auth log file
-$logFilePath = '/auth.log';
-
 // Get parameters from URL
-$search = $_GET['search'] ?? null;
-$page = $_GET['page'] ?? 0;  // ignored for search
+$search = $_GET['search'] ?? null;  // search string
+$page = $_GET['page'] ?? 0;
 $linesPerPage = $_GET['n'] ?? 16;
 
+// Path to the auth log file
+$logFilePaths = ['/auth.log.1', '/auth.log'];
+
+// Remove any log files that don't exist
+foreach ($logFilePaths as $key => $logFilePath) {
+    if (!file_exists($logFilePath)) {
+        unset($logFilePaths[$key]);
+    }
+}
+
 // generate UNIX grep command line argument to only include lines containing IP addresses
-$escFilePath = escapeshellarg($logFilePath);
-$grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' $escFilePath";
+$grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
 
 // generate UNIX grep command line arguments to include services we care about
 $services = ['sshd', 'sudo'];
@@ -21,19 +27,19 @@ $grepArgs = '';
 foreach ($services as $service) {
     $grepArgs .= " -e $service";
 }
-$escFilePath = escapeshellarg($logFilePath);
-$grepSrvCmd = "grep $grepArgs $escFilePath";
+$grepSrvCmd = "grep $grepArgs";
+
+// generate cat command to concatenate all log files
+$catCmd = 'cat ' . implode(' ', $logFilePaths);
 
 // build UNIX command
-if ($search) {
-    $escSearch = escapeshellarg($search);
-    $srchCmd .= "grep $escSearch";
-    $cmd = "$grepSrvCmd | $grepIPCmd | $srchCmd | tail -n $linesPerPage";
-} else {
+if (!$search) {
     // compute the first and last line numbers
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "$grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage";
+    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage | tac";
+} else {
+    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tail -n $linesPerPage | tac";
 }
 
 // execute the UNIX command
@@ -45,6 +51,8 @@ while ($line = fgets($fp)) {
     $lines[] = $line;
 }
 
+pclose($fp);
+
 // Read in CLF header name array from clfhead.json
 $headers = json_decode(file_get_contents('loghead.json'));
 
@@ -52,8 +60,27 @@ $headers = json_decode(file_get_contents('loghead.json'));
 $logLines = [];
 $logLines[] = $headers;
 
-// Array of words indicating a failed login attempt
-$failedWords = ['failed', 'invalid', 'Unable', '[preauth]'];
+// Check $search string for terms preceded by ip: or date:, and assume there is,
+// at most, one of each. Remove the terms from $string and set $ip and $date to
+// the values. If $string is empty afterwards, set it to null.
+$ip = null;
+$date = null;
+if ($search) {
+    $search = trim($search);
+    $ipPos = strpos($search, 'ip:');
+    $datePos = strpos($search, 'date:');
+    if ($ipPos !== false) {
+        $ip = substr($search, $ipPos + 3);
+        $search = trim(substr($search, 0, $ipPos));
+    }
+    if ($datePos !== false) {
+        $date = substr($search, $datePos + 5);
+        $search = trim(substr($search, 0, $datePos));
+    }
+    if ($search === '') {
+        $search = null;
+    }
+}
 
 // Process each line and add to the array
 foreach ($lines as $line) {
@@ -64,13 +91,32 @@ foreach ($lines as $line) {
         continue;
     }
 
+    // If $search is set, check if $data[2] contains $search
+    if ($search) {
+        if (strpos($data[2], $search) === false) {
+            continue;
+        }
+    }
+
+    // If $ip is set, check if $data[0] contains $ip
+    if ($ip) {
+        if (strpos($data[0], $ip) === false) {
+            continue;
+        }
+    }
+
+    // If $date is set, check if $data[1] contains $date
+    if ($date) {
+        if (strpos($data[1], $date) === false) {
+            continue;
+        }
+    }
+
     // determine status based on $data[2]
     $status = getAuthLogStatus($data[2]);
 
     $logLines[] = [$data[0], $data[1], $data[2], $status];
 }
-
-pclose($fp);
 
 // Output the array as JSON
 echo json_encode($logLines);
