@@ -105,7 +105,7 @@ function jsonToTable(json) {
                 const ip = data[i][j];
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
-                const srchlink = "?type=" + logType + "&search=" + ip;
+                const srchlink = "?type=" + logType + "&search=ip:" + ip;
                 table += "<td><a href=" + srchlink + ">" + ip + "</a></td>";
                 // Add new cell for Host name after the first cell
                 hostnameid = "hostname-" + ip;
@@ -164,10 +164,11 @@ function plotHeatmap(searchTerm) {
         heatmapURL = "authheatmap.php";
     }
     if (searchTerm) {
-        heatmapURL += "?search=" + encodeURIComponent(searchTerm);
+        heatmapURL += "?search=" + searchTerm;
     }
 
     // get summary data (2D map of log entry counts referenced by day-of-the-year and hour)
+    console.log("plotHeatmap: fetching " + heatmapURL);
     fetch(heatmapURL)
         .then((response) => response.json())
         .then((jsonData) => {
@@ -273,15 +274,14 @@ function plotHeatmap(searchTerm) {
                     const hour = d.hour;
                     // build a partial date and time string for search
                     const partial = date + " " + hour + ":";
-                    console.log("plotHeatmap: clicked on " + partial);
-                    const searchTerm = buildTimestampSearch(date, hour);
+                    const searchTerm = "date:" + buildTimestampSearch(date, hour);
                     console.log("plotHeatmap: searching for " + searchTerm);
                     // update the search box
                     const searchInput = document.getElementById("search-input");
                     searchInput.value = searchTerm;
                     // run the search
                     uiSearch();
-                });  
+                });
 
             // Create legend
             const legendWidth = 15;
