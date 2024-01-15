@@ -7,7 +7,7 @@ include 'authparse.php';
 $searchTerm = $_GET['search'] ?? null;
 
 // Log files to read
-$logFilePaths = ['auth.log.1', '/auth.log'];
+$logFilePaths = ['/auth.log.1', '/auth.log'];
 
 // Remove any log files that don't exist
 foreach ($logFilePaths as $key => $logFilePath) {
@@ -17,8 +17,7 @@ foreach ($logFilePaths as $key => $logFilePath) {
 }
 
 // generate UNIX grep command line argument to only include lines containing IP addresses
-$escFilePath = escapeshellarg($logFilePath);
-$grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' $escFilePath";
+$grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
 
 // generate UNIX grep command line arguments to include services we care about
 $services = ['sshd', 'sudo'];
@@ -37,19 +36,10 @@ $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd";
 // execute the UNIX command
 $fp = popen($cmd, 'r');
 
-// Hour integer to string conversion function
-function hourStr($hour) {
-    if ($hour < 10) {
-        return "0$hour";
-    } else {
-        return "$hour";
-    }
-}
-
 // Initialize an empty array to store the log summary data
 $logSummary = [];
 
-// Read each line of the log file
+// Add each failed login attempt to the log summary
 while (($line = fgets($fp)) !== false) {
     // Skip this log entry if the search term isn't found in $line
     if ($searchTerm !== null && strpos($line, $searchTerm) === false) {
@@ -94,5 +84,14 @@ pclose($fp);
 
 // Echo the log summary data as JSON
 echo json_encode($logSummary);
+
+// Hour integer to string conversion function
+function hourStr($hour) {
+    if ($hour < 10) {
+        return "0$hour";
+    } else {
+        return "$hour";
+    }
+}
 
 ?>

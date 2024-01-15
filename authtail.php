@@ -19,8 +19,7 @@ $page = $_GET['page'] ?? 0;  // ignored for search
 $linesPerPage = $_GET['n'] ?? 16;
 
 // generate UNIX grep command line argument to only include lines containing IP addresses
-$escFilePath = escapeshellarg($logFilePath);
-$grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' $escFilePath";
+$grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
 
 // generate UNIX grep command line arguments to include services we care about
 $services = ['sshd', 'sudo'];
@@ -54,15 +53,14 @@ while ($line = fgets($fp)) {
     $lines[] = $line;
 }
 
+pclose($fp);
+
 // Read in CLF header name array from clfhead.json
 $headers = json_decode(file_get_contents('loghead.json'));
 
 // Create array of auth log lines
 $logLines = [];
 $logLines[] = $headers;
-
-// Array of words indicating a failed login attempt
-$failedWords = ['failed', 'invalid', 'Unable', '[preauth]'];
 
 // Process each line and add to the array
 foreach ($lines as $line) {
@@ -78,8 +76,6 @@ foreach ($lines as $line) {
 
     $logLines[] = [$data[0], $data[1], $data[2], $status];
 }
-
-pclose($fp);
 
 // Output the array as JSON
 echo json_encode($logLines);

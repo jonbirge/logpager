@@ -24,19 +24,38 @@ function parseAuthLogLine($line)
     // Current year
     $year = date('Y');
 
-    // Extract the month, day, and time from the line
-    if (!preg_match('/(\S+)\s+(\d+) (\d+):(\d+):(\d+)/', $line, $matches)) {
-        return false; // handle error as appropriate
-    }
-    $month = $matches[1];
-    $day = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
-    $hour = str_pad($matches[3], 2, '0', STR_PAD_LEFT);
-    $minute = str_pad($matches[4], 2, '0', STR_PAD_LEFT);
-    $second = str_pad($matches[5], 2, '0', STR_PAD_LEFT);
+    // Check to see if the first character is a letter or a number (to determine
+    // which kind of time stamp is used)
+    if (preg_match('/^[a-zA-Z]/', $line)) {
+        // Extract the month, day, and time from the line
+        if (!preg_match('/(\S+)\s+(\d+) (\d+):(\d+):(\d+)/', $line, $matches)) {
+            return false; // handle error as appropriate
+        }
+        $monthStr = $matches[1];
+        $day = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+        $hour = str_pad($matches[3], 2, '0', STR_PAD_LEFT);
+        $minute = str_pad($matches[4], 2, '0', STR_PAD_LEFT);
+        $second = str_pad($matches[5], 2, '0', STR_PAD_LEFT);
 
-    // Convert the month to a number
-    $dateInfo = date_parse($month);
-    $monthNum = $dateInfo['month'];
+        // Convert the month to a number
+        $dateInfo = date_parse($monthStr);
+        $monthNum = $dateInfo['month'];
+    } else {
+        // handle timespace of the type 2017-12-31T23:59:59.999999-00:00
+        if (!preg_match('/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)/', $line, $matches)) {
+            return false; // handle error as appropriate
+        }
+        $year = $matches[1];
+        $month = $matches[2];
+        $day = $matches[3];
+        $hour = $matches[4];
+        $minute = $matches[5];
+        $second = $matches[6];
+
+        // Convert the month number to a three-letter month string
+        $monthNum = intval($month);
+        $monthStr = date('M', mktime(0, 0, 0, $monthNum, 1));
+    }
 
     // Infer the year from the month
     if ($monthNum > date('n')) {
@@ -58,7 +77,7 @@ function parseAuthLogLine($line)
     }
 
     // Return the array
-    return [$ip, "$day/$month/$year:$hour:$minute:$second", $message];
+    return [$ip, "$day/$monthStr/$year:$hour:$minute:$second", $message];
 }
 
 ?>
