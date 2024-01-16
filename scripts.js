@@ -14,6 +14,13 @@ let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
 let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
 
+// highlight the current log type
+if (logType == "clf") {
+    document.getElementById("clftab").classList.add("selected");
+} else {
+    document.getElementById("authtab").classList.add("selected");
+}
+
 // decide what to do on page load
 if (search !== null) {  // search beats page
     console.log("page load: searching for " + search + "...");
