@@ -13,7 +13,7 @@ $logFilePath = '/access.log';
 // Get an array of IP addresses to exclude from counts
 $excludedIPs = getExcludedIPs();
 
-[$ip, $dateStr] = parseSearch($search);
+[$search, $ip, $dateStr] = parseSearch($search);
 
 // Open the log file for reading
 $logFile = fopen($logFilePath, 'r');
