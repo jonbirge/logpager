@@ -1,12 +1,15 @@
 <?php
 
 // Include the authparse.php file
+include 'searchparse.php';
 include 'authparse.php';
 
 // Get parameters from URL
 $search = $_GET['search'] ?? null;  // search string
 $page = $_GET['page'] ?? 0;
 $linesPerPage = $_GET['n'] ?? 16;
+
+[$search, $ip, $date] = parseSearch($search);
 
 // Path to the auth log file
 $logFilePaths = ['/auth.log.1', '/auth.log'];
@@ -59,28 +62,6 @@ $headers = json_decode(file_get_contents('loghead.json'));
 // Create array of auth log lines
 $logLines = [];
 $logLines[] = $headers;
-
-// Check $search string for terms preceded by ip: or date:, and assume there is,
-// at most, one of each. Remove the terms from $string and set $ip and $date to
-// the values. If $string is empty afterwards, set it to null.
-$ip = null;
-$date = null;
-if ($search) {
-    $search = trim($search);
-    $ipPos = strpos($search, 'ip:');
-    $datePos = strpos($search, 'date:');
-    if ($ipPos !== false) {
-        $ip = substr($search, $ipPos + 3);
-        $search = trim(substr($search, 0, $ipPos));
-    }
-    if ($datePos !== false) {
-        $date = substr($search, $datePos + 5);
-        $search = trim(substr($search, 0, $datePos));
-    }
-    if ($search === '') {
-        $search = null;
-    }
-}
 
 // Process each line and add to the array
 foreach ($lines as $line) {

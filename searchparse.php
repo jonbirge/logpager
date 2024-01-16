@@ -23,7 +23,7 @@ function parseSearch($search) {
         }
     }
 
-    return [$ip, $dateStr];
+    return [$search, $ip, $dateStr];
 }
 
 ?>

@@ -1,6 +1,7 @@
 <?php
 
 // IP addresses to exclude from counts
+include 'searchparse.php';
 include 'exclude.php';
 $excludedIPs = getExcludedIPs();
 
@@ -12,11 +13,13 @@ $search = $_GET['search'] ?? null;
 $page = $_GET['page'] ?? 0;  // ignored for search
 $linesPerPage = $_GET['n'] ?? 16;
 
+[$search, $ip, $date] = parseSearch($search);
+
 // generate UNIX grep command line arguments to exclude IP addresses
 $escFilePath = escapeshellarg($logFilePath);
 $grepArgs = '';
-foreach ($excludedIPs as $ip) {
-    $grepArgs .= " -e $ip";
+foreach ($excludedIPs as $exip) {
+    $grepArgs .= " -e $exip";
 }
 $grepCmd = "grep -v $grepArgs $escFilePath";
 
@@ -29,7 +32,7 @@ if (!$search) {
 } else {
     $escSearch = escapeshellarg($search);
     $srchCmd .= "grep $escSearch";
-    $cmd = "$grepCmd | tail -n $linesPerPage | tac";
+    $cmd = "$grepCmd | $srchCmd | tail -n $linesPerPage | tac";
 }
 
 // execute UNIX command
@@ -50,37 +53,10 @@ $headers = json_decode(file_get_contents('loghead.json'));
 $logLines = [];
 $logLines[] = $headers;
 
-// Check $search string for terms preceded by ip: or date:, and assume there is,
-// at most, one of each. Remove the terms from $string and set $ip and $date to
-// the values. If $string is empty afterwards, set it to null.
-$ip = null;
-$date = null;
-if ($search) {
-    $search = trim($search);
-    $ipPos = strpos($search, 'ip:');
-    $datePos = strpos($search, 'date:');
-    if ($ipPos !== false) {
-        $ip = substr($search, $ipPos + 3);
-        $search = trim(substr($search, 0, $ipPos));
-    }
-    if ($datePos !== false) {
-        $date = substr($search, $datePos + 5);
-        $search = trim(substr($search, 0, $datePos));
-    }
-    if ($search === '') {
-        $search = null;
-    }
-}
-
 // Process each line and add to the array
 foreach ($lines as $line) {
     // Extract the CLF fields from the line
     preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $matches);
-
-    // If $search is set, skip this line if it doesn't contain $search
-    if ($search !== null && strpos($matches[2], $search) === false) {
-        continue;
-    }
 
     // If $ip is set, skip this line if it doesn't contain $ip
     if ($ip !== null && strpos($matches[1], $ip) === false) {

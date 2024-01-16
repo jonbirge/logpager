@@ -17,7 +17,7 @@ foreach ($logFilePaths as $key => $logFilePath) {
     }
 }
 
-[$ip, $dateStr] = parseSearch($search);
+[$search, $ip, $dateStr] = parseSearch($search);
 
 // generate UNIX grep command line argument to only include lines containing IP addresses
 $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
