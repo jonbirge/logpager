@@ -95,3 +95,810 @@
 2024-01-14T07:47:36.465817+00:00 nyc3-1 sshd[89906]: pam_env(sshd:session): deprecated reading of user environment enabled
 2024-01-14T07:47:42.360102+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge ; USER=root ; COMMAND=/bin/bash
 2024-01-14T07:47:42.360941+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 00:17:01 nyc3-1-new CRON[1322816]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Jan  7 00:22:34 nyc3-1-new sshd[1323052]: Unable to negotiate with 220.77.4.105 port 33062: no matching host key type found. Their offer: ssh-rsa,ssh-dss [preauth]
+Jan  7 00:27:55 nyc3-1-new CRON[1322816]: pam_unix(cron:session): session closed for user root
+Jan  7 01:02:10 nyc3-1-new sshd[1324840]: Accepted publickey for birge from 172.56.193.165 port 14700 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+Jan  7 01:02:10 nyc3-1-new sshd[1324840]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+Jan  7 01:02:10 nyc3-1-new systemd-logind[656]: New session 696 of user birge.
+Jan  7 01:02:18 nyc3-1-new sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/apt update
+Jan  7 01:02:18 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 01:02:27 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 01:02:33 nyc3-1-new sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/apt upgrade
+Jan  7 01:02:33 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 01:02:46 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 01:02:50 nyc3-1-new sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/apt update
+Jan  7 01:02:50 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 01:02:55 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 01:03:06 nyc3-1-new sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/distro-info
+Jan  7 01:03:06 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 01:03:06 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 01:03:13 nyc3-1-new sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/distro-info --all
+Jan  7 01:03:13 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 01:03:13 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 01:03:30 nyc3-1-new sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/distro-info --latest
+Jan  7 01:03:30 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 01:03:30 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 01:04:25 nyc3-1-new sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/apt dist-upgrade
+Jan  7 01:04:25 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 01:04:26 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 01:05:02 nyc3-1-new sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/vi /etc/update-manager/release-upgrades
+Jan  7 01:05:02 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 01:05:09 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 01:05:20 nyc3-1-new sudo:    birge : TTY=pts/1 ; PWD=/tmp/ubuntu-release-upgrader-fh7gg4au ; USER=root ; COMMAND=/tmp/ubuntu-release-upgrader-fh7gg4au/lunar --mode=server --frontend=DistUpgradeViewText
+Jan  7 01:05:20 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 01:05:32 nyc3-1-new sshd[1327159]: Server listening on 0.0.0.0 port 1022.
+Jan  7 01:05:32 nyc3-1-new sshd[1327159]: Server listening on :: port 1022.
+Jan  7 01:06:41 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 01:17:01 nyc3-1-new CRON[1329097]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Jan  7 01:23:18 nyc3-1-new CRON[1329097]: pam_unix(cron:session): session closed for user root
+Jan  7 02:04:47 nyc3-1-new sshd[1321632]: pam_unix(sshd:session): session closed for user birge
+Jan  7 02:04:47 nyc3-1-new systemd-logind[656]: Session 693 logged out. Waiting for processes to exit.
+Jan  7 02:04:47 nyc3-1-new systemd-logind[656]: Removed session 693.
+Jan  7 02:17:01 nyc3-1-new CRON[1331488]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Jan  7 02:29:56 nyc3-1-new CRON[1331488]: pam_unix(cron:session): session closed for user root
+Jan  7 03:10:01 nyc3-1-new CRON[1333739]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Jan  7 03:10:01 nyc3-1-new CRON[1333739]: pam_unix(cron:session): session closed for user root
+Jan  7 03:12:10 nyc3-1-new sshd[1333850]: Accepted publickey for birge from 173.48.140.140 port 55686 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+Jan  7 03:12:10 nyc3-1-new sshd[1333850]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+Jan  7 03:12:10 nyc3-1-new systemd-logind[656]: New session 700 of user birge.
+Jan  7 03:12:31 nyc3-1-new sudo:    birge : TTY=pts/0 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/do-release-upgrade
+Jan  7 03:12:31 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 03:15:44 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 03:17:01 nyc3-1-new CRON[1335641]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Jan  7 03:18:11 nyc3-1-new CRON[1335641]: pam_unix(cron:session): session closed for user root
+Jan  7 03:19:30 nyc3-1-new sudo:    birge : TTY=pts/0 ; PWD=/etc/apt ; USER=root ; COMMAND=/bin/bash
+Jan  7 03:19:30 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 03:20:06 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 03:22:08 nyc3-1-new sudo:    birge : TTY=pts/0 ; PWD=/etc/apt ; USER=root ; COMMAND=/bin/bash
+Jan  7 03:22:08 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 03:22:34 nyc3-1-new sshd[1324840]: pam_unix(sshd:session): session closed for user birge
+Jan  7 03:22:34 nyc3-1-new systemd-logind[656]: Session 696 logged out. Waiting for processes to exit.
+Jan  7 03:23:27 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 03:23:38 nyc3-1-new sudo:    birge : TTY=pts/0 ; PWD=/etc/apt ; USER=root ; COMMAND=/usr/bin/do-release-upgrade
+Jan  7 03:23:38 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 03:23:39 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 03:23:44 nyc3-1-new sudo:    birge : TTY=pts/0 ; PWD=/home/birge ; USER=root ; COMMAND=/bin/bash
+Jan  7 03:23:44 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+Jan  7 03:23:52 nyc3-1-new sudo:     root : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/apt update
+Jan  7 03:23:52 nyc3-1-new sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=0)
+Jan  7 03:24:09 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+Jan  7 03:28:31 nyc3-1-new sshd[1135656]: Received signal 15; terminating.
+Jan  7 03:31:22 nyc3-1-new groupadd[1380394]: group added to /etc/group: name=ssl-cert, GID=123
+Jan  7 03:31:22 nyc3-1-new groupadd[1380394]: group added to /etc/gshadow: name=ssl-cert
+Jan  7 03:31:22 nyc3-1-new groupadd[1380394]: new group: name=ssl-cert, GID=123
+Jan  7 03:31:32 nyc3-1-new groupadd[1380601]: group added to /etc/group: name=postfix, GID=124
+Jan  7 03:31:32 nyc3-1-new groupadd[1380601]: group added to /etc/gshadow: name=postfix
+Jan  7 03:31:32 nyc3-1-new groupadd[1380601]: new group: name=postfix, GID=124
+Jan  7 03:31:32 nyc3-1-new useradd[1380609]: new user: name=postfix, UID=117, GID=124, home=/var/spool/postfix, shell=/usr/sbin/nologin, from=none
+Jan  7 03:31:32 nyc3-1-new groupadd[1380653]: group added to /etc/group: name=postdrop, GID=125
+Jan  7 03:31:32 nyc3-1-new groupadd[1380653]: group added to /etc/gshadow: name=postdrop
+Jan  7 03:31:32 nyc3-1-new groupadd[1380653]: new group: name=postdrop, GID=125
+Jan  7 04:17:01 nyc3-1-new CRON[1384330]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Jan  7 04:22:10 nyc3-1-new CRON[1384330]: pam_unix(cron:session): session closed for user root
+Jan  7 05:17:01 nyc3-1-new CRON[1386732]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Jan  7 05:17:12 nyc3-1-new CRON[1386732]: pam_unix(cron:session): session closed for user root
+Jan  7 06:17:01 nyc3-1-new CRON[1389138]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T06:22:57.754157+00:00 nyc3-1-new CRON[1389138]: pam_unix(cron:session): session closed for user root
+2024-01-07T06:24:42.502152+00:00 nyc3-1-new userdel[1418995]: delete user 'dnsmasq'
+2024-01-07T06:24:44.151662+00:00 nyc3-1-new userdel[1419083]: delete user 'postfix'
+2024-01-07T06:24:44.153548+00:00 nyc3-1-new userdel[1419083]: removed group 'postfix' owned by 'postfix'
+2024-01-07T06:24:44.154358+00:00 nyc3-1-new userdel[1419083]: removed shadow group 'postfix' owned by 'postfix'
+2024-01-07T06:24:44.216984+00:00 nyc3-1-new groupdel[1419090]: group 'postdrop' removed from /etc/group
+2024-01-07T06:24:44.226974+00:00 nyc3-1-new groupdel[1419090]: group 'postdrop' removed from /etc/gshadow
+2024-01-07T06:24:44.229104+00:00 nyc3-1-new groupdel[1419090]: group 'postdrop' removed
+2024-01-07T06:25:01.774353+00:00 nyc3-1-new CRON[1419361]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T06:27:13.049637+00:00 nyc3-1-new systemd-logind[656]: System is rebooting.
+2024-01-07T06:27:13.097817+00:00 nyc3-1-new sshd[1327159]: Received signal 15; terminating.
+2024-01-07T06:27:13.137549+00:00 nyc3-1-new sshd[1333850]: pam_unix(sshd:session): session closed for user birge
+2024-01-07T06:27:13.155252+00:00 nyc3-1-new sudo: pam_unix(sudo:session): session closed for user root
+2024-01-07T06:30:11.683197+00:00 nyc3-1 systemd-logind[641]: New seat seat0.
+2024-01-07T06:30:11.683199+00:00 nyc3-1 systemd-logind[641]: Watching system buttons on /dev/input/event0 (Power Button)
+2024-01-07T06:30:11.683202+00:00 nyc3-1 systemd-logind[641]: Watching system buttons on /dev/input/event1 (AT Translated Set 2 keyboard)
+2024-01-07T06:30:43.416447+00:00 nyc3-1 sshd[1823]: Server listening on :: port 22022.
+2024-01-07T06:30:43.649144+00:00 nyc3-1 sshd[1825]: Accepted publickey for birge from 173.48.140.140 port 60778 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-07T06:30:43.652027+00:00 nyc3-1 sshd[1825]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-07T06:30:43.691333+00:00 nyc3-1 systemd-logind[641]: New session 1 of user birge.
+2024-01-07T06:30:43.720105+00:00 nyc3-1 systemd: pam_unix(systemd-user:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-07T06:30:45.105310+00:00 nyc3-1 sshd[1825]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-07T06:34:47.023623+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge ; USER=root ; COMMAND=/bin/bash
+2024-01-07T06:34:47.041188+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-07T06:34:54.687078+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-07T06:35:22.506822+00:00 nyc3-1 sshd[1931]: Received disconnect from 173.48.140.140 port 60778:11: disconnected by user
+2024-01-07T06:35:22.514943+00:00 nyc3-1 sshd[1931]: Disconnected from user birge 173.48.140.140 port 60778
+2024-01-07T06:35:22.517486+00:00 nyc3-1 sshd[1825]: pam_unix(sshd:session): session closed for user birge
+2024-01-07T06:35:22.525289+00:00 nyc3-1 systemd-logind[641]: Session 1 logged out. Waiting for processes to exit.
+2024-01-07T06:35:22.530620+00:00 nyc3-1 systemd-logind[641]: Removed session 1.
+2024-01-07T06:47:01.899369+00:00 nyc3-1 CRON[4112]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T06:47:01.922980+00:00 nyc3-1 CRON[4112]: pam_unix(cron:session): session closed for user root
+2024-01-07T07:17:01.936627+00:00 nyc3-1 CRON[5375]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T07:23:50.205822+00:00 nyc3-1 CRON[5375]: pam_unix(cron:session): session closed for user root
+2024-01-07T08:17:01.238674+00:00 nyc3-1 CRON[7968]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T08:29:16.481423+00:00 nyc3-1 CRON[7968]: pam_unix(cron:session): session closed for user root
+2024-01-07T08:58:46.197112+00:00 nyc3-1 sshd[9892]: Connection closed by 167.248.133.36 port 38016 [preauth]
+2024-01-07T09:17:01.499458+00:00 nyc3-1 CRON[10643]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T09:22:32.710199+00:00 nyc3-1 CRON[10643]: pam_unix(cron:session): session closed for user root
+2024-01-07T09:31:34.758407+00:00 nyc3-1 sshd[11310]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-07T09:31:34.759065+00:00 nyc3-1 sshd[11310]: banner exchange: Connection from 212.70.149.146 port 63758: invalid format
+2024-01-07T10:05:43.584065+00:00 nyc3-1 sshd[12758]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-07T10:05:43.584520+00:00 nyc3-1 sshd[12758]: banner exchange: Connection from 212.70.149.146 port 64249: invalid format
+2024-01-07T10:17:01.733211+00:00 nyc3-1 CRON[13218]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T10:19:48.988039+00:00 nyc3-1 CRON[13218]: pam_unix(cron:session): session closed for user root
+2024-01-07T10:39:16.494455+00:00 nyc3-1 sshd[14326]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-07T10:39:16.497418+00:00 nyc3-1 sshd[14326]: banner exchange: Connection from 212.70.149.146 port 64214: invalid format
+2024-01-07T11:17:01.070045+00:00 nyc3-1 CRON[15915]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T11:31:10.344908+00:00 nyc3-1 CRON[15915]: pam_unix(cron:session): session closed for user root
+2024-01-07T12:17:01.363087+00:00 nyc3-1 CRON[18466]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T12:21:36.567492+00:00 nyc3-1 CRON[18466]: pam_unix(cron:session): session closed for user root
+2024-01-07T13:17:01.594988+00:00 nyc3-1 CRON[21042]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T13:30:29.816845+00:00 nyc3-1 CRON[21042]: pam_unix(cron:session): session closed for user root
+2024-01-07T13:52:01.983913+00:00 nyc3-1 sshd[22572]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-07T13:52:01.984221+00:00 nyc3-1 sshd[22572]: banner exchange: Connection from 45.79.181.223 port 36350: invalid format
+2024-01-07T14:17:01.831757+00:00 nyc3-1 CRON[23619]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T14:23:45.044041+00:00 nyc3-1 CRON[23619]: pam_unix(cron:session): session closed for user root
+2024-01-07T15:17:01.074560+00:00 nyc3-1 CRON[26195]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T15:26:46.313582+00:00 nyc3-1 CRON[26195]: pam_unix(cron:session): session closed for user root
+2024-01-07T16:17:01.329025+00:00 nyc3-1 CRON[28762]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T16:25:59.540921+00:00 nyc3-1 CRON[28762]: pam_unix(cron:session): session closed for user root
+2024-01-07T16:35:42.645194+00:00 nyc3-1 sshd[29598]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-07T16:35:42.646112+00:00 nyc3-1 sshd[29598]: banner exchange: Connection from 45.79.172.21 port 13270: invalid format
+2024-01-07T16:55:56.064366+00:00 nyc3-1 sshd[30497]: Connection reset by 35.203.210.60 port 60900 [preauth]
+2024-01-07T17:17:01.559190+00:00 nyc3-1 CRON[31381]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T17:18:27.796593+00:00 nyc3-1 CRON[31381]: pam_unix(cron:session): session closed for user root
+2024-01-07T18:17:01.815277+00:00 nyc3-1 CRON[33947]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T18:19:17.565316+00:00 nyc3-1 sshd[34068]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-07T18:19:17.565959+00:00 nyc3-1 sshd[34068]: banner exchange: Connection from 45.227.254.48 port 65427: invalid format
+2024-01-07T18:27:30.065680+00:00 nyc3-1 CRON[33947]: pam_unix(cron:session): session closed for user root
+2024-01-07T19:17:01.103392+00:00 nyc3-1 CRON[37089]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T19:30:54.315068+00:00 nyc3-1 CRON[37089]: pam_unix(cron:session): session closed for user root
+2024-01-07T20:17:01.329025+00:00 nyc3-1 CRON[39658]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T20:18:25.564905+00:00 nyc3-1 CRON[39658]: pam_unix(cron:session): session closed for user root
+2024-01-07T21:17:01.583085+00:00 nyc3-1 CRON[42243]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T21:29:43.792828+00:00 nyc3-1 CRON[42243]: pam_unix(cron:session): session closed for user root
+2024-01-07T22:17:01.806774+00:00 nyc3-1 CRON[44828]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T22:23:02.067787+00:00 nyc3-1 CRON[44828]: pam_unix(cron:session): session closed for user root
+2024-01-07T23:17:01.084209+00:00 nyc3-1 CRON[47421]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-07T23:28:51.279857+00:00 nyc3-1 CRON[47421]: pam_unix(cron:session): session closed for user root
+2024-01-08T00:17:01.294568+00:00 nyc3-1 CRON[50046]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T00:23:35.489747+00:00 nyc3-1 CRON[50046]: pam_unix(cron:session): session closed for user root
+2024-01-08T01:17:01.513146+00:00 nyc3-1 CRON[52758]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T01:25:26.752428+00:00 nyc3-1 CRON[52758]: pam_unix(cron:session): session closed for user root
+2024-01-08T02:17:01.769348+00:00 nyc3-1 CRON[55355]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T02:28:26.071236+00:00 nyc3-1 CRON[55355]: pam_unix(cron:session): session closed for user root
+2024-01-08T03:10:01.095123+00:00 nyc3-1 CRON[57734]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T03:10:01.100681+00:00 nyc3-1 CRON[57734]: pam_unix(cron:session): session closed for user root
+2024-01-08T03:17:01.107718+00:00 nyc3-1 CRON[58031]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T03:30:23.400943+00:00 nyc3-1 CRON[58031]: pam_unix(cron:session): session closed for user root
+2024-01-08T04:17:01.417614+00:00 nyc3-1 CRON[60782]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T04:20:56.650766+00:00 nyc3-1 CRON[60782]: pam_unix(cron:session): session closed for user root
+2024-01-08T04:29:15.669382+00:00 nyc3-1 sshd[61353]: Accepted publickey for birge from 173.48.140.140 port 51644 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-08T04:29:15.679738+00:00 nyc3-1 sshd[61353]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-08T04:29:15.707473+00:00 nyc3-1 systemd-logind[641]: New session 27 of user birge.
+2024-01-08T04:29:15.723542+00:00 nyc3-1 systemd: pam_unix(systemd-user:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-08T04:29:16.578024+00:00 nyc3-1 sshd[61353]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-08T04:29:27.233062+00:00 nyc3-1 sshd[61466]: Accepted publickey for birge from 173.48.140.140 port 51645 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-08T04:29:27.235801+00:00 nyc3-1 sshd[61466]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-08T04:29:27.246668+00:00 nyc3-1 systemd-logind[641]: New session 29 of user birge.
+2024-01-08T04:29:27.288121+00:00 nyc3-1 sshd[61466]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-08T04:29:40.674797+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/do-release-upgrade
+2024-01-08T04:29:40.676531+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-08T04:30:10.704884+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-08T05:07:44.384457+00:00 nyc3-1 sshd[61512]: Received disconnect from 173.48.140.140 port 51645:11: disconnected by user
+2024-01-08T05:07:44.387424+00:00 nyc3-1 sshd[61512]: Disconnected from user birge 173.48.140.140 port 51645
+2024-01-08T05:07:44.387659+00:00 nyc3-1 sshd[61466]: pam_unix(sshd:session): session closed for user birge
+2024-01-08T05:07:44.391012+00:00 nyc3-1 systemd-logind[641]: Session 29 logged out. Waiting for processes to exit.
+2024-01-08T05:07:44.393454+00:00 nyc3-1 systemd-logind[641]: Removed session 29.
+2024-01-08T05:17:01.668313+00:00 nyc3-1 CRON[63867]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T05:29:43.243714+00:00 nyc3-1 sshd[64412]: error: kex_exchange_identification: read: Connection reset by peer
+2024-01-08T05:29:43.243883+00:00 nyc3-1 sshd[64412]: Connection reset by 85.209.11.227 port 8849
+2024-01-08T05:29:59.993064+00:00 nyc3-1 CRON[63867]: pam_unix(cron:session): session closed for user root
+2024-01-08T06:17:01.008070+00:00 nyc3-1 CRON[66425]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T06:25:01.011376+00:00 nyc3-1 CRON[66778]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T06:30:10.256207+00:00 nyc3-1 CRON[66425]: pam_unix(cron:session): session closed for user root
+2024-01-08T06:30:27.236071+00:00 nyc3-1 sshd[61353]: pam_unix(sshd:session): session closed for user birge
+2024-01-08T06:30:27.241938+00:00 nyc3-1 systemd-logind[641]: Session 27 logged out. Waiting for processes to exit.
+2024-01-08T06:30:27.242943+00:00 nyc3-1 systemd-logind[641]: Removed session 27.
+2024-01-08T06:35:06.911731+00:00 nyc3-1 CRON[66778]: pam_unix(cron:session): session closed for user root
+2024-01-08T07:17:01.938479+00:00 nyc3-1 CRON[69664]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T07:22:30.227738+00:00 nyc3-1 CRON[69664]: pam_unix(cron:session): session closed for user root
+2024-01-08T08:00:01.239827+00:00 nyc3-1 CRON[71523]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T08:00:01.753034+00:00 nyc3-1 CRON[71523]: pam_unix(cron:session): session closed for user root
+2024-01-08T08:17:01.766169+00:00 nyc3-1 CRON[72235]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T08:23:43.969408+00:00 nyc3-1 CRON[72235]: pam_unix(cron:session): session closed for user root
+2024-01-08T08:46:52.347632+00:00 nyc3-1 sshd[73638]: Invalid user admin from 85.209.11.227 port 53689
+2024-01-08T08:46:52.480374+00:00 nyc3-1 sshd[73638]: Connection reset by invalid user admin 85.209.11.227 port 53689 [preauth]
+2024-01-08T09:17:01.986970+00:00 nyc3-1 CRON[74910]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T09:21:10.217781+00:00 nyc3-1 CRON[74910]: pam_unix(cron:session): session closed for user root
+2024-01-08T09:24:51.287871+00:00 nyc3-1 sshd[75305]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-08T09:24:51.288391+00:00 nyc3-1 sshd[75305]: banner exchange: Connection from 212.70.149.146 port 64806: invalid format
+2024-01-08T09:54:52.160512+00:00 nyc3-1 sshd[76558]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-08T09:54:52.160999+00:00 nyc3-1 sshd[76558]: banner exchange: Connection from 212.70.149.146 port 63960: invalid format
+2024-01-08T10:15:28.042476+00:00 nyc3-1 sshd[77414]: error: kex_exchange_identification: read: Connection reset by peer
+2024-01-08T10:15:28.043495+00:00 nyc3-1 sshd[77414]: Connection reset by 45.79.168.172 port 33294
+2024-01-08T10:17:01.233343+00:00 nyc3-1 CRON[77471]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T10:18:13.433477+00:00 nyc3-1 sshd[77536]: error: kex_exchange_identification: read: Connection reset by peer
+2024-01-08T10:18:13.433626+00:00 nyc3-1 sshd[77536]: Connection reset by 69.164.217.74 port 55120
+2024-01-08T10:22:59.698654+00:00 nyc3-1 sshd[77743]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-08T10:22:59.699012+00:00 nyc3-1 sshd[77743]: banner exchange: Connection from 212.70.149.146 port 65193: invalid format
+2024-01-08T10:26:54.436660+00:00 nyc3-1 CRON[77471]: pam_unix(cron:session): session closed for user root
+2024-01-08T10:34:19.179975+00:00 nyc3-1 sshd[78359]: error: kex_exchange_identification: read: Connection reset by peer
+2024-01-08T10:34:19.180200+00:00 nyc3-1 sshd[78359]: Connection reset by 45.79.163.53 port 50045
+2024-01-08T10:39:25.942904+00:00 nyc3-1 sshd[78590]: error: kex_exchange_identification: read: Connection reset by peer
+2024-01-08T10:39:25.943062+00:00 nyc3-1 sshd[78590]: Connection reset by 198.74.56.46 port 48441
+2024-01-08T10:53:28.988026+00:00 nyc3-1 sshd[79181]: error: kex_exchange_identification: read: Connection reset by peer
+2024-01-08T10:53:28.988211+00:00 nyc3-1 sshd[79181]: Connection reset by 192.155.88.231 port 36695
+2024-01-08T11:17:01.451425+00:00 nyc3-1 CRON[80152]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T11:18:11.691087+00:00 nyc3-1 CRON[80152]: pam_unix(cron:session): session closed for user root
+2024-01-08T12:17:01.707471+00:00 nyc3-1 CRON[82723]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T12:28:02.946239+00:00 nyc3-1 CRON[82723]: pam_unix(cron:session): session closed for user root
+2024-01-08T13:17:01.961505+00:00 nyc3-1 CRON[85287]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T13:29:22.170408+00:00 nyc3-1 CRON[85287]: pam_unix(cron:session): session closed for user root
+2024-01-08T14:17:01.184454+00:00 nyc3-1 CRON[87859]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T14:28:31.448196+00:00 nyc3-1 CRON[87859]: pam_unix(cron:session): session closed for user root
+2024-01-08T15:17:01.463014+00:00 nyc3-1 CRON[90417]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T15:21:14.728161+00:00 nyc3-1 CRON[90417]: pam_unix(cron:session): session closed for user root
+2024-01-08T16:17:01.745679+00:00 nyc3-1 CRON[93052]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T16:18:44.975644+00:00 nyc3-1 CRON[93052]: pam_unix(cron:session): session closed for user root
+2024-01-08T16:53:11.376639+00:00 nyc3-1 sshd[94666]: Accepted publickey for birge from 10.17.0.2 port 38450 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-08T16:53:11.385679+00:00 nyc3-1 sshd[94666]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-08T16:53:11.412733+00:00 nyc3-1 systemd-logind[641]: New session 44 of user birge.
+2024-01-08T16:53:11.439482+00:00 nyc3-1 systemd: pam_unix(systemd-user:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-08T16:53:12.481503+00:00 nyc3-1 sshd[94666]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-08T16:55:05.342597+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/etc/update-motd.d ; USER=root ; COMMAND=/usr/local/bin/rm 50-landscape-sysinfo
+2024-01-08T16:55:05.345084+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-08T16:55:05.348535+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-08T16:55:27.326011+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/ ; USER=root ; COMMAND=/usr/bin/apt update
+2024-01-08T16:55:27.327273+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-08T16:55:30.879390+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-08T16:55:34.478592+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/ ; USER=root ; COMMAND=/usr/bin/do-release-upgrade
+2024-01-08T16:55:34.479527+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-08T16:55:42.463540+00:00 nyc3-1 sshd[95513]: Server listening on 0.0.0.0 port 1022.
+2024-01-08T16:55:42.468224+00:00 nyc3-1 sshd[95513]: Server listening on :: port 1022.
+2024-01-08T17:17:02.007239+00:00 nyc3-1 CRON[97311]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T17:23:32.335813+00:00 nyc3-1 sshd[1823]: Received signal 15; terminating.
+2024-01-08T17:24:41.608715+00:00 nyc3-1 useradd[110567]: new user: name=dhcpcd, UID=114, GID=65534, home=/usr/lib/dhcpcd, shell=/bin/false, from=/dev/pts/3
+2024-01-08T17:24:41.649728+00:00 nyc3-1 chfn[110574]: changed user 'dhcpcd' information
+2024-01-08T17:28:30.300889+00:00 nyc3-1 CRON[97311]: pam_unix(cron:session): session closed for user root
+2024-01-08T17:31:17.386922+00:00 nyc3-1 polkitd[119477]: Loading rules from directory /etc/polkit-1/rules.d
+2024-01-08T17:31:17.387455+00:00 nyc3-1 polkitd[119477]: Loading rules from directory /usr/share/polkit-1/rules.d
+2024-01-08T17:31:17.389711+00:00 nyc3-1 polkitd[119477]: Finished loading, compiling and executing 5 rules
+2024-01-08T17:31:17.398619+00:00 nyc3-1 polkitd[119477]: Acquired the name org.freedesktop.PolicyKit1 on the system bus
+2024-01-08T17:34:51.444184+00:00 nyc3-1 systemd-logind[641]: The system will reboot now!
+2024-01-08T17:34:51.812421+00:00 nyc3-1 systemd-logind[641]: System is rebooting.
+2024-01-08T17:34:51.891037+00:00 nyc3-1 sshd[95513]: Received signal 15; terminating.
+2024-01-08T17:34:51.896366+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-08T17:34:51.931228+00:00 nyc3-1 sshd[94666]: pam_unix(sshd:session): session closed for user birge
+2024-01-08T17:35:33.141208+00:00 nyc3-1 systemd-logind[685]: New seat seat0.
+2024-01-08T17:35:33.141211+00:00 nyc3-1 systemd-logind[685]: Watching system buttons on /dev/input/event0 (Power Button)
+2024-01-08T17:35:33.141214+00:00 nyc3-1 systemd-logind[685]: Watching system buttons on /dev/input/event1 (AT Translated Set 2 keyboard)
+2024-01-08T18:17:01.710115+00:00 nyc3-1 CRON[3551]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T18:30:31.030308+00:00 nyc3-1 CRON[3551]: pam_unix(cron:session): session closed for user root
+2024-01-08T18:58:20.629435+00:00 nyc3-1 sshd[5426]: Server listening on :: port 22022.
+2024-01-08T18:58:20.634135+00:00 nyc3-1 sshd[5427]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-08T18:58:20.634483+00:00 nyc3-1 sshd[5427]: banner exchange: Connection from 194.165.16.72 port 65478: invalid format
+2024-01-08T19:17:01.056766+00:00 nyc3-1 CRON[6228]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T19:22:21.282081+00:00 nyc3-1 CRON[6228]: pam_unix(cron:session): session closed for user root
+2024-01-08T20:17:01.307906+00:00 nyc3-1 CRON[8772]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T20:17:21.568996+00:00 nyc3-1 CRON[8772]: pam_unix(cron:session): session closed for user root
+2024-01-08T20:55:38.504174+00:00 nyc3-1 sshd[10420]: Connection closed by authenticating user root 173.48.140.140 port 60752 [preauth]
+2024-01-08T20:56:08.854895+00:00 nyc3-1 sshd[10461]: Accepted publickey for birge from 173.48.140.140 port 60753 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-08T20:56:08.857542+00:00 nyc3-1 sshd[10461]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-08T20:56:08.900920+00:00 nyc3-1 systemd-logind[685]: New session 4 of user birge.
+2024-01-08T20:56:08.951912+00:00 nyc3-1 (systemd): pam_unix(systemd-user:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-08T20:56:10.419549+00:00 nyc3-1 sshd[10461]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-08T20:59:20.684380+00:00 nyc3-1 sudo: pam_unix(sudo:auth): authentication failure; logname=birge uid=1000 euid=0 tty=/dev/pts/0 ruser=birge rhost=  user=birge
+2024-01-08T20:59:25.348360+00:00 nyc3-1 sudo:    birge : TTY=pts/0 ; PWD=/home/birge/costack ; USER=root ; COMMAND=/usr/bin/do-release-upgrade
+2024-01-08T20:59:25.351770+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-08T20:59:26.358591+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-08T21:17:01.624534+00:00 nyc3-1 CRON[12646]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T21:24:29.915630+00:00 nyc3-1 CRON[12646]: pam_unix(cron:session): session closed for user root
+2024-01-08T22:13:45.467819+00:00 nyc3-1 sshd[15053]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-08T22:13:45.468265+00:00 nyc3-1 sshd[15053]: banner exchange: Connection from 212.70.149.142 port 64477: invalid format
+2024-01-08T22:17:01.932547+00:00 nyc3-1 CRON[15188]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T22:22:33.153672+00:00 nyc3-1 CRON[15188]: pam_unix(cron:session): session closed for user root
+2024-01-08T23:17:01.175480+00:00 nyc3-1 CRON[17744]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-08T23:19:10.940397+00:00 nyc3-1 sshd[17827]: Connection closed by 162.142.125.215 port 37984 [preauth]
+2024-01-08T23:22:32.470428+00:00 nyc3-1 CRON[17744]: pam_unix(cron:session): session closed for user root
+2024-01-09T00:17:01.497614+00:00 nyc3-1 CRON[20420]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T00:23:48.714522+00:00 nyc3-1 CRON[20420]: pam_unix(cron:session): session closed for user root
+2024-01-09T00:41:16.097309+00:00 nyc3-1 sshd[21528]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-09T00:41:16.097723+00:00 nyc3-1 sshd[21528]: banner exchange: Connection from 212.70.149.142 port 64385: invalid format
+2024-01-09T01:17:01.747030+00:00 nyc3-1 CRON[23344]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T01:26:59.029513+00:00 nyc3-1 CRON[23344]: pam_unix(cron:session): session closed for user root
+2024-01-09T01:57:03.293681+00:00 nyc3-1 sshd[25073]: Accepted publickey for birge from 173.48.140.140 port 60859 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-09T01:57:03.310153+00:00 nyc3-1 sshd[25073]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-09T01:57:03.332595+00:00 nyc3-1 systemd-logind[685]: New session 11 of user birge.
+2024-01-09T01:57:04.226380+00:00 nyc3-1 sshd[25073]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-09T01:57:32.545879+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/etc/update-motd.d ; USER=root ; COMMAND=/usr/local/bin/rm 55-sysinfo
+2024-01-09T01:57:32.551513+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-09T01:57:32.552037+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-09T02:17:01.046180+00:00 nyc3-1 CRON[26008]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T02:29:37.272405+00:00 nyc3-1 CRON[26008]: pam_unix(cron:session): session closed for user root
+2024-01-09T03:05:57.138971+00:00 nyc3-1 sshd[25149]: Received disconnect from 173.48.140.140 port 60859:11: disconnected by user
+2024-01-09T03:05:57.146596+00:00 nyc3-1 sshd[25149]: Disconnected from user birge 173.48.140.140 port 60859
+2024-01-09T03:05:57.147505+00:00 nyc3-1 systemd-logind[685]: Session 11 logged out. Waiting for processes to exit.
+2024-01-09T03:05:57.147710+00:00 nyc3-1 sshd[25073]: pam_unix(sshd:session): session closed for user birge
+2024-01-09T03:05:57.148361+00:00 nyc3-1 systemd-logind[685]: Removed session 11.
+2024-01-09T03:09:31.953799+00:00 nyc3-1 sshd[28336]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-09T03:09:31.954267+00:00 nyc3-1 sshd[28336]: banner exchange: Connection from 212.70.149.142 port 64390: invalid format
+2024-01-09T03:10:01.305971+00:00 nyc3-1 CRON[28356]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T03:10:01.316047+00:00 nyc3-1 CRON[28356]: pam_unix(cron:session): session closed for user root
+2024-01-09T03:13:01.776791+00:00 nyc3-1 sshd[28493]: error: kex_exchange_identification: Connection closed by remote host
+2024-01-09T03:13:01.777035+00:00 nyc3-1 sshd[28493]: Connection closed by 87.236.176.106 port 49121
+2024-01-09T03:13:02.195323+00:00 nyc3-1 sshd[28494]: Connection closed by 87.236.176.106 port 54973 [preauth]
+2024-01-09T03:17:01.323706+00:00 nyc3-1 CRON[28668]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T03:25:14.561062+00:00 nyc3-1 CRON[28668]: pam_unix(cron:session): session closed for user root
+2024-01-09T03:51:42.846171+00:00 nyc3-1 sshd[30194]: Accepted publickey for birge from 173.48.140.140 port 63363 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-09T03:51:42.847736+00:00 nyc3-1 sshd[30194]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-09T03:51:42.856696+00:00 nyc3-1 systemd-logind[685]: New session 15 of user birge.
+2024-01-09T03:51:43.774322+00:00 nyc3-1 sshd[30194]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-09T03:52:03.125197+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge/costack ; USER=root ; COMMAND=/bin/bash
+2024-01-09T03:52:03.137984+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-09T03:52:14.342627+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-09T03:52:16.666119+00:00 nyc3-1 sshd[30267]: Received disconnect from 173.48.140.140 port 63363:11: disconnected by user
+2024-01-09T03:52:16.666933+00:00 nyc3-1 sshd[30267]: Disconnected from user birge 173.48.140.140 port 63363
+2024-01-09T03:52:16.672067+00:00 nyc3-1 sshd[30194]: pam_unix(sshd:session): session closed for user birge
+2024-01-09T03:52:16.673133+00:00 nyc3-1 systemd-logind[685]: Session 15 logged out. Waiting for processes to exit.
+2024-01-09T03:52:16.673274+00:00 nyc3-1 systemd-logind[685]: Removed session 15.
+2024-01-09T03:54:38.734828+00:00 nyc3-1 sshd[30398]: Accepted publickey for birge from 173.48.140.140 port 52402 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-09T03:54:38.736590+00:00 nyc3-1 sshd[30398]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-09T03:54:38.748781+00:00 nyc3-1 systemd-logind[685]: New session 16 of user birge.
+2024-01-09T03:54:39.216472+00:00 nyc3-1 sshd[30398]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-09T03:54:42.098867+00:00 nyc3-1 sshd[30448]: Received disconnect from 173.48.140.140 port 52402:11: disconnected by user
+2024-01-09T03:54:42.101905+00:00 nyc3-1 sshd[30448]: Disconnected from user birge 173.48.140.140 port 52402
+2024-01-09T03:54:42.102304+00:00 nyc3-1 sshd[30398]: pam_unix(sshd:session): session closed for user birge
+2024-01-09T03:54:42.104375+00:00 nyc3-1 systemd-logind[685]: Session 16 logged out. Waiting for processes to exit.
+2024-01-09T03:54:42.107299+00:00 nyc3-1 systemd-logind[685]: Removed session 16.
+2024-01-09T03:54:53.753014+00:00 nyc3-1 sshd[30470]: Accepted publickey for birge from 173.48.140.140 port 63384 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-09T03:54:53.756783+00:00 nyc3-1 sshd[30470]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-09T03:54:53.768951+00:00 nyc3-1 systemd-logind[685]: New session 17 of user birge.
+2024-01-09T03:54:53.817557+00:00 nyc3-1 sshd[30470]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-09T04:00:26.093927+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge/src/gzip-1.12 ; USER=root ; COMMAND=/usr/bin/make uninstall
+2024-01-09T04:00:26.096202+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-09T04:00:26.310408+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-09T04:03:51.334619+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge/src/gzip-1.12 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-09T04:03:51.336892+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-09T04:03:51.729735+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-09T04:05:04.297849+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge/src/bzip2-1.0.8 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-09T04:05:04.300864+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-09T04:05:04.362668+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-09T04:07:05.178566+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge/src/pbzip2-1.1.13 ; USER=root ; COMMAND=/usr/bin/apt remove libbz2-1.0
+2024-01-09T04:07:05.181062+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-09T04:07:06.999661+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-09T04:11:03.950358+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge/src/bzip2-1.0.8 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-09T04:11:03.952477+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-09T04:11:04.007666+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-09T04:11:10.083884+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge/src/gzip-1.12 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-09T04:11:10.085236+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-09T04:11:10.533631+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-09T04:11:42.570215+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge/src/lzlib-1.9 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-09T04:11:42.571663+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-09T04:11:42.595711+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-09T04:12:04.379114+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge/src/lzip-1.23 ; USER=root ; COMMAND=/usr/bin/make install
+2024-01-09T04:12:04.380933+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-09T04:12:04.420638+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-09T04:17:01.583936+00:00 nyc3-1 CRON[36685]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T04:18:24.796715+00:00 nyc3-1 CRON[36685]: pam_unix(cron:session): session closed for user root
+2024-01-09T04:24:43.524349+00:00 nyc3-1 sshd[30512]: Received disconnect from 173.48.140.140 port 63384:11: disconnected by user
+2024-01-09T04:24:43.528053+00:00 nyc3-1 sshd[30512]: Disconnected from user birge 173.48.140.140 port 63384
+2024-01-09T04:24:43.528365+00:00 nyc3-1 sshd[30470]: pam_unix(sshd:session): session closed for user birge
+2024-01-09T04:24:43.531469+00:00 nyc3-1 systemd-logind[685]: Session 17 logged out. Waiting for processes to exit.
+2024-01-09T04:24:43.531565+00:00 nyc3-1 systemd-logind[685]: Removed session 17.
+2024-01-09T04:46:36.920325+00:00 nyc3-1 sshd[38059]: Connection closed by 167.248.133.190 port 50102 [preauth]
+2024-01-09T05:17:01.817188+00:00 nyc3-1 CRON[39367]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T05:18:25.119299+00:00 nyc3-1 CRON[39367]: pam_unix(cron:session): session closed for user root
+2024-01-09T05:37:11.580130+00:00 nyc3-1 sshd[40266]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-09T05:37:11.580656+00:00 nyc3-1 sshd[40266]: banner exchange: Connection from 212.70.149.142 port 65386: invalid format
+2024-01-09T06:17:01.141234+00:00 nyc3-1 CRON[41929]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T06:23:15.358296+00:00 nyc3-1 CRON[41929]: pam_unix(cron:session): session closed for user root
+2024-01-09T06:25:01.378901+00:00 nyc3-1 CRON[42310]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T06:25:54.398006+00:00 nyc3-1 CRON[42310]: pam_unix(cron:session): session closed for user root
+2024-01-09T07:17:01.423437+00:00 nyc3-1 CRON[44683]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T07:21:28.666753+00:00 nyc3-1 CRON[44683]: pam_unix(cron:session): session closed for user root
+2024-01-09T08:17:01.688196+00:00 nyc3-1 CRON[47243]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T08:29:50.901320+00:00 nyc3-1 CRON[47243]: pam_unix(cron:session): session closed for user root
+2024-01-09T09:17:01.917826+00:00 nyc3-1 CRON[49924]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T09:25:43.173198+00:00 nyc3-1 CRON[49924]: pam_unix(cron:session): session closed for user root
+2024-01-09T09:47:41.507267+00:00 nyc3-1 sshd[51260]: error: kex_exchange_identification: Connection closed by remote host
+2024-01-09T09:47:41.507423+00:00 nyc3-1 sshd[51260]: Connection closed by 87.236.176.38 port 51067
+2024-01-09T09:47:41.853723+00:00 nyc3-1 sshd[51261]: Connection closed by 87.236.176.38 port 52427 [preauth]
+2024-01-09T10:17:01.190882+00:00 nyc3-1 CRON[52504]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T10:23:53.449115+00:00 nyc3-1 CRON[52504]: pam_unix(cron:session): session closed for user root
+2024-01-09T11:00:45.565629+00:00 nyc3-1 polkitd[54870]: Loading rules from directory /etc/polkit-1/rules.d
+2024-01-09T11:00:45.566348+00:00 nyc3-1 polkitd[54870]: Loading rules from directory /usr/share/polkit-1/rules.d
+2024-01-09T11:00:45.570580+00:00 nyc3-1 polkitd[54870]: Finished loading, compiling and executing 5 rules
+2024-01-09T11:00:45.573961+00:00 nyc3-1 polkitd[54870]: Acquired the name org.freedesktop.PolicyKit1 on the system bus
+2024-01-09T11:17:01.483540+00:00 nyc3-1 CRON[55727]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T11:19:21.734318+00:00 nyc3-1 CRON[55727]: pam_unix(cron:session): session closed for user root
+2024-01-09T11:59:47.360626+00:00 nyc3-1 sshd[57838]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-09T11:59:47.360997+00:00 nyc3-1 sshd[57838]: banner exchange: Connection from 45.79.128.205 port 25286: invalid format
+2024-01-09T12:17:01.754606+00:00 nyc3-1 CRON[58565]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T12:21:34.969174+00:00 nyc3-1 CRON[58565]: pam_unix(cron:session): session closed for user root
+2024-01-09T13:17:01.988855+00:00 nyc3-1 CRON[61167]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T13:30:57.259838+00:00 nyc3-1 CRON[61167]: pam_unix(cron:session): session closed for user root
+2024-01-09T14:17:01.279314+00:00 nyc3-1 CRON[63724]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T14:20:49.556420+00:00 nyc3-1 CRON[63724]: pam_unix(cron:session): session closed for user root
+2024-01-09T14:48:22.304897+00:00 nyc3-1 sshd[65099]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-09T14:48:22.305254+00:00 nyc3-1 sshd[65099]: banner exchange: Connection from 172.104.11.34 port 65310: invalid format
+2024-01-09T15:17:01.578445+00:00 nyc3-1 CRON[66308]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T15:27:29.864985+00:00 nyc3-1 CRON[66308]: pam_unix(cron:session): session closed for user root
+2024-01-09T16:17:01.884162+00:00 nyc3-1 CRON[68858]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T16:23:43.095595+00:00 nyc3-1 CRON[68858]: pam_unix(cron:session): session closed for user root
+2024-01-09T17:06:45.076151+00:00 nyc3-1 sshd[71020]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-09T17:06:45.076437+00:00 nyc3-1 sshd[71020]: banner exchange: Connection from 43.129.39.141 port 33718: invalid format
+2024-01-09T17:06:46.750180+00:00 nyc3-1 sshd[71021]: Invalid user  from 43.129.39.141 port 33976
+2024-01-09T17:06:47.029537+00:00 nyc3-1 sshd[71021]: Connection closed by invalid user  43.129.39.141 port 33976 [preauth]
+2024-01-09T17:17:01.115053+00:00 nyc3-1 CRON[71446]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T17:21:45.364115+00:00 nyc3-1 CRON[71446]: pam_unix(cron:session): session closed for user root
+2024-01-09T18:17:01.381603+00:00 nyc3-1 CRON[74037]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T18:20:21.610888+00:00 nyc3-1 CRON[74037]: pam_unix(cron:session): session closed for user root
+2024-01-09T18:39:33.578653+00:00 nyc3-1 sshd[75032]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-09T18:39:33.579180+00:00 nyc3-1 sshd[75032]: banner exchange: Connection from 45.227.254.49 port 65278: invalid format
+2024-01-09T19:17:01.632175+00:00 nyc3-1 CRON[76606]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T19:31:32.845142+00:00 nyc3-1 CRON[76606]: pam_unix(cron:session): session closed for user root
+2024-01-09T20:17:01.869999+00:00 nyc3-1 CRON[79213]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T20:19:43.135334+00:00 nyc3-1 CRON[79213]: pam_unix(cron:session): session closed for user root
+2024-01-09T21:17:01.155691+00:00 nyc3-1 CRON[81774]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T21:19:16.378327+00:00 nyc3-1 CRON[81774]: pam_unix(cron:session): session closed for user root
+2024-01-09T22:17:01.398080+00:00 nyc3-1 CRON[84358]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T22:31:52.665506+00:00 nyc3-1 CRON[84358]: pam_unix(cron:session): session closed for user root
+2024-01-09T23:17:01.681627+00:00 nyc3-1 CRON[86942]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-09T23:20:33.951689+00:00 nyc3-1 CRON[86942]: pam_unix(cron:session): session closed for user root
+2024-01-10T00:03:23.070813+00:00 nyc3-1 sshd[88927]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-10T00:03:23.071275+00:00 nyc3-1 sshd[88927]: banner exchange: Connection from 212.70.149.142 port 64892: invalid format
+2024-01-10T00:17:01.977967+00:00 nyc3-1 CRON[89500]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T00:20:39.246548+00:00 nyc3-1 CRON[89500]: pam_unix(cron:session): session closed for user root
+2024-01-10T01:17:01.264084+00:00 nyc3-1 CRON[92240]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T01:31:21.495886+00:00 nyc3-1 CRON[92240]: pam_unix(cron:session): session closed for user root
+2024-01-10T02:17:01.513602+00:00 nyc3-1 CRON[94824]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T02:18:50.753671+00:00 nyc3-1 CRON[94824]: pam_unix(cron:session): session closed for user root
+2024-01-10T03:10:01.772924+00:00 nyc3-1 CRON[97186]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T03:10:01.776170+00:00 nyc3-1 CRON[97186]: pam_unix(cron:session): session closed for user root
+2024-01-10T03:17:01.781848+00:00 nyc3-1 CRON[97490]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T03:24:15.994781+00:00 nyc3-1 CRON[97490]: pam_unix(cron:session): session closed for user root
+2024-01-10T04:17:01.012682+00:00 nyc3-1 CRON[100065]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T04:18:47.267474+00:00 nyc3-1 CRON[100065]: pam_unix(cron:session): session closed for user root
+2024-01-10T04:48:08.509012+00:00 nyc3-1 sshd[101419]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-10T04:48:08.509296+00:00 nyc3-1 sshd[101419]: banner exchange: Connection from 212.70.149.142 port 65493: invalid format
+2024-01-10T05:17:01.295610+00:00 nyc3-1 CRON[103153]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T05:23:56.559879+00:00 nyc3-1 CRON[103153]: pam_unix(cron:session): session closed for user root
+2024-01-10T06:17:01.581020+00:00 nyc3-1 CRON[105723]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T06:25:01.581345+00:00 nyc3-1 CRON[106053]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T06:30:19.803365+00:00 nyc3-1 CRON[105723]: pam_unix(cron:session): session closed for user root
+2024-01-10T06:36:57.281817+00:00 nyc3-1 CRON[106053]: pam_unix(cron:session): session closed for user root
+2024-01-10T07:17:01.301266+00:00 nyc3-1 CRON[108441]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T07:22:12.531729+00:00 nyc3-1 CRON[108441]: pam_unix(cron:session): session closed for user root
+2024-01-10T08:17:01.551088+00:00 nyc3-1 CRON[111004]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T08:19:07.796284+00:00 nyc3-1 CRON[111004]: pam_unix(cron:session): session closed for user root
+2024-01-10T09:17:01.808151+00:00 nyc3-1 CRON[113701]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T09:20:25.031682+00:00 nyc3-1 CRON[113701]: pam_unix(cron:session): session closed for user root
+2024-01-10T10:17:01.049450+00:00 nyc3-1 CRON[116296]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T10:23:11.710391+00:00 nyc3-1 sshd[116554]: error: kex_exchange_identification: read: Connection reset by peer
+2024-01-10T10:23:11.711111+00:00 nyc3-1 sshd[116554]: Connection reset by 45.79.168.172 port 48758
+2024-01-10T10:24:18.297530+00:00 nyc3-1 CRON[116296]: pam_unix(cron:session): session closed for user root
+2024-01-10T10:46:05.286643+00:00 nyc3-1 sshd[117663]: error: kex_exchange_identification: read: Connection reset by peer
+2024-01-10T10:46:05.286813+00:00 nyc3-1 sshd[117663]: Connection reset by 45.79.163.53 port 46373
+2024-01-10T11:17:01.312242+00:00 nyc3-1 CRON[118961]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T11:30:51.545900+00:00 nyc3-1 CRON[118961]: pam_unix(cron:session): session closed for user root
+2024-01-10T12:17:01.561035+00:00 nyc3-1 CRON[121622]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T12:24:07.776543+00:00 nyc3-1 CRON[121622]: pam_unix(cron:session): session closed for user root
+2024-01-10T13:17:01.797428+00:00 nyc3-1 CRON[124193]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T13:21:24.043252+00:00 nyc3-1 CRON[124193]: pam_unix(cron:session): session closed for user root
+2024-01-10T14:17:01.063063+00:00 nyc3-1 CRON[126770]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T14:28:10.315350+00:00 nyc3-1 CRON[126770]: pam_unix(cron:session): session closed for user root
+2024-01-10T15:17:01.333156+00:00 nyc3-1 CRON[129373]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T15:22:47.090501+00:00 nyc3-1 sshd[129609]: Accepted publickey for birge from 173.48.140.140 port 59795 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-10T15:22:47.110730+00:00 nyc3-1 sshd[129609]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-10T15:22:47.136673+00:00 nyc3-1 systemd-logind[685]: New session 57 of user birge.
+2024-01-10T15:22:47.936636+00:00 nyc3-1 sshd[129609]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-10T15:22:54.073125+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/apt update
+2024-01-10T15:22:54.085270+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-10T15:23:03.199226+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-10T15:30:03.625065+00:00 nyc3-1 CRON[129373]: pam_unix(cron:session): session closed for user root
+2024-01-10T15:34:30.701062+00:00 nyc3-1 sshd[130689]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-10T15:34:30.701614+00:00 nyc3-1 sshd[130689]: banner exchange: Connection from 45.227.254.49 port 65289: invalid format
+2024-01-10T16:17:01.654917+00:00 nyc3-1 CRON[132621]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T16:18:03.902803+00:00 nyc3-1 CRON[132621]: pam_unix(cron:session): session closed for user root
+2024-01-10T16:23:25.616469+00:00 nyc3-1 sshd[133051]: Accepted publickey for birge from 173.48.140.140 port 64560 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-10T16:23:25.618200+00:00 nyc3-1 sshd[133051]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-10T16:23:25.629134+00:00 nyc3-1 systemd-logind[685]: New session 59 of user birge.
+2024-01-10T16:23:26.342868+00:00 nyc3-1 sshd[133051]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-10T16:23:58.542098+00:00 nyc3-1 sshd[133124]: Received disconnect from 173.48.140.140 port 64560:11: disconnected by user
+2024-01-10T16:23:58.542996+00:00 nyc3-1 sshd[133124]: Disconnected from user birge 173.48.140.140 port 64560
+2024-01-10T16:23:58.548667+00:00 nyc3-1 sshd[133051]: pam_unix(sshd:session): session closed for user birge
+2024-01-10T16:23:58.561628+00:00 nyc3-1 systemd-logind[685]: Session 59 logged out. Waiting for processes to exit.
+2024-01-10T16:33:13.982479+00:00 nyc3-1 sshd[133853]: Accepted publickey for birge from 10.17.0.2 port 45494 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-10T16:33:13.996721+00:00 nyc3-1 sshd[133853]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-10T16:33:14.048339+00:00 nyc3-1 systemd-logind[685]: New session 60 of user birge.
+2024-01-10T16:33:15.217048+00:00 nyc3-1 sshd[133853]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-10T16:33:23.693328+00:00 nyc3-1 sudo:    birge : TTY=pts/2 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/apt upgrade
+2024-01-10T16:33:23.710791+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-10T16:33:37.958760+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-10T16:35:15.137945+00:00 nyc3-1 sshd[133903]: Received disconnect from 10.17.0.2 port 45494:11: Bye
+2024-01-10T16:35:15.143332+00:00 nyc3-1 sshd[133903]: Disconnected from user birge 10.17.0.2 port 45494
+2024-01-10T16:35:15.145173+00:00 nyc3-1 sshd[133853]: pam_unix(sshd:session): session closed for user birge
+2024-01-10T16:35:15.155639+00:00 nyc3-1 systemd-logind[685]: Session 60 logged out. Waiting for processes to exit.
+2024-01-10T16:35:15.156431+00:00 nyc3-1 systemd-logind[685]: Removed session 60.
+2024-01-10T17:17:01.953507+00:00 nyc3-1 CRON[136081]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T17:28:41.234620+00:00 nyc3-1 CRON[136081]: pam_unix(cron:session): session closed for user root
+2024-01-10T17:35:28.649862+00:00 nyc3-1 sshd[129609]: pam_unix(sshd:session): session closed for user birge
+2024-01-10T17:35:28.669648+00:00 nyc3-1 systemd-logind[685]: Session 57 logged out. Waiting for processes to exit.
+2024-01-10T17:35:28.684492+00:00 nyc3-1 systemd-logind[685]: Removed session 57.
+2024-01-10T18:17:01.266828+00:00 nyc3-1 CRON[138831]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T18:29:51.594642+00:00 nyc3-1 CRON[138831]: pam_unix(cron:session): session closed for user root
+2024-01-10T19:17:01.623661+00:00 nyc3-1 CRON[141697]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T19:26:01.898210+00:00 nyc3-1 CRON[141697]: pam_unix(cron:session): session closed for user root
+2024-01-10T19:29:09.529988+00:00 nyc3-1 systemd-logind[685]: Removed session 59.
+2024-01-10T20:17:01.914104+00:00 nyc3-1 CRON[144349]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T20:28:39.120949+00:00 nyc3-1 CRON[144349]: pam_unix(cron:session): session closed for user root
+2024-01-10T21:17:01.135664+00:00 nyc3-1 CRON[147007]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T21:21:13.358845+00:00 nyc3-1 CRON[147007]: pam_unix(cron:session): session closed for user root
+2024-01-10T22:17:01.404353+00:00 nyc3-1 CRON[149610]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T22:24:53.688728+00:00 nyc3-1 CRON[149610]: pam_unix(cron:session): session closed for user root
+2024-01-10T23:17:01.705888+00:00 nyc3-1 CRON[152228]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-10T23:19:04.906681+00:00 nyc3-1 CRON[152228]: pam_unix(cron:session): session closed for user root
+2024-01-11T00:17:01.922707+00:00 nyc3-1 CRON[154966]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T00:22:13.123782+00:00 nyc3-1 CRON[154966]: pam_unix(cron:session): session closed for user root
+2024-01-11T01:17:01.143156+00:00 nyc3-1 CRON[157702]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T01:25:21.367471+00:00 nyc3-1 CRON[157702]: pam_unix(cron:session): session closed for user root
+2024-01-11T02:17:01.391005+00:00 nyc3-1 CRON[160292]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T02:30:14.697034+00:00 nyc3-1 CRON[160292]: pam_unix(cron:session): session closed for user root
+2024-01-11T02:51:15.152549+00:00 nyc3-1 sshd[161831]: Connection closed by 167.94.138.36 port 46548 [preauth]
+2024-01-11T03:10:01.717944+00:00 nyc3-1 CRON[162637]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T03:10:01.721777+00:00 nyc3-1 CRON[162637]: pam_unix(cron:session): session closed for user root
+2024-01-11T03:17:01.728988+00:00 nyc3-1 CRON[162923]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T03:26:08.987000+00:00 nyc3-1 CRON[162923]: pam_unix(cron:session): session closed for user root
+2024-01-11T04:17:02.004195+00:00 nyc3-1 CRON[165475]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T04:20:43.234315+00:00 nyc3-1 CRON[165475]: pam_unix(cron:session): session closed for user root
+2024-01-11T04:41:20.345950+00:00 nyc3-1 sshd[167079]: Connection closed by 162.142.125.222 port 40836 [preauth]
+2024-01-11T05:17:01.260169+00:00 nyc3-1 CRON[168575]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T05:27:26.482474+00:00 nyc3-1 CRON[168575]: pam_unix(cron:session): session closed for user root
+2024-01-11T05:56:21.879075+00:00 nyc3-1 sshd[170293]: Unable to negotiate with 118.36.69.40 port 47108: no matching host key type found. Their offer: ssh-rsa,ssh-dss [preauth]
+2024-01-11T06:17:01.497257+00:00 nyc3-1 CRON[171154]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T06:25:01.500232+00:00 nyc3-1 CRON[171668]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T06:30:50.705008+00:00 nyc3-1 CRON[171154]: pam_unix(cron:session): session closed for user root
+2024-01-11T06:37:15.711044+00:00 nyc3-1 CRON[171668]: pam_unix(cron:session): session closed for user root
+2024-01-11T07:17:01.723182+00:00 nyc3-1 CRON[173991]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T07:29:13.923314+00:00 nyc3-1 CRON[173991]: pam_unix(cron:session): session closed for user root
+2024-01-11T08:17:01.937147+00:00 nyc3-1 CRON[176548]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T08:30:16.177208+00:00 nyc3-1 CRON[176548]: pam_unix(cron:session): session closed for user root
+2024-01-11T09:17:01.193196+00:00 nyc3-1 CRON[179230]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T09:25:24.431398+00:00 nyc3-1 CRON[179230]: pam_unix(cron:session): session closed for user root
+2024-01-11T09:57:59.841417+00:00 nyc3-1 sshd[180992]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-11T09:57:59.842042+00:00 nyc3-1 sshd[180992]: banner exchange: Connection from 80.66.88.215 port 65463: invalid format
+2024-01-11T10:17:01.445889+00:00 nyc3-1 CRON[181787]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T10:23:49.653999+00:00 nyc3-1 CRON[181787]: pam_unix(cron:session): session closed for user root
+2024-01-11T11:17:01.669858+00:00 nyc3-1 CRON[184573]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T11:26:37.897284+00:00 nyc3-1 CRON[184573]: pam_unix(cron:session): session closed for user root
+2024-01-11T12:10:35.631070+00:00 nyc3-1 sshd[186884]: Unable to negotiate with 59.29.145.37 port 50685: no matching host key type found. Their offer: ssh-rsa,ssh-dss [preauth]
+2024-01-11T12:17:01.910955+00:00 nyc3-1 CRON[187157]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T12:25:22.243265+00:00 nyc3-1 sshd[187527]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-11T12:25:22.244020+00:00 nyc3-1 sshd[187527]: banner exchange: Connection from 45.79.181.223 port 45124: invalid format
+2024-01-11T12:26:20.127701+00:00 nyc3-1 CRON[187157]: pam_unix(cron:session): session closed for user root
+2024-01-11T13:17:01.144924+00:00 nyc3-1 CRON[189731]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T13:22:45.361118+00:00 nyc3-1 CRON[189731]: pam_unix(cron:session): session closed for user root
+2024-01-11T14:17:01.380307+00:00 nyc3-1 CRON[192290]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T14:18:13.660554+00:00 nyc3-1 CRON[192290]: pam_unix(cron:session): session closed for user root
+2024-01-11T15:17:01.679133+00:00 nyc3-1 CRON[194856]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T15:29:18.890830+00:00 nyc3-1 CRON[194856]: pam_unix(cron:session): session closed for user root
+2024-01-11T16:17:01.907261+00:00 nyc3-1 CRON[197400]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T16:17:42.384807+00:00 nyc3-1 sshd[197448]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-11T16:17:42.385413+00:00 nyc3-1 sshd[197448]: banner exchange: Connection from 45.79.181.251 port 20052: invalid format
+2024-01-11T16:20:20.159810+00:00 nyc3-1 CRON[197400]: pam_unix(cron:session): session closed for user root
+2024-01-11T17:17:01.180634+00:00 nyc3-1 CRON[199978]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T17:29:16.407130+00:00 nyc3-1 CRON[199978]: pam_unix(cron:session): session closed for user root
+2024-01-11T18:17:01.428159+00:00 nyc3-1 CRON[202572]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T18:21:57.693287+00:00 nyc3-1 CRON[202572]: pam_unix(cron:session): session closed for user root
+2024-01-11T18:55:02.865699+00:00 nyc3-1 sshd[204223]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-11T18:55:02.866196+00:00 nyc3-1 sshd[204223]: banner exchange: Connection from 185.233.19.202 port 56368: invalid format
+2024-01-11T18:55:03.278484+00:00 nyc3-1 sshd[204243]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-11T18:55:03.278767+00:00 nyc3-1 sshd[204243]: banner exchange: Connection from 185.233.19.202 port 56674: invalid format
+2024-01-11T18:55:03.697887+00:00 nyc3-1 sshd[204244]: error: kex_exchange_identification: client sent invalid protocol identifier "GET / HTTP/1.1"
+2024-01-11T18:55:03.698258+00:00 nyc3-1 sshd[204244]: banner exchange: Connection from 185.233.19.202 port 56864: invalid format
+2024-01-11T18:55:05.150647+00:00 nyc3-1 sshd[204245]: error: kex_exchange_identification: Connection closed by remote host
+2024-01-11T18:55:05.150945+00:00 nyc3-1 sshd[204245]: Connection closed by 185.233.19.202 port 57056
+2024-01-11T18:55:19.528635+00:00 nyc3-1 sshd[204246]: Connection closed by 185.233.19.202 port 57268 [preauth]
+2024-01-11T19:06:22.520281+00:00 nyc3-1 sshd[204707]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-11T19:06:22.521056+00:00 nyc3-1 sshd[204707]: banner exchange: Connection from 185.233.19.142 port 57762: invalid format
+2024-01-11T19:06:22.942075+00:00 nyc3-1 sshd[204708]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-11T19:06:22.942811+00:00 nyc3-1 sshd[204708]: banner exchange: Connection from 185.233.19.142 port 58020: invalid format
+2024-01-11T19:06:23.360644+00:00 nyc3-1 sshd[204709]: error: kex_exchange_identification: client sent invalid protocol identifier "GET / HTTP/1.1"
+2024-01-11T19:06:23.361322+00:00 nyc3-1 sshd[204709]: banner exchange: Connection from 185.233.19.142 port 58114: invalid format
+2024-01-11T19:06:24.846818+00:00 nyc3-1 sshd[204710]: error: kex_exchange_identification: Connection closed by remote host
+2024-01-11T19:06:24.847221+00:00 nyc3-1 sshd[204710]: Connection closed by 185.233.19.142 port 58446
+2024-01-11T19:06:39.204488+00:00 nyc3-1 sshd[204711]: Connection closed by 185.233.19.142 port 58718 [preauth]
+2024-01-11T19:17:01.709810+00:00 nyc3-1 CRON[205160]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T19:24:42.938185+00:00 nyc3-1 CRON[205160]: pam_unix(cron:session): session closed for user root
+2024-01-11T20:17:01.957991+00:00 nyc3-1 CRON[207721]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T20:22:36.167869+00:00 nyc3-1 CRON[207721]: pam_unix(cron:session): session closed for user root
+2024-01-11T21:17:01.183779+00:00 nyc3-1 CRON[210291]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T21:26:26.417602+00:00 nyc3-1 CRON[210291]: pam_unix(cron:session): session closed for user root
+2024-01-11T22:17:01.439842+00:00 nyc3-1 CRON[212866]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T22:30:47.656497+00:00 nyc3-1 CRON[212866]: pam_unix(cron:session): session closed for user root
+2024-01-11T23:17:01.684141+00:00 nyc3-1 CRON[215496]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-11T23:26:41.909580+00:00 nyc3-1 CRON[215496]: pam_unix(cron:session): session closed for user root
+2024-01-11T23:31:44.897206+00:00 nyc3-1 sshd[216160]: error: kex_exchange_identification: Connection closed by remote host
+2024-01-11T23:31:44.897469+00:00 nyc3-1 sshd[216160]: Connection closed by 87.236.176.231 port 53393
+2024-01-11T23:31:45.242029+00:00 nyc3-1 sshd[216161]: Connection closed by 87.236.176.231 port 53519 [preauth]
+2024-01-12T00:17:01.925295+00:00 nyc3-1 CRON[218184]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T00:20:55.142905+00:00 nyc3-1 CRON[218184]: pam_unix(cron:session): session closed for user root
+2024-01-12T00:39:46.111543+00:00 nyc3-1 sshd[219213]: Accepted publickey for birge from 173.48.140.140 port 64730 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-12T00:39:46.126196+00:00 nyc3-1 sshd[219213]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-12T00:39:46.152595+00:00 nyc3-1 systemd-logind[685]: New session 95 of user birge.
+2024-01-12T00:39:46.974438+00:00 nyc3-1 sshd[219213]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-12T01:17:01.166083+00:00 nyc3-1 CRON[221085]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T01:26:51.396647+00:00 nyc3-1 CRON[221085]: pam_unix(cron:session): session closed for user root
+2024-01-12T02:17:01.411527+00:00 nyc3-1 CRON[223665]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T02:31:21.639292+00:00 nyc3-1 CRON[223665]: pam_unix(cron:session): session closed for user root
+2024-01-12T02:40:27.936263+00:00 nyc3-1 sshd[224806]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-12T02:40:27.936748+00:00 nyc3-1 sshd[224806]: banner exchange: Connection from 80.66.88.204 port 65323: invalid format
+2024-01-12T03:10:01.677822+00:00 nyc3-1 CRON[226550]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T03:10:01.684890+00:00 nyc3-1 CRON[226550]: pam_unix(cron:session): session closed for user root
+2024-01-12T03:17:01.693165+00:00 nyc3-1 CRON[226836]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T03:25:11.961110+00:00 nyc3-1 CRON[226836]: pam_unix(cron:session): session closed for user root
+2024-01-12T04:17:01.052550+00:00 nyc3-1 sshd[229646]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-12T04:17:01.052821+00:00 nyc3-1 sshd[229646]: banner exchange: Connection from 165.154.225.214 port 53356: invalid format
+2024-01-12T04:17:01.975557+00:00 nyc3-1 CRON[229648]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T04:17:19.773909+00:00 nyc3-1 sshd[229647]: error: kex_exchange_identification: Connection closed by remote host
+2024-01-12T04:17:19.774121+00:00 nyc3-1 sshd[229647]: Connection closed by 165.154.225.214 port 53852
+2024-01-12T04:17:20.001728+00:00 nyc3-1 sshd[229674]: error: Protocol major versions differ: 2 vs. 1
+2024-01-12T04:17:20.002097+00:00 nyc3-1 sshd[229674]: banner exchange: Connection from 165.154.225.214 port 59876: could not read protocol version
+2024-01-12T04:17:20.689872+00:00 nyc3-1 sshd[229675]: Unable to negotiate with 165.154.225.214 port 60092: no matching host key type found. Their offer: ssh-rsa [preauth]
+2024-01-12T04:30:28.195248+00:00 nyc3-1 CRON[229648]: pam_unix(cron:session): session closed for user root
+2024-01-12T05:17:01.211075+00:00 nyc3-1 CRON[232220]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T05:18:48.415073+00:00 nyc3-1 CRON[232220]: pam_unix(cron:session): session closed for user root
+2024-01-12T06:17:01.437263+00:00 nyc3-1 CRON[234781]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T06:25:01.434579+00:00 nyc3-1 CRON[235127]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T06:25:16.711454+00:00 nyc3-1 CRON[234781]: pam_unix(cron:session): session closed for user root
+2024-01-12T06:36:58.239982+00:00 nyc3-1 CRON[235127]: pam_unix(cron:session): session closed for user root
+2024-01-12T07:17:01.262452+00:00 nyc3-1 CRON[237485]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T07:18:10.488749+00:00 nyc3-1 CRON[237485]: pam_unix(cron:session): session closed for user root
+2024-01-12T08:17:01.504967+00:00 nyc3-1 CRON[240078]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T08:17:07.725081+00:00 nyc3-1 CRON[240078]: pam_unix(cron:session): session closed for user root
+2024-01-12T09:17:01.739348+00:00 nyc3-1 CRON[242735]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T09:30:21.962430+00:00 nyc3-1 CRON[242735]: pam_unix(cron:session): session closed for user root
+2024-01-12T09:41:10.811877+00:00 nyc3-1 sshd[243799]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-12T09:41:10.812316+00:00 nyc3-1 sshd[243799]: banner exchange: Connection from 212.70.149.146 port 63763: invalid format
+2024-01-12T10:17:01.976675+00:00 nyc3-1 CRON[245300]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T10:20:28.318221+00:00 nyc3-1 sshd[245456]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-12T10:20:28.318514+00:00 nyc3-1 sshd[245456]: banner exchange: Connection from 212.70.149.146 port 63788: invalid format
+2024-01-12T10:31:40.189592+00:00 nyc3-1 CRON[245300]: pam_unix(cron:session): session closed for user root
+2024-01-12T10:47:10.052315+00:00 nyc3-1 sshd[246726]: error: kex_exchange_identification: read: Connection reset by peer
+2024-01-12T10:47:10.053134+00:00 nyc3-1 sshd[246726]: Connection reset by 198.74.56.46 port 45628
+2024-01-12T10:55:53.820043+00:00 nyc3-1 sshd[247089]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-12T10:55:53.820629+00:00 nyc3-1 sshd[247089]: banner exchange: Connection from 212.70.149.146 port 64451: invalid format
+2024-01-12T11:16:35.231849+00:00 nyc3-1 sshd[247968]: error: kex_exchange_identification: read: Connection reset by peer
+2024-01-12T11:16:35.232171+00:00 nyc3-1 sshd[247968]: Connection reset by 69.164.217.245 port 45112
+2024-01-12T11:17:01.202921+00:00 nyc3-1 CRON[247988]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T11:17:19.437265+00:00 nyc3-1 CRON[247988]: pam_unix(cron:session): session closed for user root
+2024-01-12T12:17:01.452133+00:00 nyc3-1 CRON[250529]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T12:21:40.685808+00:00 nyc3-1 CRON[250529]: pam_unix(cron:session): session closed for user root
+2024-01-12T12:26:23.208308+00:00 nyc3-1 sshd[250984]: error: kex_exchange_identification: Connection closed by remote host
+2024-01-12T12:26:23.208444+00:00 nyc3-1 sshd[250984]: Connection closed by 87.236.176.62 port 49573
+2024-01-12T12:26:23.853070+00:00 nyc3-1 sshd[250985]: Connection closed by 87.236.176.62 port 57143 [preauth]
+2024-01-12T13:17:01.701012+00:00 nyc3-1 CRON[253086]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T13:31:43.977068+00:00 nyc3-1 CRON[253086]: pam_unix(cron:session): session closed for user root
+2024-01-12T13:58:25.403873+00:00 nyc3-1 sshd[219213]: pam_unix(sshd:session): session closed for user birge
+2024-01-12T13:58:25.413286+00:00 nyc3-1 systemd-logind[685]: Session 95 logged out. Waiting for processes to exit.
+2024-01-12T13:58:25.414680+00:00 nyc3-1 systemd-logind[685]: Removed session 95.
+2024-01-12T14:17:01.990714+00:00 nyc3-1 CRON[255669]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T14:26:24.213078+00:00 nyc3-1 CRON[255669]: pam_unix(cron:session): session closed for user root
+2024-01-12T15:17:01.228416+00:00 nyc3-1 CRON[258251]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T15:27:42.439618+00:00 nyc3-1 CRON[258251]: pam_unix(cron:session): session closed for user root
+2024-01-12T16:17:01.454719+00:00 nyc3-1 CRON[260826]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T16:30:17.698307+00:00 nyc3-1 CRON[260826]: pam_unix(cron:session): session closed for user root
+2024-01-12T17:14:10.757725+00:00 nyc3-1 sshd[263276]: Connection reset by 35.203.211.47 port 63206 [preauth]
+2024-01-12T17:17:01.716657+00:00 nyc3-1 CRON[263376]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T17:28:49.919011+00:00 nyc3-1 CRON[263376]: pam_unix(cron:session): session closed for user root
+2024-01-12T18:17:01.933199+00:00 nyc3-1 CRON[266042]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T18:30:20.152226+00:00 nyc3-1 CRON[266042]: pam_unix(cron:session): session closed for user root
+2024-01-12T19:17:01.165314+00:00 nyc3-1 CRON[268614]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T19:26:51.375071+00:00 nyc3-1 CRON[268614]: pam_unix(cron:session): session closed for user root
+2024-01-12T19:35:32.907854+00:00 nyc3-1 sshd[269426]: Connection closed by 162.142.125.12 port 36236 [preauth]
+2024-01-12T19:58:26.956269+00:00 nyc3-1 sshd[270401]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-12T19:58:26.956876+00:00 nyc3-1 sshd[270401]: banner exchange: Connection from 80.66.88.211 port 65289: invalid format
+2024-01-12T20:17:01.397345+00:00 nyc3-1 CRON[271162]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T20:27:39.618045+00:00 nyc3-1 CRON[271162]: pam_unix(cron:session): session closed for user root
+2024-01-12T21:01:10.721080+00:00 nyc3-1 sshd[273128]: Accepted publickey for birge from 10.17.0.2 port 55882 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-12T21:01:10.731375+00:00 nyc3-1 sshd[273128]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-12T21:01:10.748510+00:00 nyc3-1 systemd-logind[685]: New session 118 of user birge.
+2024-01-12T21:01:11.465261+00:00 nyc3-1 sshd[273128]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-12T21:17:01.640136+00:00 nyc3-1 CRON[274325]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T21:28:02.907891+00:00 nyc3-1 CRON[274325]: pam_unix(cron:session): session closed for user root
+2024-01-12T21:29:49.921807+00:00 nyc3-1 sshd[273201]: Received disconnect from 10.17.0.2 port 55882:11: Bye
+2024-01-12T21:29:49.934857+00:00 nyc3-1 sshd[273201]: Disconnected from user birge 10.17.0.2 port 55882
+2024-01-12T21:29:49.935294+00:00 nyc3-1 sshd[273128]: pam_unix(sshd:session): session closed for user birge
+2024-01-12T21:29:49.935509+00:00 nyc3-1 systemd-logind[685]: Session 118 logged out. Waiting for processes to exit.
+2024-01-12T21:29:49.935570+00:00 nyc3-1 systemd-logind[685]: Removed session 118.
+2024-01-12T22:17:01.922521+00:00 nyc3-1 CRON[277262]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T22:21:30.123736+00:00 nyc3-1 CRON[277262]: pam_unix(cron:session): session closed for user root
+2024-01-12T23:17:01.139883+00:00 nyc3-1 CRON[279805]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-12T23:25:42.368481+00:00 nyc3-1 CRON[279805]: pam_unix(cron:session): session closed for user root
+2024-01-13T00:17:01.390464+00:00 nyc3-1 CRON[282452]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T00:24:28.592510+00:00 nyc3-1 CRON[282452]: pam_unix(cron:session): session closed for user root
+2024-01-13T01:17:01.629488+00:00 nyc3-1 CRON[285165]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T01:21:59.889462+00:00 nyc3-1 CRON[285165]: pam_unix(cron:session): session closed for user root
+2024-01-13T02:17:01.911464+00:00 nyc3-1 CRON[287726]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T02:24:38.123313+00:00 nyc3-1 CRON[287726]: pam_unix(cron:session): session closed for user root
+2024-01-13T02:58:39.644087+00:00 nyc3-1 sshd[289618]: Accepted publickey for birge from 173.48.140.140 port 61574 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-13T02:58:39.649644+00:00 nyc3-1 sshd[289618]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-13T02:58:39.660545+00:00 nyc3-1 systemd-logind[685]: New session 125 of user birge.
+2024-01-13T02:58:40.356451+00:00 nyc3-1 sshd[289618]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-13T02:58:49.188353+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/bin/apt update
+2024-01-13T02:58:49.192233+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-13T02:58:55.831403+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-13T03:00:02.678460+00:00 nyc3-1 sudo:    birge : TTY=pts/1 ; PWD=/home/birge ; USER=root ; COMMAND=/usr/sbin/shutdown -r now
+2024-01-13T03:00:02.682740+00:00 nyc3-1 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by birge(uid=1000)
+2024-01-13T03:00:02.689554+00:00 nyc3-1 systemd-logind[685]: The system will reboot now!
+2024-01-13T03:00:02.710246+00:00 nyc3-1 sudo: pam_unix(sudo:session): session closed for user root
+2024-01-13T03:00:03.038225+00:00 nyc3-1 systemd-logind[685]: System is rebooting.
+2024-01-13T03:00:03.071491+00:00 nyc3-1 sshd[289618]: pam_unix(sshd:session): session closed for user birge
+2024-01-13T03:00:03.089570+00:00 nyc3-1 sshd[10461]: pam_unix(sshd:session): session closed for user birge
+2024-01-13T03:00:45.027589+00:00 nyc3-1 systemd-logind[684]: New seat seat0.
+2024-01-13T03:00:45.027593+00:00 nyc3-1 systemd-logind[684]: Watching system buttons on /dev/input/event0 (Power Button)
+2024-01-13T03:00:45.027596+00:00 nyc3-1 systemd-logind[684]: Watching system buttons on /dev/input/event1 (AT Translated Set 2 keyboard)
+2024-01-13T03:10:01.624661+00:00 nyc3-1 CRON[2137]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T03:10:01.633500+00:00 nyc3-1 CRON[2137]: pam_unix(cron:session): session closed for user root
+2024-01-13T03:17:01.641484+00:00 nyc3-1 CRON[2444]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T03:28:59.884536+00:00 nyc3-1 CRON[2444]: pam_unix(cron:session): session closed for user root
+2024-01-13T04:17:01.907200+00:00 nyc3-1 CRON[5013]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T04:22:55.180100+00:00 nyc3-1 CRON[5013]: pam_unix(cron:session): session closed for user root
+2024-01-13T05:17:01.212852+00:00 nyc3-1 CRON[7546]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T05:18:40.408335+00:00 nyc3-1 CRON[7546]: pam_unix(cron:session): session closed for user root
+2024-01-13T06:17:01.429270+00:00 nyc3-1 CRON[10090]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T06:25:01.430650+00:00 nyc3-1 CRON[10420]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T06:28:59.647913+00:00 nyc3-1 CRON[10090]: pam_unix(cron:session): session closed for user root
+2024-01-13T06:37:14.768853+00:00 nyc3-1 CRON[10420]: pam_unix(cron:session): session closed for user root
+2024-01-13T07:17:01.792795+00:00 nyc3-1 CRON[12781]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T07:27:08.999210+00:00 nyc3-1 CRON[12781]: pam_unix(cron:session): session closed for user root
+2024-01-13T08:17:01.016327+00:00 nyc3-1 CRON[15321]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T08:19:35.208209+00:00 nyc3-1 CRON[15321]: pam_unix(cron:session): session closed for user root
+2024-01-13T09:17:01.237178+00:00 nyc3-1 CRON[17980]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T09:28:09.456418+00:00 nyc3-1 CRON[17980]: pam_unix(cron:session): session closed for user root
+2024-01-13T10:17:01.481363+00:00 nyc3-1 CRON[20551]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T10:17:35.690973+00:00 nyc3-1 CRON[20551]: pam_unix(cron:session): session closed for user root
+2024-01-13T11:17:01.707524+00:00 nyc3-1 CRON[23188]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T11:23:30.957827+00:00 nyc3-1 CRON[23188]: pam_unix(cron:session): session closed for user root
+2024-01-13T12:11:46.634895+00:00 nyc3-1 sshd[25505]: Server listening on :: port 22022.
+2024-01-13T12:11:46.638490+00:00 nyc3-1 sshd[25506]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-13T12:11:46.638694+00:00 nyc3-1 sshd[25506]: banner exchange: Connection from 192.155.90.220 port 58804: invalid format
+2024-01-13T12:17:01.972652+00:00 nyc3-1 CRON[25732]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T12:17:04.197863+00:00 nyc3-1 CRON[25732]: pam_unix(cron:session): session closed for user root
+2024-01-13T13:17:01.214743+00:00 nyc3-1 CRON[28284]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T13:31:55.415643+00:00 nyc3-1 CRON[28284]: pam_unix(cron:session): session closed for user root
+2024-01-13T14:17:01.429929+00:00 nyc3-1 CRON[30815]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T14:17:09.649858+00:00 nyc3-1 CRON[30815]: pam_unix(cron:session): session closed for user root
+2024-01-13T14:47:15.866771+00:00 nyc3-1 sshd[32137]: error: kex_exchange_identification: banner line contains invalid characters
+2024-01-13T14:47:15.867253+00:00 nyc3-1 sshd[32137]: banner exchange: Connection from 172.104.11.46 port 61740: invalid format
+2024-01-13T15:17:01.668755+00:00 nyc3-1 CRON[33369]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T15:26:52.872370+00:00 nyc3-1 CRON[33369]: pam_unix(cron:session): session closed for user root
+2024-01-13T16:17:01.885691+00:00 nyc3-1 CRON[35949]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T16:20:54.110562+00:00 nyc3-1 CRON[35949]: pam_unix(cron:session): session closed for user root
+2024-01-13T17:17:01.131821+00:00 nyc3-1 CRON[38469]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T17:24:11.060373+00:00 nyc3-1 polkitd[39158]: Loading rules from directory /etc/polkit-1/rules.d
+2024-01-13T17:24:11.061060+00:00 nyc3-1 polkitd[39158]: Loading rules from directory /usr/share/polkit-1/rules.d
+2024-01-13T17:24:11.066193+00:00 nyc3-1 polkitd[39158]: Finished loading, compiling and executing 5 rules
+2024-01-13T17:24:11.070049+00:00 nyc3-1 polkitd[39158]: Acquired the name org.freedesktop.PolicyKit1 on the system bus
+2024-01-13T17:28:23.378268+00:00 nyc3-1 CRON[38469]: pam_unix(cron:session): session closed for user root
+2024-01-13T17:39:07.186144+00:00 nyc3-1 sshd[39955]: Accepted publickey for birge from 173.48.140.140 port 53210 ssh2: RSA SHA256:LBVscsH5ahJTY7++gVkALPrE+WIVdweDdkYfAfPW+Ac
+2024-01-13T17:39:07.187775+00:00 nyc3-1 sshd[39955]: pam_unix(sshd:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-13T17:39:07.234350+00:00 nyc3-1 systemd-logind[684]: New session 18 of user birge.
+2024-01-13T17:39:07.252312+00:00 nyc3-1 (systemd): pam_unix(systemd-user:session): session opened for user birge(uid=1000) by (uid=0)
+2024-01-13T17:39:08.077699+00:00 nyc3-1 sshd[39955]: pam_env(sshd:session): deprecated reading of user environment enabled
+2024-01-13T17:55:49.771323+00:00 nyc3-1 sshd[41922]: Connection closed by 162.142.125.214 port 44636 [preauth]
+2024-01-13T18:17:01.428449+00:00 nyc3-1 CRON[42840]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T18:29:05.724457+00:00 nyc3-1 CRON[42840]: pam_unix(cron:session): session closed for user root
+2024-01-13T19:17:01.740911+00:00 nyc3-1 CRON[45391]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T19:17:17.936180+00:00 nyc3-1 CRON[45391]: pam_unix(cron:session): session closed for user root
+2024-01-13T19:52:46.970711+00:00 nyc3-1 sshd[39955]: pam_unix(sshd:session): session closed for user birge
+2024-01-13T19:52:46.984336+00:00 nyc3-1 systemd-logind[684]: Session 18 logged out. Waiting for processes to exit.
+2024-01-13T19:52:46.992460+00:00 nyc3-1 systemd-logind[684]: Removed session 18.
+2024-01-13T20:00:14.741382+00:00 nyc3-1 sshd[47230]: Connection closed by 167.248.133.190 port 52446 [preauth]
+2024-01-13T20:17:01.960252+00:00 nyc3-1 CRON[47947]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T20:30:28.183262+00:00 nyc3-1 CRON[47947]: pam_unix(cron:session): session closed for user root
+2024-01-13T21:17:01.196598+00:00 nyc3-1 CRON[50505]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T21:28:32.413895+00:00 nyc3-1 CRON[50505]: pam_unix(cron:session): session closed for user root
+2024-01-13T22:17:01.428707+00:00 nyc3-1 CRON[53045]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T22:24:54.631033+00:00 nyc3-1 CRON[53045]: pam_unix(cron:session): session closed for user root
+2024-01-13T23:17:01.649800+00:00 nyc3-1 CRON[55629]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+2024-01-13T23:17:50.873570+00:00 nyc3-1 CRON[55629]: pam_unix(cron:session): session closed for user root
