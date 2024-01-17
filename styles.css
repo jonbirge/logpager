@@ -1,14 +1,9 @@
-body, table {
-    margin: 0;
-    padding: 0;
-}
-
 /* Style the main page container */
 .container {
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: sans-serif;
     font-size: 14px; /* Slightly smaller font size */
     margin: auto;
-    width: calc(min(100%, 1320px) - 40pt); /* Responsive width */
+    width: calc(min(100%, 1080px) - 40pt); /* Responsive width */
 }
 
 /* Add a border to the container element */
@@ -29,10 +24,9 @@ body, table {
     border-top-right-radius: 5px;
     border-top-left-radius: 5px;
     background-color: #f0f0f0;
-    color: black;
     text-decoration: none;
     font-size: 16px;
-    font-weight: normal;
+    color: #555;
 }
 
 /* Style the selected tab */
@@ -43,6 +37,14 @@ body, table {
     background-color: white;
     margin-bottom: -1px;
     font-weight: bold;
+    font-size: 17px;
+    color: black;
+}
+
+/* Lighten the unselected tabs on hover */
+.log-link:hover:not(.selected) {
+    background-color: #fafafa;
+    color: #333;
 }
 
 /* Make all links black */
@@ -52,8 +54,38 @@ a {
 
 /* Style the search span to have everything on one line and be right-justified */
 .search-header {
+    align-items: center;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    margin: 0px;
+    padding: 0px;
+}
+
+/* Style the UTC time div to be left-justified */
+.time {
+    font-size: 15px;
+    margin: 0px;
+    padding: 0px;
+}
+
+/* Style the form to be right-justified */
+.search-form {
+    align-self: flex-end;
+}
+
+/* Text box with 16pt font and wide left and right margins */
+.text-box {
+    font-size: 16px;
+    margin-left: 16px;
+    margin-right: 12px;
+}
+
+/* Style tables to have a smaller font size */
+table, th, td {
+    border: 1px solid black;
+    margin-bottom: 20px;
+    padding: 6px;
+    font-size: 12px;
 }
 
 /* Style the log table to responsively fit all screen sizes, and wrap text to avoid scrolling if possible */
@@ -65,35 +97,11 @@ table {
     border-collapse: collapse;
 }
 
-table, th, td {
-    border: 1px solid black;
-    margin-bottom: 20px;
-    padding: 6px;
-}
-
+/* Style the table header row */
 th {
     background-color: #777777;
     color: white;
     font-weight: bold;
-}
-
-/* Monospace font for HTTP request column */
-.code {
-    font-family: Cascadia, Consolas, monospace;
-    text-align: left;
-    padding-left: 9pt;
-}
-
-.green {
-    font-weight: bold;
-    color: black;
-    background-color: rgb(128, 204, 128);
-}
-
-.red {
-    font-weight: bold;
-    color: black;
-    background-color: rgb(252, 199, 199);
 }
 
 /* Style alternating rows */
@@ -101,12 +109,14 @@ tr:nth-child(even) {
     background-color: #f0f0f0;
 }
 
-/* Text box with 16pt font and wide left and right margins */
-.text-box {
-    font-size: 16px;
-    margin-left: 16px;
-    margin-right: 12px;
+/* Monospace font for HTTP request column */
+.code {
+    font-family: monospace;
+    text-align: left;
+    padding-left: 9pt;
 }
+
+/*** Buttons ***/
 
 /* Center the buttons */
 .button-set {
@@ -157,4 +167,16 @@ tr:nth-child(even) {
     background-color: #d0d0d0;
     color: white;
     cursor: not-allowed;
+}
+
+.green {
+    font-weight: bold;
+    color: black;
+    background-color: rgb(128, 204, 128);
+}
+
+.red {
+    font-weight: bold;
+    color: black;
+    background-color: rgb(252, 199, 199);
 }

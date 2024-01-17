@@ -34,6 +34,15 @@ if (search !== null) {  // search beats page
     };
 }
 
+// update utc time every second
+setInterval(
+    () => {
+        const utc = document.getElementById("utc");
+        const timeStr = "UTC: " + new Date().toUTCString();
+        utc.innerHTML = timeStr;
+    }
+    , 1000);
+
 // pull the relevent log data from the server
 function pollLog() {
     console.log("pollLog: fetching page " + page + " of type " + logType);
@@ -479,8 +488,8 @@ function doSearch() {
                     resetButton.innerHTML = "Reset";
                     resetButton.classList.add("toggle-button");
                     resetButton.onclick = resetSearch;
-                    const searchSpan = document.getElementById("search-span");
-                    searchSpan.insertBefore(resetButton, searchSpan.firstChild);
+                    const searchDiv = document.getElementById("search-header");
+                    searchDiv.insertBefore(resetButton, searchDiv.firstChild);
                 } else {
                     resetButton.disabled = false;
                     resetButton.classList.remove("disabled");
