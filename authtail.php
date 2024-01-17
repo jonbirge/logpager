@@ -9,6 +9,11 @@ $search = $_GET['search'] ?? null;  // search string
 $page = $_GET['page'] ?? 0;
 $linesPerPage = $_GET['n'] ?? 16;
 
+if ($search) {
+    $doSearch = true;
+} else {
+    $doSearch = false;
+}
 [$search, $ip, $date] = parseSearch($search);
 
 // Path to the auth log file
@@ -36,13 +41,13 @@ $grepSrvCmd = "grep $grepArgs";
 $catCmd = 'cat ' . implode(' ', $logFilePaths);
 
 // build UNIX command
-if (!$search) {
+if ($doSearch) {
+    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tac"; 
+} else {
     // compute the first and last line numbers
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
     $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage | tac";
-} else {
-    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tail -n $linesPerPage | tac";
 }
 
 // execute the UNIX command
