@@ -26,6 +26,8 @@ body, table {
     margin-bottom: 0px;
     border: 1px solid #bbb;
     border-bottom: none;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
     background-color: #f0f0f0;
     color: black;
     text-decoration: none;
@@ -37,6 +39,7 @@ body, table {
 .log-link.selected {
     border-color: #333;
     border-bottom: 1px solid white;
+    border-top: 3px solid #333;
     background-color: white;
     margin-bottom: -1px;
     font-weight: bold;

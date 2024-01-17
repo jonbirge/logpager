@@ -12,7 +12,7 @@ $linesPerPage = $_GET['n'] ?? 16;
 [$search, $ip, $date] = parseSearch($search);
 
 // Path to the auth log file
-$logFilePaths = ['/auth.log.1', '/auth.log'];
+$logFilePaths = ['/auth.log'];
 
 // Remove any log files that don't exist
 foreach ($logFilePaths as $key => $logFilePath) {
