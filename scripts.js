@@ -208,9 +208,9 @@ function plotHeatmap(searchTerm) {
             processedData = processedData.filter((d) => d.count !== null);
 
             // Set dimensions for the heatmap
-            const cellSize = 11; // size of each tile
+            const cellSize = 15; // size of each tile
             const ratio = 1; // width to height ratio
-            const margin = { top: 10, right: 20, bottom: 50, left: 60 };
+            const margin = { top: 25, right: 50, bottom: 50, left: 50 };
             const width = ratio * Object.keys(jsonData).length * cellSize;
             const height = 24 * cellSize; // 24 hours
 
@@ -243,29 +243,16 @@ function plotHeatmap(searchTerm) {
                 .select("#heatmap")
                 .append("svg")
                 .attr("font-size", "12px")
-                .attr("class", "responsive-svg") // Add a class for styling
                 .attr("width", "100%") // Set width to 100%
-                .style("height", height + margin.top + margin.bottom + "px") // Set height using CSS
+                .style("height", height + "px") // Set height using CSS
                 .attr(
                     "viewBox",
                     `0 0 ${width + margin.left + margin.right} ${
-                        height + margin.top + margin.bottom
+                        height + margin.bottom + margin.top
                     }`
                 ) // Add viewBox
                 .append("g")
-                .attr("transform", `translate(${margin.left},${margin.top})`);
-
-            // Function to handle resizing of the SVG element
-            function handleResize() {
-                const containerWidth = d3
-                    .select("#heatmap")
-                    .node()
-                    .getBoundingClientRect().width;
-                const newWidth = Math.min(containerWidth, width); // Limit the width to the desired width
-                svg.attr("width", newWidth);
-            }
-            handleResize();
-            window.addEventListener("resize", handleResize);
+                .attr("transform", `translate(0,${margin.top})`);
 
             // Create color scale
             const colorScale = d3
@@ -274,7 +261,7 @@ function plotHeatmap(searchTerm) {
                 .domain([1, d3.max(processedData, (d) => d.count)])
                 .range([0, 1]);
 
-            // Create the tiles
+            // Create the tiles and make interactive
             svg.selectAll()
                 .data(processedData)
                 .enter()
@@ -299,14 +286,15 @@ function plotHeatmap(searchTerm) {
                     uiSearch();
                 });
 
-            // Create legend
-            const legendWidth = 15;
+            // Add legend
+            const legendWidth = 11;
             const legend = svg
                 .selectAll(".legend")
                 .data(colorScale.ticks(15))
                 .enter()
                 .append("g")
                 .attr("class", "legend")
+                .attr("width", "10%")
                 .attr("transform", (d, i) => {
                     return `translate(${width + 20}, ${i * legendWidth})`;
                 });
@@ -361,12 +349,6 @@ function plotHeatmap(searchTerm) {
             // Add Y-axis
             svg.append("g").call(d3.axisLeft(yScale));
 
-            // Center the chart in the div
-            d3.select("#heatmap")
-                .style("display", "flex")
-                .style("justify-content", "center")
-                .style("align-items", "center");
-
             // Add X-axis label
             svg.append("text")
                 .attr("x", width / 2)
@@ -383,6 +365,12 @@ function plotHeatmap(searchTerm) {
                 .attr("transform", "rotate(-90)")
                 .style("font-size", "14px")
                 .text("Hour of the day");
+
+            // Center the chart in the div
+            d3.select("#heatmap")
+                .style("display", "flex")
+                .style("justify-content", "center")
+                .style("align-items", "center");
         });
 }
 
