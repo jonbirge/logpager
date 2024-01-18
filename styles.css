@@ -69,13 +69,11 @@ a {
 /* Style the UTC time div to be left-justified */
 .time {
     font-size: 15px;
-    margin: 0px;
-    padding: 0px;
 }
 
 /* Style the form to be right-justified */
 .search-form {
-    align-self: flex-end;
+    display: inline;
 }
 
 /* Text box with 16pt font and wide left and right margins */
@@ -130,7 +128,7 @@ tr:nth-child(even) {
 
 /* Styling the button for a modern look */
 .toggle-button {
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     background-color: #4CAF50; /* Green background */
     border: none;
     color: white;

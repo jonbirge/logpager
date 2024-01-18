@@ -20,12 +20,14 @@
         <div id="heatmap"></div>
 
         <!-- search header -->
-        <div id="search-header" class="search-header">
-            <div id="utc" class="time"></div>
-            <form id="search-form" class="search-form" onsubmit="uiSearch(); return false;">
-                <input type="text" id="search-input" placeholder="Search..." autocomplete="off" class="text-box">
-                <button class="toggle-button gray" id="search-button">Search</button>
-            </form>
+        <div class="search-header">
+            <span id="utc" class="time"></span>
+            <span id="search-header">
+                <form id="search-form" class="search-form" onsubmit="uiSearch(); return false;">
+                    <input type="text" id="search-input" placeholder="Search..." autocomplete="off" class="text-box">
+                    <button class="toggle-button gray" id="search-button">Search</button>
+                </form>
+            </span>
         </div>
 
         <!-- log file -->
