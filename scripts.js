@@ -35,13 +35,13 @@ if (search !== null) {  // search beats page
 }
 
 // update utc time every second
-setInterval(
-    () => {
-        const utc = document.getElementById("utc");
-        const timeStr = "UTC: " + new Date().toUTCString();
-        utc.innerHTML = timeStr;
-    }
-    , 1000);
+function updateClock() {
+    const utc = document.getElementById("utc");
+    const timeStr = "<b>UTC</b>: " + new Date().toUTCString();
+    utc.innerHTML = timeStr;
+}
+updateClock();
+setInterval(updateClock, 1000);
 
 // pull the relevent log data from the server
 function pollLog() {
@@ -106,7 +106,7 @@ function jsonToTable(json) {
             table += "<th>Host name</th>";
             if (geolocate) {
                 table +=
-                '<th>Geolocation (courtesy of <a href=https://www.ip-api.com style="color: white">ip-api.com</a>)</th>';
+                '<th>Geolocation (from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
             }
         }
     }
@@ -183,7 +183,7 @@ function plotHeatmap(searchTerm) {
         heatmapURL += "?search=" + searchTerm;
     }
 
-    // get summary data (2D map of log entry counts referenced by day-of-the-year and hour)
+    // get summary data from server
     console.log("plotHeatmap: fetching " + heatmapURL);
     fetch(heatmapURL)
         .then((response) => response.json())
@@ -208,7 +208,7 @@ function plotHeatmap(searchTerm) {
             processedData = processedData.filter((d) => d.count !== null);
 
             // Set dimensions for the heatmap
-            const cellSize = 12; // size of each tile
+            const cellSize = 11; // size of each tile
             const ratio = 1; // width to height ratio
             const margin = { top: 10, right: 20, bottom: 50, left: 60 };
             const width = ratio * Object.keys(jsonData).length * cellSize;
@@ -281,8 +281,8 @@ function plotHeatmap(searchTerm) {
                 .append("rect")
                 .attr("x", (d) => xScale(d.date))
                 .attr("y", (d) => yScale(d.hour))
-                .attr("width", xScale.bandwidth() - 1) // create a gap between tiles
-                .attr("height", yScale.bandwidth() - 1) // create a gap between tiles
+                .attr("width", xScale.bandwidth() - 0.5) // create a gap between tiles
+                .attr("height", yScale.bandwidth() - 0.5) // create a gap between tiles
                 .style("fill", (d) => colorScale(d.count))
                 .on("click", function (d) {
                     // get the date and hour from the data
