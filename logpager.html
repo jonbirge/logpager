@@ -5,13 +5,13 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?version=10">
+    <link rel="stylesheet" href="styles.css?version=11">
     <title>Log Pager</title>
 </head>
 
 <body>
     <div class="container">
-        <div class="tab-container">
+        <div class="tab-header">
         <a id="clftab" class="log-link" href='./?type=clf&page=0'>access.log</a>
         <a id="authtab" class="log-link" href="./?type=auth&page=0">auth.log</a>
         </div>
@@ -21,7 +21,7 @@
 
         <!-- search header -->
         <div class="search-header">
-            <span id="utc" class="time"></span>
+            <span id="utc" class="time">Loading UTC...</span>
             <span id="search-header">
                 <form id="search-form" class="search-form" onsubmit="uiSearch(); return false;">
                     <input type="text" id="search-input" placeholder="Search..." autocomplete="off" class="text-box">
@@ -31,7 +31,7 @@
         </div>
 
         <!-- log file -->
-        <div id="log"></div>
+        <div id="log">Loading logs...</div>
  
         <!-- paging buttons -->
         <div class="button-set" id="buttons">

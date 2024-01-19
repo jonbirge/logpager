@@ -7,7 +7,7 @@
 }
 
 /* Add a border to the container element */
-.tab-container {
+.tab-header {
     border-bottom: 1px solid #555;
     margin-bottom: 7px;
 }
