@@ -1,6 +1,7 @@
 // hard-wired settings
 const geolocate = true; // pull IP geolocation from external service?
 const hostNames = false; // pull hostnames from external service?
+const orgNames = true; // pull organization names from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
 const maxRequestLength = 196; // truncation length of log details
@@ -128,6 +129,9 @@ function jsonToTable(jsonData) {
             if (hostNames) {
                 table += "<th>Host name</th>";
             }
+            if (orgNames) {
+                table += "<th>Org</th>";
+            }
             if (geolocate) {
                 table +=
                 '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
@@ -151,6 +155,11 @@ function jsonToTable(jsonData) {
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;
                     table += '<td id="' + hostnameid + '">-</td>';
+                }
+                // Add new cell for Organization name after the first cell
+                if (orgNames) {
+                    const orgid = "org-" + ip;
+                    table += '<td id="' + orgid + '">-</td>';
                 }
                 // Add new cell for Geolocation after the first cell (maybe)
                 if (geolocate) {
@@ -193,7 +202,7 @@ function jsonToTable(jsonData) {
 
     // Get the host names from the IP addresses
     if (hostNames) getHostNames(ips, signal);
-    if (geolocate) getGeoLocations(ips, signal);
+    if (geolocate | orgNames) getGeoLocations(ips, signal);
 
     return table;
 }
@@ -547,7 +556,7 @@ function getHostNames(ips, signal) {
     });
 }
 
-// get geolocations from IP addresses using ip-api.com
+// get geolocations and orgs from IP addresses using ip-api.com
 function getGeoLocations(ips, signal) {
     // Get set of unique ip addresses
     ips = [...new Set(ips)];
@@ -568,17 +577,29 @@ function getGeoLocations(ips, signal) {
         fetch("geo.php?ip=" + ip, { signal })
             .then((response) => response.json())
             .then((data) => {
-                // Get all cells with id of the form geo-ipAddress
-                const geoCells = document.querySelectorAll(
-                    '[id^="geo-' + ip + '"]'
-                );
-                // set each cell in geoCells to data
-                geoCells.forEach((cell) => {
-                    cell.innerHTML =
-                        data.city + ", " +
-                        data.region + ", " +
-                        data.countryCode;
-                });
+                if (geolocate) {
+                    // Get all cells with id of the form geo-ipAddress
+                    const geoCells = document.querySelectorAll(
+                        '[id^="geo-' + ip + '"]'
+                    );
+                    // set each cell in geoCells to data
+                    geoCells.forEach((cell) => {
+                        cell.innerHTML =
+                            data.city + ", " +
+                            data.region + ", " +
+                            data.countryCode;
+                    });
+                }
+                if (orgNames) {
+                    // Get all cells with id of the form org-ipAddress
+                    const orgCells = document.querySelectorAll(
+                        '[id^="org-' + ip + '"]'
+                    );
+                    // set each cell in orgCells to data
+                    orgCells.forEach((cell) => {
+                        cell.innerHTML = data.org;
+                    });
+                }
                 fetchCount--;
             })
             .catch((error) => {
