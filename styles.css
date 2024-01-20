@@ -1,18 +1,13 @@
-body, table {
-    margin: 0;
-    padding: 0;
-}
-
 /* Style the main page container */
 .container {
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: sans-serif;
     font-size: 14px; /* Slightly smaller font size */
     margin: auto;
-    width: calc(min(100%, 1320px) - 40pt); /* Responsive width */
+    width: calc(min(100%, 1080px) - 40pt); /* Responsive width */
 }
 
 /* Add a border to the container element */
-.tab-container {
+.tab-header {
     border-bottom: 1px solid #555;
     margin-bottom: 7px;
 }
@@ -20,26 +15,41 @@ body, table {
 /* Style the links to look like tabs */
 .log-link {
     display: inline-block;
-    padding: 8px 17px;
-    margin-left: 5px;
+    padding: 9px 19px;
+    margin-left: 3px;
     margin-top: 10px;
     margin-bottom: 0px;
     border: 1px solid #bbb;
     border-bottom: none;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
     background-color: #f0f0f0;
-    color: black;
     text-decoration: none;
     font-size: 16px;
-    font-weight: normal;
+    color: #555;
+}
+
+/* Add left margin to the first tab */
+.log-link:first-child {
+    margin-left: 21px; /* adjust as needed */
 }
 
 /* Style the selected tab */
 .log-link.selected {
     border-color: #333;
     border-bottom: 1px solid white;
+    border-top: 3px solid #333;
     background-color: white;
     margin-bottom: -1px;
     font-weight: bold;
+    font-size: 17px;
+    color: black;
+}
+
+/* Lighten the unselected tabs on hover */
+.log-link:hover:not(.selected) {
+    background-color: #fafafa;
+    color: #333;
 }
 
 /* Make all links black */
@@ -49,8 +59,36 @@ a {
 
 /* Style the search span to have everything on one line and be right-justified */
 .search-header {
+    align-items: center;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    margin: 0px;
+    padding: 0px;
+}
+
+/* Style the UTC time div to be left-justified */
+.time {
+    font-size: 15px;
+}
+
+/* Style the form to be right-justified */
+.search-form {
+    display: inline;
+}
+
+/* Text box with 16pt font and wide left and right margins */
+.text-box {
+    font-size: 16px;
+    margin-left: 16px;
+    margin-right: 12px;
+}
+
+/* Style tables to have a smaller font size */
+table, th, td {
+    border: 1px solid black;
+    margin-bottom: 20px;
+    padding: 6px;
+    font-size: 12px;
 }
 
 /* Style the log table to responsively fit all screen sizes, and wrap text to avoid scrolling if possible */
@@ -62,35 +100,11 @@ table {
     border-collapse: collapse;
 }
 
-table, th, td {
-    border: 1px solid black;
-    margin-bottom: 20px;
-    padding: 6px;
-}
-
+/* Style the table header row */
 th {
     background-color: #777777;
     color: white;
     font-weight: bold;
-}
-
-/* Monospace font for HTTP request column */
-.code {
-    font-family: Cascadia, Consolas, monospace;
-    text-align: left;
-    padding-left: 9pt;
-}
-
-.green {
-    font-weight: bold;
-    color: black;
-    background-color: rgb(128, 204, 128);
-}
-
-.red {
-    font-weight: bold;
-    color: black;
-    background-color: rgb(252, 199, 199);
 }
 
 /* Style alternating rows */
@@ -98,12 +112,14 @@ tr:nth-child(even) {
     background-color: #f0f0f0;
 }
 
-/* Text box with 16pt font and wide left and right margins */
-.text-box {
-    font-size: 16px;
-    margin-left: 16px;
-    margin-right: 12px;
+/* Monospace font for HTTP request column */
+.code {
+    font-family: monospace;
+    text-align: left;
+    padding-left: 9pt;
 }
+
+/*** Buttons ***/
 
 /* Center the buttons */
 .button-set {
@@ -112,7 +128,7 @@ tr:nth-child(even) {
 
 /* Styling the button for a modern look */
 .toggle-button {
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     background-color: #4CAF50; /* Green background */
     border: none;
     color: white;
@@ -154,4 +170,16 @@ tr:nth-child(even) {
     background-color: #d0d0d0;
     color: white;
     cursor: not-allowed;
+}
+
+.green {
+    font-weight: bold;
+    color: black;
+    background-color: rgb(128, 204, 128);
+}
+
+.red {
+    font-weight: bold;
+    color: black;
+    background-color: rgb(252, 199, 199);
 }

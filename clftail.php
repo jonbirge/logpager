@@ -13,6 +13,11 @@ $search = $_GET['search'] ?? null;
 $page = $_GET['page'] ?? 0;  // ignored for search
 $linesPerPage = $_GET['n'] ?? 16;
 
+if ($search) {
+    $doSearch = true;
+} else {
+    $doSearch = false;
+}
 [$search, $ip, $date] = parseSearch($search);
 
 // generate UNIX grep command line arguments to exclude IP addresses
@@ -21,18 +26,27 @@ $grepArgs = '';
 foreach ($excludedIPs as $exip) {
     $grepArgs .= " -e $exip";
 }
-$grepCmd = "grep -v $grepArgs $escFilePath";
+$ipCmd = "grep -v $grepArgs $escFilePath";
 
 // build UNIX command
-if (!$search) {
+if ($doSearch) {
+    // build grep search command from $search, $ip, and $date
+    $grepSearch = '';
+    if ($search) {
+        $grepSearch .= " -e $search";
+    }
+    if ($ip) {
+        $grepSearch .= " -e $ip";
+    }
+    if ($date) {
+        $grepSearch .= " -e $date";
+    }
+    $cmd = "$ipCmd | grep $grepSearch | tac | head -n $linesPerPage";
+} else {
     // compute the first and last line numbers
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "$grepCmd | tail -n $lastLine | head -n $linesPerPage | tac";
-} else {
-    $escSearch = escapeshellarg($search);
-    $srchCmd .= "grep $escSearch";
-    $cmd = "$grepCmd | $srchCmd | tail -n $linesPerPage | tac";
+    $cmd = "$ipCmd | tail -n $lastLine | head -n $linesPerPage | tac";
 }
 
 // execute UNIX command
