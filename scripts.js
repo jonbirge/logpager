@@ -1,8 +1,8 @@
-// settings
-const geolocate = true; // pull IP geolocation from external service
-const tileLabels = false; // show tile labels on heatmap
-const apiWait = 200; // ms to wait between external API calls
-const maxRequestLength = 96; // truncation length of log details
+// hard-wired settings
+const geolocate = true; // pull IP geolocation from external service?
+const tileLabels = false; // show tile labels on heatmap?
+const apiWait = 200; // milliseconds to wait between external API calls
+const maxRequestLength = 196; // truncation length of log details
 
 // global variables
 let pollInterval;
@@ -127,7 +127,7 @@ function jsonToTable(jsonData) {
             table += "<th>Host name</th>";
             if (geolocate) {
                 table +=
-                '<th>Geolocation (from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
+                '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
             }
         }
     }
@@ -166,13 +166,17 @@ function jsonToTable(jsonData) {
                         : rawRequest;
                 table += '<td class="code">' + truncRequest + "</td>";
             } else if (j == 3) {
-                // generalized status handling
+                // common status handling
+                const greenStatus = ["200", "304", "OK"];
+                const redStatus = ["400", "401", "403", "404", "500", "FAIL"];
                 const status = data[i][j];
-                if (status == "200" || status == "304" || status == "OK") {
-                    table += '<td class="green">' + data[i][j] + "</td>";
+                if (greenStatus.includes(status)) {
+                    table += '<td class="green">' + status + "</td>";
+                } else if (redStatus.includes(status)) {
+                    table += '<td class="red">' + status + "</td>";
                 } else {
-                    table += '<td class="red">' + data[i][j] + "</td>";
-                }
+                    table += '<td class="gray">' + status + "</td>";
+                } 
             } else {
                 // anything else
                 table += "<td>" + data[i][j] + "</td>";
@@ -219,7 +223,7 @@ function jsonToHeatmap(jsonData) {
     // Set dimensions for the heatmap
     const cellSize = 11; // size of each tile
     const ratio = 1; // width to height ratio
-    const margin = { top: 25, right: 75, bottom: 50, left: 50 };
+    const margin = { top: 25, right: 50, bottom: 50, left: 50 };
     const width = ratio * Object.keys(jsonData).length * cellSize;
     const height = 24 * cellSize;  // 24 hours
 
@@ -559,11 +563,9 @@ function getGeoLocations(ips, signal) {
                         // set each cell in geoCells to data
                         geoCells.forEach((cell) => {
                             cell.innerHTML =
-                                data.country +
-                                ", " +
-                                data.regionName +
-                                ", " +
-                                data.city;
+                                data.city + ", " +
+                                data.region + ", " +
+                                data.countryCode;
                         });
                         fetchCount--;
                     })
@@ -580,27 +582,6 @@ function getGeoLocations(ips, signal) {
         );
         waitTime += apiWait;
     });
-}
-
-// run whois query on IP address string using the ARIN.net web service. the
-// response is a JSON object containing the whois information.
-function whois(ip) {
-    const whoisDiv = document.getElementById("whois");
-    whoisDiv.innerHTML = "<h2>Whois " + ip + "...</h2>";
-    fetch("whois.php?ip=" + ip)
-        .then((response) => response.text())
-        .then((data) => {
-            // remove comment lines from whois data
-            data = data.replace(/^#.*$/gm, "");
-
-            // remove all blank lines from whois data
-            data = data.replace(/^\s*[\r\n]/gm, "");
-
-            // output to whois div
-            whoisHTML = "<h2>Whois " + ip + "</h2>";
-            whoisHTML += data;
-            whoisDiv.innerHTML = whoisHTML;
-        });
 }
 
 // function to setup polling
@@ -637,4 +618,25 @@ function runWatch() {
         watchButton.innerHTML = "Stop";
         watchButton.classList.add("red");
     }
+}
+
+// run whois query on IP address string using the ARIN.net web service. the
+// response is a JSON object containing the whois information.
+function whois(ip) {
+    const whoisDiv = document.getElementById("whois");
+    whoisDiv.innerHTML = "<h2>Whois " + ip + "...</h2>";
+    fetch("whois.php?ip=" + ip)
+        .then((response) => response.text())
+        .then((data) => {
+            // remove comment lines from whois data
+            data = data.replace(/^#.*$/gm, "");
+
+            // remove all blank lines from whois data
+            data = data.replace(/^\s*[\r\n]/gm, "");
+
+            // output to whois div
+            whoisHTML = "<h2>Whois " + ip + "</h2>";
+            whoisHTML += data;
+            whoisDiv.innerHTML = whoisHTML;
+        });
 }

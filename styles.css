@@ -87,7 +87,10 @@ a {
 table, th, td {
     border: 1px solid black;
     margin-bottom: 20px;
-    padding: 6px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 3px;
+    padding-bottom: 3px;
     font-size: 12px;
 }
 
@@ -110,6 +113,24 @@ th {
 /* Style alternating rows */
 tr:nth-child(even) {
     background-color: #f0f0f0;
+}
+
+.green {
+    font-weight: bold;
+    color: black;
+    background-color: rgb(128, 204, 128);
+}
+
+.red {
+    font-weight: bold;
+    color: black;
+    background-color: rgb(252, 199, 199);
+}
+
+.gray {
+    font-weight: bold;
+    color: black;
+    background-color: lightgray;
 }
 
 /* Monospace font for HTTP request column */
@@ -170,16 +191,4 @@ tr:nth-child(even) {
     background-color: #d0d0d0;
     color: white;
     cursor: not-allowed;
-}
-
-.green {
-    font-weight: bold;
-    color: black;
-    background-color: rgb(128, 204, 128);
-}
-
-.red {
-    font-weight: bold;
-    color: black;
-    background-color: rgb(252, 199, 199);
 }

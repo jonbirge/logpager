@@ -5,7 +5,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?version=11">
+    <link rel="stylesheet" href="styles.css">
     <title>Log Pager</title>
 </head>
 
@@ -39,7 +39,7 @@
             <button class="toggle-button gray" onclick="page += 10; pollLog();">&lt;&lt;</button>
             <button class="toggle-button gray" onclick="page += 1; pollLog();">&lt;</button>
             <span id="page" style="margin: 12px; font-size: 13pt;">Loading...</span>
-            <button class="toggle-button gray" onclick="page += -1; polllog();">&gt;</button>
+            <button class="toggle-button gray" onclick="page += -1; pollLog();">&gt;</button>
             <button class="toggle-button gray" onclick="page = 0; pollLog();">Current</button>
             <button class="toggle-button" id="watch-button" onclick="runWatch()">Live</button>
         </div>
@@ -51,7 +51,7 @@
 
     </div>
 
-    <script src="scripts.js?version=9"></script>
+    <script src="scripts.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 </body>
 

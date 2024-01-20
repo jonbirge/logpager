@@ -5,12 +5,19 @@ function getAuthLogStatus($line)
 {
     // Array of words indicating a failed login attempt
     $failedWords = ['failed', 'invalid', 'Unable', '[preauth]'];
+    $successWords = ['Accepted', 'success', 'publickey'];
 
     // check if $line contains any of the failed words
-    $status = 'OK';
+    $status = 'INFO';
     foreach ($failedWords as $word) {
         if (stripos($line, $word) !== false) {
             $status = 'FAIL';
+            break;
+        }
+    }
+    foreach ($successWords as $word) {
+        if (stripos($line, $word) !== false) {
+            $status = 'OK';
             break;
         }
     }
