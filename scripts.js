@@ -150,7 +150,10 @@ function jsonToTable(jsonData) {
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
                 const srchlink = "?type=" + logType + "&search=ip:" + ip;
-                table += "<td><a href=" + srchlink + ">" + ip + "</a></td>";
+                table += "<td><a href=" + srchlink + ">" + ip + "</a><br>";
+                // Create link string that calls blacklist(ip) function
+                const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
+                table += '<a href="#" ' + blacklistCall + ">blacklist</a>";
                 // Add new cell for Host name after the first cell
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;
@@ -205,6 +208,21 @@ function jsonToTable(jsonData) {
     if (geolocate | orgNames) getGeoLocations(ips, signal);
 
     return table;
+}
+
+// Function to send POST request to blacklist.php with a given IP address in the body of the POST
+function blacklist(ip) {
+    console.log("blacklist: add " + ip);
+    var formData = new FormData();
+    formData.append('ip', ip);
+    fetch("blacklist.php", {
+        method: "POST",
+        body: formData,
+    })
+        .then((response) => response.text())
+        .then((data) => {
+            console.log(data);
+        });
 }
 
 // Take JSON array of command log data and build SVG heatmap
