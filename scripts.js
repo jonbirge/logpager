@@ -552,36 +552,38 @@ function getGeoLocations(ips, signal) {
     let waitTime = 0;
     ips.forEach((ip) => {
         setTimeout(
-            () => {
-                fetch("geo.php?ip=" + ip, { signal })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        // Get all cells with id of the form geo-ipAddress
-                        const geoCells = document.querySelectorAll(
-                            '[id^="geo-' + ip + '"]'
-                        );
-                        // set each cell in geoCells to data
-                        geoCells.forEach((cell) => {
-                            cell.innerHTML =
-                                data.city + ", " +
-                                data.region + ", " +
-                                data.countryCode;
-                        });
-                        fetchCount--;
-                    })
-                    .catch((error) => {
-                        if (error.name === "AbortError") {
-                            console.log("Fetch safely aborted");
-                        } else {
-                            console.log("Fetch error:", error);
-                        }
-                    });
-            },
+            () => fetchGeoLocation(ip),
             waitTime,
             { signal }
         );
         waitTime += apiWait;
     });
+
+    function fetchGeoLocation(ip) {
+        fetch("geo.php?ip=" + ip, { signal })
+            .then((response) => response.json())
+            .then((data) => {
+                // Get all cells with id of the form geo-ipAddress
+                const geoCells = document.querySelectorAll(
+                    '[id^="geo-' + ip + '"]'
+                );
+                // set each cell in geoCells to data
+                geoCells.forEach((cell) => {
+                    cell.innerHTML =
+                        data.city + ", " +
+                        data.region + ", " +
+                        data.countryCode;
+                });
+                fetchCount--;
+            })
+            .catch((error) => {
+                if (error.name === "AbortError") {
+                    console.log("Fetch safely aborted");
+                } else {
+                    console.log("Fetch error:", error);
+                }
+            });
+    }
 }
 
 // function to setup polling
