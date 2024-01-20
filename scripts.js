@@ -182,7 +182,7 @@ function jsonToTable(jsonData) {
             } else if (j == 3) {
                 // common status handling
                 const greenStatus = ["200", "304", "OK"];
-                const redStatus = ["400", "401", "403", "404", "500", "FAIL"];
+                const redStatus = ["308", "400", "401", "403", "404", "500", "FAIL"];
                 const status = data[i][j];
                 if (greenStatus.includes(status)) {
                     table += '<td class="green">' + status + "</td>";
