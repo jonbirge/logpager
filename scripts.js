@@ -1,5 +1,6 @@
 // hard-wired settings
 const geolocate = true; // pull IP geolocation from external service?
+const hostNames = false; // pull hostnames from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
 const maxRequestLength = 196; // truncation length of log details
@@ -124,7 +125,9 @@ function jsonToTable(jsonData) {
     for (let i = 0; i < data[0].length; i++) {
         table += "<th>" + data[0][i] + "</th>";
         if (i == 0) {
-            table += "<th>Host name</th>";
+            if (hostNames) {
+                table += "<th>Host name</th>";
+            }
             if (geolocate) {
                 table +=
                 '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
@@ -145,11 +148,13 @@ function jsonToTable(jsonData) {
                 const srchlink = "?type=" + logType + "&search=ip:" + ip;
                 table += "<td><a href=" + srchlink + ">" + ip + "</a></td>";
                 // Add new cell for Host name after the first cell
-                hostnameid = "hostname-" + ip;
-                table += '<td id="' + hostnameid + '">-</td>';
+                if (hostNames) {
+                    const hostnameid = "hostname-" + ip;
+                    table += '<td id="' + hostnameid + '">-</td>';
+                }
                 // Add new cell for Geolocation after the first cell (maybe)
                 if (geolocate) {
-                    geoid = "geo-" + ip;
+                    const geoid = "geo-" + ip;
                     table += '<td id="' + geoid + '">-</td>';
                 }
             } else if (j == 1) {
@@ -187,7 +192,7 @@ function jsonToTable(jsonData) {
     table += "</table>";
 
     // Get the host names from the IP addresses
-    getHostNames(ips, signal);
+    if (hostNames) getHostNames(ips, signal);
     if (geolocate) getGeoLocations(ips, signal);
 
     return table;
