@@ -39,7 +39,7 @@ if (search !== null) {  // search beats page
 // update utc time every second
 function updateClock() {
     const utc = document.getElementById("utc");
-    const timeStr = "<b>UTC</b>: " + new Date().toUTCString();
+    const timeStr = "UTC: " + new Date().toUTCString();
     utc.innerHTML = timeStr;
 }
 updateClock();
@@ -67,9 +67,11 @@ function pollLog() {
     url.searchParams.set("page", page);
     window.history.replaceState({}, "", url);
 
-    // clear whois div
+    // clear whois and status divs
     const whoisDiv = document.getElementById("whois");
     whoisDiv.innerHTML = "";
+    const searchStatus = document.getElementById("status");
+    searchStatus.innerHTML = "";
 
     // get the log from the server
     let logURL;
@@ -150,7 +152,10 @@ function jsonToTable(jsonData) {
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
                 const srchlink = "?type=" + logType + "&search=ip:" + ip;
-                table += "<td><a href=" + srchlink + ">" + ip + "</a></td>";
+                table += "<td><a href=" + srchlink + ">" + ip + "</a><br>";
+                // Create link string that calls blacklist(ip) function
+                const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
+                table += '<a href="#" ' + blacklistCall + ">blacklist</a>";
                 // Add new cell for Host name after the first cell
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;
@@ -205,6 +210,21 @@ function jsonToTable(jsonData) {
     if (geolocate | orgNames) getGeoLocations(ips, signal);
 
     return table;
+}
+
+// Function to send POST request to blacklist.php with a given IP address in the body of the POST
+function blacklist(ip) {
+    console.log("blacklist: add " + ip);
+    var formData = new FormData();
+    formData.append('ip', ip);
+    fetch("blacklist.php", {
+        method: "POST",
+        body: formData,
+    })
+        .then((response) => response.text())
+        .then((data) => {
+            console.log(data);
+        });
 }
 
 // Take JSON array of command log data and build SVG heatmap
@@ -473,7 +493,7 @@ function doSearch() {
                 const logDiv = document.getElementById("log");
                 const pageSpan = document.getElementById("page");
                 logDiv.innerHTML = jsonToTable(data);
-                pageSpan.innerHTML = "<b>Search results for " + search + "</b>";
+                pageSpan.innerHTML = search;
 
                 // disable all other buttons and
                 const buttons = document.querySelectorAll("button");
@@ -501,6 +521,12 @@ function doSearch() {
                     resetButton.disabled = false;
                     resetButton.classList.remove("disabled");
                 }
+
+                // count the number of elements in the JSON array data
+                const count = JSON.parse(data).length;
+                console.log("doSearch: " + count + " results");
+                const searchStatus = document.getElementById("status");
+                searchStatus.innerHTML = "<b>" + count + " items</b>";
 
                 // update the heatmap with the search term
                 plotHeatmap(search);

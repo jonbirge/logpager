@@ -67,7 +67,7 @@ a {
 }
 
 /* Style the UTC time div to be left-justified */
-.time {
+.status {
     font-size: 15px;
 }
 
@@ -78,7 +78,7 @@ a {
 
 /* Text box with 16pt font and wide left and right margins */
 .text-box {
-    font-size: 16px;
+    font-size: 15px;
     margin-left: 16px;
     margin-right: 12px;
 }
