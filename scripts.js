@@ -39,7 +39,7 @@ if (search !== null) {  // search beats page
 // update utc time every second
 function updateClock() {
     const utc = document.getElementById("utc");
-    const timeStr = "<b>UTC</b>: " + new Date().toUTCString();
+    const timeStr = "UTC: " + new Date().toUTCString();
     utc.innerHTML = timeStr;
 }
 updateClock();
@@ -67,9 +67,11 @@ function pollLog() {
     url.searchParams.set("page", page);
     window.history.replaceState({}, "", url);
 
-    // clear whois div
+    // clear whois and status divs
     const whoisDiv = document.getElementById("whois");
     whoisDiv.innerHTML = "";
+    const searchStatus = document.getElementById("status");
+    searchStatus.innerHTML = "";
 
     // get the log from the server
     let logURL;
@@ -491,7 +493,7 @@ function doSearch() {
                 const logDiv = document.getElementById("log");
                 const pageSpan = document.getElementById("page");
                 logDiv.innerHTML = jsonToTable(data);
-                pageSpan.innerHTML = "<b>Search results for " + search + "</b>";
+                pageSpan.innerHTML = search;
 
                 // disable all other buttons and
                 const buttons = document.querySelectorAll("button");
@@ -519,6 +521,12 @@ function doSearch() {
                     resetButton.disabled = false;
                     resetButton.classList.remove("disabled");
                 }
+
+                // count the number of elements in the JSON array data
+                const count = JSON.parse(data).length;
+                console.log("doSearch: " + count + " results");
+                const searchStatus = document.getElementById("status");
+                searchStatus.innerHTML = "<b>" + count + " items</b>";
 
                 // update the heatmap with the search term
                 plotHeatmap(search);
