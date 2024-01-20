@@ -90,8 +90,29 @@ function pollLog() {
         });
 }
 
-// Take JSON array of commond log data and write HTML table, assuming the
-// first row is table headers.
+// plot heatmap of log entries by hour and day
+function plotHeatmap(searchTerm) {
+    console.log("plotHeatmap: plotting heatmap");
+
+    // Build data query URL
+    let heatmapURL;
+    if (logType == "clf") {
+        heatmapURL = "clfheatmap.php";
+    } else {
+        heatmapURL = "authheatmap.php";
+    }
+    if (searchTerm) {
+        heatmapURL += "?search=" + searchTerm;
+    }
+
+    // get summary data from server
+    console.log("plotHeatmap: fetching " + heatmapURL);
+    fetch(heatmapURL)
+        .then( (response) => response.json() )
+        .then(jsonToHeatmap);
+}
+
+// Take JSON array of commond log data and write HTML table
 function jsonToTable(jsonData) {
     const signal = controller.signal;
     let ips = [];
@@ -168,7 +189,14 @@ function jsonToTable(jsonData) {
     return table;
 }
 
+// Take JSON array of command log data and build SVG heatmap
 function jsonToHeatmap(jsonData) {
+    // Check if SVG element already exists and remove if so
+    const svgElement = document.querySelector("svg");
+    if (svgElement) {
+        svgElement.remove();
+    }
+    
     // Process the data to work with D3 library
     let processedData = [];
     Object.keys(jsonData).forEach((date) => {
@@ -180,7 +208,7 @@ function jsonToHeatmap(jsonData) {
                 count:
                     jsonData[date][hourStr] !== undefined
                         ? jsonData[date][hourStr]
-                        : 0,
+                        : null,
             });
         }
     });
@@ -189,11 +217,11 @@ function jsonToHeatmap(jsonData) {
     processedData = processedData.filter((d) => d.count !== null);
 
     // Set dimensions for the heatmap
-    const cellSize = 13; // size of each tile
+    const cellSize = 11; // size of each tile
     const ratio = 1; // width to height ratio
-    const margin = { top: 25, right: 50, bottom: 50, left: 50 };
+    const margin = { top: 25, right: 75, bottom: 50, left: 50 };
     const width = ratio * Object.keys(jsonData).length * cellSize;
-    const height = 24 * cellSize; // 24 hours
+    const height = 24 * cellSize;  // 24 hours
 
     // Creating scales for date axes
     const xScale = d3
@@ -213,12 +241,6 @@ function jsonToHeatmap(jsonData) {
         .domain(hours)
         .range([0, height]);
 
-    // Check if SVG element already exists and remove if so
-    const svgElement = document.querySelector("svg");
-    if (svgElement) {
-        svgElement.remove();
-    }
-
     // Create SVG element
     const svg = d3
         .select("#heatmap")
@@ -228,7 +250,7 @@ function jsonToHeatmap(jsonData) {
         .style("height", height + "px") // Set height using CSS
         .attr(
             "viewBox",
-            `0 0 ${width + margin.left + margin.right} ${height + margin.bottom + margin.top
+            `${-margin.left} 0 ${width + margin.right + margin.left} ${height + margin.bottom + margin.top
             }`
         ) // Add viewBox
         .append("g")
@@ -351,28 +373,6 @@ function jsonToHeatmap(jsonData) {
         .style("display", "flex")
         .style("justify-content", "center")
         .style("align-items", "center");
-}
-
-// plot heatmap of log entries by hour and day
-function plotHeatmap(searchTerm) {
-    console.log("plotHeatmap: plotting heatmap");
-
-    // Build data query URL
-    let heatmapURL;
-    if (logType == "clf") {
-        heatmapURL = "clfheatmap.php";
-    } else {
-        heatmapURL = "authheatmap.php";
-    }
-    if (searchTerm) {
-        heatmapURL += "?search=" + searchTerm;
-    }
-
-    // get summary data from server
-    console.log("plotHeatmap: fetching " + heatmapURL);
-    fetch(heatmapURL)
-        .then( (response) => response.json() )
-        .then(jsonToHeatmap);
 }
 
 // take date of the form YYYY-MM-DD as one parameter, and the hour of the day as another parameter,
