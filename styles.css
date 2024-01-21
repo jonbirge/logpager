@@ -57,6 +57,10 @@ a {
     color: black;
 }
 
+.blue {
+    color: darkslateblue;
+}
+
 /* Style the search span to have everything on one line and be right-justified */
 .search-header {
     align-items: center;

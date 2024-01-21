@@ -176,7 +176,11 @@ function jsonToTable(jsonData) {
                 table += "<td><a href=" + srchlink + ">" + ip + "</a><br>";
                 // Create link string that calls blacklist(ip) function
                 const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
-                table += '<a href="#" ' + blacklistCall + ">blacklist</a>";
+                table += '<a class="blue" href="#" ' + blacklistCall + ">blacklist</a>";
+                // Create link string that calls whois(ip) function
+                const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
+                table += ' <a class="blue" href="#" ' + whoisCall + ">whois</a></td>";
+
                 // Add new cell for Host name after the first cell
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;
