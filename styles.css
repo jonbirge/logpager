@@ -137,7 +137,7 @@ tr:nth-child(even) {
     background-color: lightgray;
 }
 
-/* Monospace font for HTTP request column */
+/* Monospace font for request column */
 .code {
     font-family: monospace;
     text-align: left;
@@ -161,7 +161,7 @@ tr:nth-child(even) {
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-family: sans-serif;
+    font-family: Arial, sans-serif;
     font-weight: normal; /* Bold font weight */
     font-size: 16px;
     cursor: pointer;
