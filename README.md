@@ -4,24 +4,25 @@
 Lightweight log file web interface written using PHP and JS, intended to provide a dashboard for security
 threats. Displays log events as heatmap using tile plot generated with D3, allowing
 user to click on a given period to drill down into the log. Performs asynchronous
-reverse-DNS hostname resolution. User can click on IP address in log and see all events
-from that IP, with a new heatmap showing counts over time just for that IP.
+geolocation and reverse DNS resolution. User can click on IP address in log and see all events
+from that IP, with a heatmap showing counts over time just for that IP.
 
 Currently under development, the long-term goal is to provide two things:
 
-- An intuitive highlevel understanding of attacks over time and where they are coming from.
-- An efficient interface to proactively identify entire IP ranges that should be black-listed and do so,
-supplementing simple "fail to ban" automation that only works with single IP addresses and only
-temporarily. While much more effective than automated banning, a human should probably be involved.
+- An intuitive high-level view attacks over time and where they are coming from.
+- An efficient interface to proactively identify entire IPs and IP ranges that should be permanently black-listed
+supplementing simple "fail to ban" automation. While much more effective than automated banning,
+a human should probably be involved in any permanent IP ban, especially for ranges.
 
 ## Approach
 The approach is to treat the log file itself as truth (rather than have a separate process and database)
 and run UNIX tool commands on the host (within the container) to rapidly extract data from the log file
-directly, essentially running the kinds of forensic commands a sysadmin would, formatting the results
+directly, essentially running the kinds of local unix forensic commands a sysadmin would, formatting the results
 in a nice user interface and graphical form on the local browser.
 
-## Screenshot
-![Screenshot 2024-01-08 195757](https://github.com/jonbirge/logpager/assets/660566/1008eb11-232c-444f-b286-216dd362da30)
+## Screenshots
+![Screenshot 2024-01-21 122840](https://github.com/jonbirge/logpager/assets/660566/d2e5adb1-2308-476d-9c62-3888ceff5bc9)
+![Screenshot 2024-01-21 122802](https://github.com/jonbirge/logpager/assets/660566/b2f53624-5f2c-46fc-b75b-58e2eb4c9333)
 
 ## Usage
 Mount the log file of interest as `/access.log` in the Docker container. Connect
@@ -47,22 +48,30 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "28080:8080"  # traefik admin
     volumes:
       - ./logs/:/logs/:rw
       - /var/run/docker.sock:/var/run/docker.sock
       - ./certs:/letsencrypt
       - ./traefik.yml:/etc/traefik.yml:ro
       - ./traefik:/etc/traefik
+    depends_on:
+      - logpager
+      - livetrace
+      - guac
+      - www
+      - adminer
 
   logpager:
-    image: ghcr.io/jonbirge/logpager:master
-    restart: always
+    image: ghcr.io/jonbirge/logpager:dev
     labels:
-      - "traefik.http.routers.logpager.rule=Host(`$HOSTNAME`) && PathPrefix(`/logs`)"
-      - "traefik.http.routers.logpager.tls.certresolver=stackresolver"
-      - "traefik.http.middlewares.strip-log.stripprefix.prefixes=/logs/"
-      - "traefik.http.routers.logpager.middlewares=strip-log"
+      - "traefik.http.routers.logpagerdev.rule=Host(`$HOSTNAME`) && PathPrefix(`/logs`)"
+      - "traefik.http.routers.logpagerdev.tls.certresolver=stackresolver"
+      - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
+      - "traefik.http.routers.logpagerdev.middlewares=topten@file,striplogdev"
     volumes:
+      - /var/log/auth.log:/auth.log:ro
       - ./logs/access.log:/access.log:ro
       - ./logs/excludes.json:/excludes.json:ro
+      - ./logs/blacklist:/blacklist:rw
 ```
