@@ -18,7 +18,7 @@ RUN touch /blacklist
 RUN chmod a+w /blacklist
 
 # Copy exclusion list
-COPY excludes.json /excludes.json
+COPY excludes.json /
 
 # Startup script
 COPY entry.sh /entry.sh

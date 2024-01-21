@@ -8,7 +8,7 @@ $ip = $_POST['ip'];
 
 // Check to see if IP address is empty
 if (empty($ip)) {
-    echo 'ERROR: no IP address provided!';
+    echo 'no IP address provided!';
     exit();
 }
 
@@ -19,7 +19,7 @@ if (!file_exists($file)) {
 
 // Check if the IP address is already in the file
 if (strpos(file_get_contents($file), $ip) !== false) {
-    echo 'SUCCESS: ' . $ip . ' already exists';
+    echo $ip . ' already exists in blacklist';
     exit();
 }
 
@@ -27,6 +27,6 @@ if (strpos(file_get_contents($file), $ip) !== false) {
 file_put_contents($file, $ip . PHP_EOL, FILE_APPEND);
 
 // Send a confirmation message
-echo 'SUCCESS: added ' . $ip;
+echo $ip . ' added to blacklist';
 
 ?>

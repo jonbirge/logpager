@@ -16,7 +16,7 @@ let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
 let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
 
-// get JSON list of logs present on server via manifest.php endpoint, and enable or disable tabs
+// get list of logs present on server and enable or disable tabs
 fetch("manifest.php")
     .then((response) => response.json())
     .then((data) => {
@@ -227,8 +227,9 @@ function jsonToTable(jsonData) {
     table += "</table>";
 
     // Get the host names from the IP addresses
-    if (hostNames) getHostNames(ips, signal);
-    if (geolocate | orgNames) getGeoLocations(ips, signal);
+    const ipSet = [...new Set(ips)]; // Get unique IP addresses
+    if (hostNames) getHostNames(ipSet, signal);
+    if (geolocate | orgNames) getGeoLocations(ipSet, signal);
 
     return table;
 }
@@ -244,7 +245,8 @@ function blacklist(ip) {
     })
         .then((response) => response.text())
         .then((data) => {
-            console.log(data);
+            const status = document.getElementById("status");
+            status.innerHTML = data;
         });
 }
 
@@ -574,8 +576,6 @@ function resetSearch() {
 
 // get host names from IP addresses
 function getHostNames(ips, signal) {
-    // Get set of unique ip addresses
-    ips = [...new Set(ips)];
     console.log("Getting host names for " + ips);
     fetchCount++;
     // Grab each ip address and send to rdns.php
@@ -605,8 +605,6 @@ function getHostNames(ips, signal) {
 
 // get geolocations and orgs from IP addresses using ip-api.com
 function getGeoLocations(ips, signal) {
-    // Get set of unique ip addresses
-    ips = [...new Set(ips)];
     console.log("Getting geolocations for " + ips);
     fetchCount++;
     // Grab each ip address and send to ip-api.com
