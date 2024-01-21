@@ -1,10 +1,10 @@
 // hard-wired settings
 const geolocate = true; // pull IP geolocation from external service?
-const hostNames = false; // pull hostnames from external service?
+const hostNames = true; // pull hostnames from external service?
 const orgNames = true; // pull organization names from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
-const maxRequestLength = 196; // truncation length of log details
+const maxRequestLength = 128; // truncation length of log details
 
 // global variables
 let pollInterval;
@@ -51,7 +51,7 @@ if (search !== null) {  // search beats page
 } else {
     console.log("page load: loading " + logType + " log...");
     // on window load run pollServer() and plotHeatmap()
- window.onload = () => {
+    window.onload = () => {
         pollLog();
         plotHeatmap();
     };
@@ -60,8 +60,10 @@ if (search !== null) {  // search beats page
 // update utc time every second
 function updateClock() {
     const utc = document.getElementById("utc");
-    const timeStr = "UTC: " + new Date().toUTCString();
-    utc.innerHTML = timeStr;
+    const timeStr = new Date().toUTCString();
+    // remove GMT from end of string
+    timeStr = timeStr.replace(" GMT", "");
+    utc.innerHTML = "UTC: " + timeStr;
 }
 updateClock();
 setInterval(updateClock, 1000);
