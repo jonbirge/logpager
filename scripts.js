@@ -5,6 +5,8 @@ const orgNames = true; // pull organization names from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
 const maxRequestLength = 196; // truncation length of log details
+const haveCLF = true;
+const haveAuth = true;
 
 // global variables
 let pollInterval;
@@ -14,7 +16,20 @@ let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
+
+// hide tabs for log types that are not available
 let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
+if (!haveCLF) {
+    document.getElementById("clftab").style.display = 'none';
+    logType = "auth";
+} else {
+    document.getElementById("clftab").style.display = '';
+}
+if (!haveAuth) {
+    document.getElementById("authtab").style.display = 'none';
+} else {
+    document.getElementById("authtab").style.display = '';
+}
 
 // highlight the current log type
 if (logType == "clf") {
