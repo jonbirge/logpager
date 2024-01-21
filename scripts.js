@@ -469,7 +469,7 @@ function buildTimestampSearch(date, hour) {
     return timestamp;
 }
 
-// uiSearch is called when the search button is clicked
+// uiSearch is called when the search button is clicked by user
 function uiSearch() {
     const searchInput = document.getElementById("search-input");
     search = searchInput.value;
@@ -487,7 +487,7 @@ function uiSearch() {
 // do search on log
 function doSearch() {
     const searchInput = document.getElementById("search-input");
-    searchInput.value = search; // handle case where search is set by URL
+    searchInput.value = search; // set search box to search term
     console.log("doSearch: searching for " + search);
 
     // abort any pending fetches
@@ -503,9 +503,9 @@ function doSearch() {
     url.searchParams.delete("page");
     window.history.replaceState({}, "", url);
 
-    // run remote search
+    // run search on server
     if (search == "") {
-        console.log("search is empty");
+        console.log("ERROR: search is empty!");
     } else {
         let searchURL;
         if (logType == "clf") {
@@ -549,8 +549,8 @@ function doSearch() {
                     resetButton.classList.remove("disabled");
                 }
 
-                // count the number of elements in the JSON array data
-                const count = JSON.parse(data).length;
+                // report the number of results
+                const count = JSON.parse(data).length - 1;  // don't count header row
                 console.log("doSearch: " + count + " results");
                 const searchStatus = document.getElementById("status");
                 searchStatus.innerHTML = "<b>" + count + " items</b>";
