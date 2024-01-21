@@ -60,9 +60,8 @@ if (search !== null) {  // search beats page
 // update utc time every second
 function updateClock() {
     const utc = document.getElementById("utc");
-    const timeStr = new Date().toUTCString();
-    // remove GMT from end of string
-    timeStr = timeStr.replace(" GMT", "");
+    let timeStr = new Date().toUTCString();
+    timeStr = timeStr.replace(" GMT", ""); // remove GMT from end of string
     utc.innerHTML = "UTC: " + timeStr;
 }
 updateClock();
