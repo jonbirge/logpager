@@ -16,12 +16,33 @@ let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
 let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
 
-// highlight the current log type
-if (logType == "clf") {
-    document.getElementById("clftab").classList.add("selected");
-} else {
-    document.getElementById("authtab").classList.add("selected");
-}
+// get JSON list of logs present on server via manifest.php endpoint, and enable or disable tabs
+fetch("manifest.php")
+    .then((response) => response.json())
+    .then((data) => {
+        const haveCLF = data.includes("access.log");
+        const haveAuth = data.includes("auth.log");
+        if (!haveCLF) {
+            document.getElementById("clftab").style.display = 'none';
+            logType = "auth";  // because clf is default
+        } else {
+            document.getElementById("clftab").style.display = '';
+        }
+        if (!haveAuth) {
+            document.getElementById("authtab").style.display = 'none';
+        } else {
+            document.getElementById("authtab").style.display = '';
+        }
+        // highlight the current log type
+        if (logType == "clf") {
+            document.getElementById("clftab").classList.add("selected");
+            document.getElementById("authtab").classList.remove("selected");
+        } else {
+            document.getElementById("authtab").classList.add("selected");
+            document.getElementById("clftab").classList.remove("selected");
+        }
+        console.log("logType: " + logType);
+    });
 
 // decide what to do on page load
 if (search !== null) {  // search beats page
@@ -30,7 +51,7 @@ if (search !== null) {  // search beats page
 } else {
     console.log("page load: loading " + logType + " log...");
     // on window load run pollServer() and plotHeatmap()
-    window.onload = () => {
+ window.onload = () => {
         pollLog();
         plotHeatmap();
     };
