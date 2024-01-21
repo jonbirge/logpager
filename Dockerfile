@@ -17,6 +17,9 @@ COPY default.conf /etc/nginx/http.d/default.conf
 RUN touch /blacklist
 RUN chmod a+w /blacklist
 
+# Copy exclusion list
+COPY excludes.json /excludes.json
+
 # Startup script
 COPY entry.sh /entry.sh
 
