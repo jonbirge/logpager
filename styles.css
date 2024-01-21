@@ -15,7 +15,7 @@
 /* Style the links to look like tabs */
 .log-link {
     display: inline-block;
-    padding: 9px 19px;
+    padding: 7px 17px;
     margin-left: 3px;
     margin-top: 10px;
     margin-bottom: 0px;
@@ -57,6 +57,10 @@ a {
     color: black;
 }
 
+.blue {
+    color: darkslateblue;
+}
+
 /* Style the search span to have everything on one line and be right-justified */
 .search-header {
     align-items: center;
@@ -67,7 +71,7 @@ a {
 }
 
 /* Style the UTC time div to be left-justified */
-.time {
+.status {
     font-size: 15px;
 }
 
@@ -78,7 +82,7 @@ a {
 
 /* Text box with 16pt font and wide left and right margins */
 .text-box {
-    font-size: 16px;
+    font-size: 15px;
     margin-left: 16px;
     margin-right: 12px;
 }
@@ -87,7 +91,10 @@ a {
 table, th, td {
     border: 1px solid black;
     margin-bottom: 20px;
-    padding: 6px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     font-size: 12px;
 }
 
@@ -110,6 +117,24 @@ th {
 /* Style alternating rows */
 tr:nth-child(even) {
     background-color: #f0f0f0;
+}
+
+.green {
+    font-weight: bold;
+    color: black;
+    background-color: rgb(128, 204, 128);
+}
+
+.red {
+    font-weight: bold;
+    color: black;
+    background-color: rgb(252, 199, 199);
+}
+
+.gray {
+    font-weight: bold;
+    color: black;
+    background-color: lightgray;
 }
 
 /* Monospace font for HTTP request column */
@@ -170,16 +195,4 @@ tr:nth-child(even) {
     background-color: #d0d0d0;
     color: white;
     cursor: not-allowed;
-}
-
-.green {
-    font-weight: bold;
-    color: black;
-    background-color: rgb(128, 204, 128);
-}
-
-.red {
-    font-weight: bold;
-    color: black;
-    background-color: rgb(252, 199, 199);
 }

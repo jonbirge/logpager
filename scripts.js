@@ -1,8 +1,10 @@
-// settings
-const geolocate = true; // pull IP geolocation from external service
-const tileLabels = false; // show tile labels on heatmap
-const apiWait = 200; // ms to wait between external API calls
-const maxRequestLength = 96; // truncation length of log details
+// hard-wired settings
+const geolocate = true; // pull IP geolocation from external service?
+const hostNames = false; // pull hostnames from external service?
+const orgNames = true; // pull organization names from external service?
+const tileLabels = false; // show tile labels on heatmap?
+const apiWait = 200; // milliseconds to wait between external API calls
+const maxRequestLength = 196; // truncation length of log details
 
 // global variables
 let pollInterval;
@@ -14,12 +16,33 @@ let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
 let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
 
-// highlight the current log type
-if (logType == "clf") {
-    document.getElementById("clftab").classList.add("selected");
-} else {
-    document.getElementById("authtab").classList.add("selected");
-}
+// get list of logs present on server and enable or disable tabs
+fetch("manifest.php")
+    .then((response) => response.json())
+    .then((data) => {
+        const haveCLF = data.includes("access.log");
+        const haveAuth = data.includes("auth.log");
+        if (!haveCLF) {
+            document.getElementById("clftab").style.display = 'none';
+            logType = "auth";  // because clf is default
+        } else {
+            document.getElementById("clftab").style.display = '';
+        }
+        if (!haveAuth) {
+            document.getElementById("authtab").style.display = 'none';
+        } else {
+            document.getElementById("authtab").style.display = '';
+        }
+        // highlight the current log type
+        if (logType == "clf") {
+            document.getElementById("clftab").classList.add("selected");
+            document.getElementById("authtab").classList.remove("selected");
+        } else {
+            document.getElementById("authtab").classList.add("selected");
+            document.getElementById("clftab").classList.remove("selected");
+        }
+        console.log("logType: " + logType);
+    });
 
 // decide what to do on page load
 if (search !== null) {  // search beats page
@@ -28,7 +51,7 @@ if (search !== null) {  // search beats page
 } else {
     console.log("page load: loading " + logType + " log...");
     // on window load run pollServer() and plotHeatmap()
-    window.onload = () => {
+ window.onload = () => {
         pollLog();
         plotHeatmap();
     };
@@ -37,7 +60,7 @@ if (search !== null) {  // search beats page
 // update utc time every second
 function updateClock() {
     const utc = document.getElementById("utc");
-    const timeStr = "<b>UTC</b>: " + new Date().toUTCString();
+    const timeStr = "UTC: " + new Date().toUTCString();
     utc.innerHTML = timeStr;
 }
 updateClock();
@@ -65,9 +88,11 @@ function pollLog() {
     url.searchParams.set("page", page);
     window.history.replaceState({}, "", url);
 
-    // clear whois div
+    // clear whois and status divs
     const whoisDiv = document.getElementById("whois");
     whoisDiv.innerHTML = "";
+    const searchStatus = document.getElementById("status");
+    searchStatus.innerHTML = "";
 
     // get the log from the server
     let logURL;
@@ -124,10 +149,15 @@ function jsonToTable(jsonData) {
     for (let i = 0; i < data[0].length; i++) {
         table += "<th>" + data[0][i] + "</th>";
         if (i == 0) {
-            table += "<th>Host name</th>";
+            if (hostNames) {
+                table += "<th>Host name</th>";
+            }
+            if (orgNames) {
+                table += "<th>Org</th>";
+            }
             if (geolocate) {
                 table +=
-                '<th>Geolocation (from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
+                '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
             }
         }
     }
@@ -143,13 +173,27 @@ function jsonToTable(jsonData) {
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
                 const srchlink = "?type=" + logType + "&search=ip:" + ip;
-                table += "<td><a href=" + srchlink + ">" + ip + "</a></td>";
+                table += "<td><a href=" + srchlink + ">" + ip + "</a><br>";
+                // Create link string that calls blacklist(ip) function
+                const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
+                table += '<a class="blue" href="#" ' + blacklistCall + ">blacklist</a>";
+                // Create link string that calls whois(ip) function
+                const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
+                table += ' <a class="blue" href="#" ' + whoisCall + ">whois</a></td>";
+
                 // Add new cell for Host name after the first cell
-                hostnameid = "hostname-" + ip;
-                table += '<td id="' + hostnameid + '">-</td>';
+                if (hostNames) {
+                    const hostnameid = "hostname-" + ip;
+                    table += '<td id="' + hostnameid + '">-</td>';
+                }
+                // Add new cell for Organization name after the first cell
+                if (orgNames) {
+                    const orgid = "org-" + ip;
+                    table += '<td id="' + orgid + '">-</td>';
+                }
                 // Add new cell for Geolocation after the first cell (maybe)
                 if (geolocate) {
-                    geoid = "geo-" + ip;
+                    const geoid = "geo-" + ip;
                     table += '<td id="' + geoid + '">-</td>';
                 }
             } else if (j == 1) {
@@ -166,13 +210,17 @@ function jsonToTable(jsonData) {
                         : rawRequest;
                 table += '<td class="code">' + truncRequest + "</td>";
             } else if (j == 3) {
-                // generalized status handling
+                // common status handling
+                const greenStatus = ["200", "304", "OK"];
+                const redStatus = ["308", "400", "401", "403", "404", "500", "FAIL"];
                 const status = data[i][j];
-                if (status == "200" || status == "304" || status == "OK") {
-                    table += '<td class="green">' + data[i][j] + "</td>";
+                if (greenStatus.includes(status)) {
+                    table += '<td class="green">' + status + "</td>";
+                } else if (redStatus.includes(status)) {
+                    table += '<td class="red">' + status + "</td>";
                 } else {
-                    table += '<td class="red">' + data[i][j] + "</td>";
-                }
+                    table += '<td class="gray">' + status + "</td>";
+                } 
             } else {
                 // anything else
                 table += "<td>" + data[i][j] + "</td>";
@@ -183,10 +231,27 @@ function jsonToTable(jsonData) {
     table += "</table>";
 
     // Get the host names from the IP addresses
-    getHostNames(ips, signal);
-    if (geolocate) getGeoLocations(ips, signal);
+    const ipSet = [...new Set(ips)]; // Get unique IP addresses
+    if (hostNames) getHostNames(ipSet, signal);
+    if (geolocate | orgNames) getGeoLocations(ipSet, signal);
 
     return table;
+}
+
+// Function to send POST request to blacklist.php with a given IP address in the body of the POST
+function blacklist(ip) {
+    console.log("blacklist: add " + ip);
+    var formData = new FormData();
+    formData.append('ip', ip);
+    fetch("blacklist.php", {
+        method: "POST",
+        body: formData,
+    })
+        .then((response) => response.text())
+        .then((data) => {
+            const status = document.getElementById("status");
+            status.innerHTML = data;
+        });
 }
 
 // Take JSON array of command log data and build SVG heatmap
@@ -219,7 +284,7 @@ function jsonToHeatmap(jsonData) {
     // Set dimensions for the heatmap
     const cellSize = 11; // size of each tile
     const ratio = 1; // width to height ratio
-    const margin = { top: 25, right: 75, bottom: 50, left: 50 };
+    const margin = { top: 25, right: 50, bottom: 50, left: 50 };
     const width = ratio * Object.keys(jsonData).length * cellSize;
     const height = 24 * cellSize;  // 24 hours
 
@@ -455,7 +520,7 @@ function doSearch() {
                 const logDiv = document.getElementById("log");
                 const pageSpan = document.getElementById("page");
                 logDiv.innerHTML = jsonToTable(data);
-                pageSpan.innerHTML = "<b>Search results for " + search + "</b>";
+                pageSpan.innerHTML = search;
 
                 // disable all other buttons and
                 const buttons = document.querySelectorAll("button");
@@ -484,6 +549,12 @@ function doSearch() {
                     resetButton.classList.remove("disabled");
                 }
 
+                // count the number of elements in the JSON array data
+                const count = JSON.parse(data).length;
+                console.log("doSearch: " + count + " results");
+                const searchStatus = document.getElementById("status");
+                searchStatus.innerHTML = "<b>" + count + " items</b>";
+
                 // update the heatmap with the search term
                 plotHeatmap(search);
             });
@@ -509,8 +580,6 @@ function resetSearch() {
 
 // get host names from IP addresses
 function getHostNames(ips, signal) {
-    // Get set of unique ip addresses
-    ips = [...new Set(ips)];
     console.log("Getting host names for " + ips);
     fetchCount++;
     // Grab each ip address and send to rdns.php
@@ -538,69 +607,58 @@ function getHostNames(ips, signal) {
     });
 }
 
-// get geolocations from IP addresses using ip-api.com
+// get geolocations and orgs from IP addresses using ip-api.com
 function getGeoLocations(ips, signal) {
-    // Get set of unique ip addresses
-    ips = [...new Set(ips)];
     console.log("Getting geolocations for " + ips);
     fetchCount++;
     // Grab each ip address and send to ip-api.com
     let waitTime = 0;
     ips.forEach((ip) => {
         setTimeout(
-            () => {
-                fetch("geo.php?ip=" + ip, { signal })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        // Get all cells with id of the form geo-ipAddress
-                        const geoCells = document.querySelectorAll(
-                            '[id^="geo-' + ip + '"]'
-                        );
-                        // set each cell in geoCells to data
-                        geoCells.forEach((cell) => {
-                            cell.innerHTML =
-                                data.country +
-                                ", " +
-                                data.regionName +
-                                ", " +
-                                data.city;
-                        });
-                        fetchCount--;
-                    })
-                    .catch((error) => {
-                        if (error.name === "AbortError") {
-                            console.log("Fetch safely aborted");
-                        } else {
-                            console.log("Fetch error:", error);
-                        }
-                    });
-            },
+            () => fetchGeoLocation(ip),
             waitTime,
             { signal }
         );
         waitTime += apiWait;
     });
-}
 
-// run whois query on IP address string using the ARIN.net web service. the
-// response is a JSON object containing the whois information.
-function whois(ip) {
-    const whoisDiv = document.getElementById("whois");
-    whoisDiv.innerHTML = "<h2>Whois " + ip + "...</h2>";
-    fetch("whois.php?ip=" + ip)
-        .then((response) => response.text())
-        .then((data) => {
-            // remove comment lines from whois data
-            data = data.replace(/^#.*$/gm, "");
-
-            // remove all blank lines from whois data
-            data = data.replace(/^\s*[\r\n]/gm, "");
-
-            // output to whois div
-            whoisHTML = "<h2>Whois " + ip + "</h2>";
-            whoisHTML += data;
-            whoisDiv.innerHTML = whoisHTML;
-        });
+    function fetchGeoLocation(ip) {
+        fetch("geo.php?ip=" + ip, { signal })
+            .then((response) => response.json())
+            .then((data) => {
+                if (geolocate) {
+                    // Get all cells with id of the form geo-ipAddress
+                    const geoCells = document.querySelectorAll(
+                        '[id^="geo-' + ip + '"]'
+                    );
+                    // set each cell in geoCells to data
+                    geoCells.forEach((cell) => {
+                        cell.innerHTML =
+                            data.city + ", " +
+                            data.region + ", " +
+                            data.countryCode;
+                    });
+                }
+                if (orgNames) {
+                    // Get all cells with id of the form org-ipAddress
+                    const orgCells = document.querySelectorAll(
+                        '[id^="org-' + ip + '"]'
+                    );
+                    // set each cell in orgCells to data
+                    orgCells.forEach((cell) => {
+                        cell.innerHTML = data.org;
+                    });
+                }
+                fetchCount--;
+            })
+            .catch((error) => {
+                if (error.name === "AbortError") {
+                    console.log("Fetch safely aborted");
+                } else {
+                    console.log("Fetch error:", error);
+                }
+            });
+    }
 }
 
 // function to setup polling
@@ -637,4 +695,25 @@ function runWatch() {
         watchButton.innerHTML = "Stop";
         watchButton.classList.add("red");
     }
+}
+
+// run whois query on IP address string using the ARIN.net web service. the
+// response is a JSON object containing the whois information.
+function whois(ip) {
+    const whoisDiv = document.getElementById("whois");
+    whoisDiv.innerHTML = "<h2>Whois " + ip + "...</h2>";
+    fetch("whois.php?ip=" + ip)
+        .then((response) => response.text())
+        .then((data) => {
+            // remove comment lines from whois data
+            data = data.replace(/^#.*$/gm, "");
+
+            // remove all blank lines from whois data
+            data = data.replace(/^\s*[\r\n]/gm, "");
+
+            // output to whois div
+            whoisHTML = "<h2>Whois " + ip + "</h2>";
+            whoisHTML += data;
+            whoisDiv.innerHTML = whoisHTML;
+        });
 }
