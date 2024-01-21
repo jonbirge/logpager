@@ -20,32 +20,29 @@ let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf
 fetch("manifest.php")
     .then((response) => response.json())
     .then((data) => {
-        const logs = data.logs;
-        const haveCLF = logs.includes("clf");
-        const haveAuth = logs.includes("auth");
-        enableTabs(haveCLF, haveAuth);
+        const haveCLF = data.includes("access.log");
+        const haveAuth = data.includes("auth.log");
+        if (!haveCLF) {
+            document.getElementById("clftab").style.display = 'none';
+            logType = "auth";  // because clf is default
+        } else {
+            document.getElementById("clftab").style.display = '';
+        }
+        if (!haveAuth) {
+            document.getElementById("authtab").style.display = 'none';
+        } else {
+            document.getElementById("authtab").style.display = '';
+        }
+        // highlight the current log type
+        if (logType == "clf") {
+            document.getElementById("clftab").classList.add("selected");
+            document.getElementById("authtab").classList.remove("selected");
+        } else {
+            document.getElementById("authtab").classList.add("selected");
+            document.getElementById("clftab").classList.remove("selected");
+        }
+        console.log("logType: " + logType);
     });
-
-function enableTabs(haveCLF, haveAuth) {
-    if (!haveCLF) {
-        document.getElementById("clftab").style.display = 'none';
-        logType = "auth";
-    } else {
-        document.getElementById("clftab").style.display = '';
-    }
-    if (!haveAuth) {
-        document.getElementById("authtab").style.display = 'none';
-    } else {
-        document.getElementById("authtab").style.display = '';
-    }
-}
-
-// highlight the current log type
-if (logType == "clf") {
-    document.getElementById("clftab").classList.add("selected");
-} else {
-    document.getElementById("authtab").classList.add("selected");
-}
 
 // decide what to do on page load
 if (search !== null) {  // search beats page
@@ -54,7 +51,7 @@ if (search !== null) {  // search beats page
 } else {
     console.log("page load: loading " + logType + " log...");
     // on window load run pollServer() and plotHeatmap()
-    window.onload = () => {
+ window.onload = () => {
         pollLog();
         plotHeatmap();
     };
