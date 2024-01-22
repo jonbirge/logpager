@@ -1,9 +1,10 @@
 #!/bin/sh
 
 # Start PHP-FPM
-echo "Starting PHP-FPM..."
-php-fpm82
+echo "Starting php-fpm83..."
+php-fpm83
 
 # Start nginx in the foreground
 echo "Starting nginx..."
 nginx -g 'daemon off;'
+

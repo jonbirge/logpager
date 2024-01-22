@@ -2,8 +2,8 @@
 FROM alpine:latest
 
 # Install nginx and PHP
-RUN apk update && apk upgrade
-RUN apk add --no-cache nginx php-fpm whois
+# RUN apk update && apk upgrade
+RUN apk add --no-cache nginx php83-fpm whois
 
 # Setup Nginx web root
 RUN rm -rf /var/www
