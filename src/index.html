@@ -12,13 +12,16 @@
 <body>
     <div class="container">
         <div class="tab-header">
-        <a id="clftab" class="log-link" href='./?type=clf&page=0'>access.log</a>
-        <a id="authtab" class="log-link" href="./?type=auth&page=0">auth.log</a>
+        <a id="clftab" class="tab" href='./?type=clf&page=0'>access.log</a>
+        <a id="authtab" class="tab" href="./?type=auth&page=0">auth.log</a>
         </div>
 
         <!-- summary chart(s) -->
         <div id="heatmap"></div>
 
+        <!-- whois info -->
+        <div id="whois"></div>
+        
         <!-- search header -->
         <div class="search-header">
             <span id="utc" class="status">Loading UTC...</span>
@@ -32,7 +35,7 @@
         </div>
 
         <!-- log file -->
-        <div id="log">Loading logs...</div>
+        <div id="log">Loading log...</div>
  
         <!-- paging buttons -->
         <div class="button-set" id="buttons">
@@ -44,11 +47,6 @@
             <button class="toggle-button gray" onclick="page = 0; pollLog();">Current</button>
             <button class="toggle-button" id="watch-button" onclick="runWatch()">Live</button>
         </div>
-
-        <!-- whois info -->
-        <pre>
-            <div id="whois"></div>
-        </pre>
 
     </div>
 
