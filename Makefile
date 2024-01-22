@@ -1,6 +1,6 @@
 # Define variables
 IMAGE_NAME=logpager
-VERSION=1.4.2
+VERSION=1.5b
 DOCKER_HUB_USER=jonbirge
 
 # Derived variables
@@ -28,7 +28,7 @@ dev: stop
 	docker build -t $(IMAGE_NAME)_dev --build-arg TESTLOGS=true .
 
 test: dev
-	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=.:/var/www/:ro $(IMAGE_NAME)_dev
+	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_dev
 
 stop:
 	-docker stop $(IMAGE_NAME)_test

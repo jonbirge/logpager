@@ -13,7 +13,7 @@
 }
 
 /* Style the links to look like tabs */
-.log-link {
+.tab {
     display: inline-block;
     padding: 7px 17px;
     margin-left: 3px;
@@ -30,12 +30,12 @@
 }
 
 /* Add left margin to the first tab */
-.log-link:first-child {
+.tab:first-child {
     margin-left: 21px; /* adjust as needed */
 }
 
 /* Style the selected tab */
-.log-link.selected {
+.tab.selected {
     border-color: #333;
     border-bottom: 1px solid white;
     border-top: 3px solid #333;
@@ -47,12 +47,12 @@
 }
 
 /* Lighten the unselected tabs on hover */
-.log-link:hover:not(.selected) {
+.tab:hover:not(.selected) {
     background-color: #fafafa;
     color: #333;
 }
 
-/* Make all links black */
+/* Make links black by default */
 a {
     color: black;
 }

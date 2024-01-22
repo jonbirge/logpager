@@ -9,7 +9,9 @@ $ipAddress = $_GET['ip'];
 // Send ip address to linux whois command
 $whois = shell_exec("whois $ipAddress");
 
-// Return answer
+// Return formatted answer
+echo "<pre>";
 echo $whois;
+echo "</pre>";
 
 ?>
