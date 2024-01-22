@@ -12,8 +12,8 @@
 <body>
     <div class="container">
         <div class="tab-header">
-        <a id="clftab" class="tab" href='./?type=clf&page=0'>access.log</a>
-        <a id="authtab" class="tab" href="./?type=auth&page=0">auth.log</a>
+            <a id="clftab" class="tab" href='./?type=clf&page=0'>access.log</a>
+            <a id="authtab" class="tab" href="./?type=auth&page=0">auth.log</a>
         </div>
 
         <!-- summary chart(s) -->
@@ -21,7 +21,7 @@
 
         <!-- whois info -->
         <div id="whois"></div>
-        
+
         <!-- search header -->
         <div class="search-header">
             <span id="utc" class="status">Loading UTC...</span>
@@ -34,9 +34,111 @@
             </span>
         </div>
 
-        <!-- log file -->
-        <div id="log">Loading log...</div>
- 
+        <!-- empty log file table -->
+        <div id="log">
+            <table id="log-table">
+                <tr>
+                    <th>IP</th>
+                    <th>Host name</th>
+                    <th>Org</th>
+                    <th>Geolocation<br>(from <a href="https://www.ip-api.com" style="color: white">ip-api</a>)</th>
+                    <th>Timestamp</th>
+                    <th>Details</th>
+                    <th>Stat</th>
+                </tr>
+                <tr>
+                    <td>-.-.-.-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="code">-</td>
+                    <td class="gray">-</td>
+                </tr>
+                <tr>
+                    <td>-.-.-.-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="code">-</td>
+                    <td class="gray">-</td>
+                </tr>
+                <tr>
+                    <td>-.-.-.-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="code">-</td>
+                    <td class="gray">-</td>
+                </tr>
+                <tr>
+                    <td>-.-.-.-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="code">-</td>
+                    <td class="gray">-</td>
+                </tr>
+                <tr>
+                    <td>-.-.-.-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="code">-</td>
+                    <td class="gray">-</td>
+                </tr>
+                <tr>
+                    <td>-.-.-.-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="code">-</td>
+                    <td class="gray">-</td>
+                </tr>
+                <tr>
+                    <td>-.-.-.-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="code">-</td>
+                    <td class="gray">-</td>
+                </tr>
+                <tr>
+                    <td>-.-.-.-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="code">-</td>
+                    <td class="gray">-</td>
+                </tr>
+                <tr>
+                    <td>-.-.-.-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="code">-</td>
+                    <td class="gray">-</td>
+                </tr>
+                <tr>
+                    <td>-.-.-.-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="code">-</td>
+                    <td class="gray">-</td>
+                </tr>
+            </table>
+        </div>
+
         <!-- paging buttons -->
         <div class="button-set" id="buttons">
             <button class="toggle-button gray" onclick="page += 100; pollLog();">&lt;&lt;&lt;</button>
@@ -48,10 +150,8 @@
             <button class="toggle-button" id="watch-button" onclick="runWatch()">Live</button>
         </div>
 
-        <!-- copyright -->
-        <div>
-            version 1.5b2
-        </div>
+        <!-- version and copyright -->
+        <div>1.5b3</div>
 
     </div>
 
