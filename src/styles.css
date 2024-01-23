@@ -25,7 +25,7 @@
     border-top-left-radius: 5px;
     background-color: #f0f0f0;
     text-decoration: none;
-    font-size: 16px;
+    font-size: 14px;
     color: #555;
 }
 
@@ -37,12 +37,12 @@
 /* Style the selected tab */
 .tab.selected {
     border-color: #333;
-    border-bottom: 1px solid white;
+    border-bottom: 2px solid white;
     border-top: 3px solid #333;
-    background-color: white;
     margin-bottom: -1px;
+    background-color: white;
     font-weight: bold;
-    font-size: 17px;
+    font-size: 15px;
     color: black;
 }
 
@@ -70,11 +70,6 @@ a {
     padding: 0px;
 }
 
-/* Style the UTC time div to be left-justified */
-.status {
-    font-size: 15px;
-}
-
 /* Style the form to be right-justified */
 .search-form {
     display: inline;
@@ -82,19 +77,19 @@ a {
 
 /* Text box with 16pt font and wide left and right margins */
 .text-box {
-    font-size: 15px;
-    margin-left: 16px;
-    margin-right: 12px;
+    margin-left: 11px;
+    margin-right: 7px;
+    font-size: 14px;
 }
 
 /* Style tables to have a smaller font size */
 table, th, td {
     border: 1px solid black;
-    margin-bottom: 20px;
-    padding-left: 6px;
-    padding-right: 6px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    margin-bottom: 9px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 3px;
+    padding-bottom: 3px;
     font-size: 12px;
 }
 
@@ -112,6 +107,11 @@ th {
     background-color: #777777;
     color: white;
     font-weight: bold;
+}
+
+/* Hidable columns */
+th.hideable, td.hideable {
+    display: table-cell;
 }
 
 /* Style alternating rows */
@@ -141,7 +141,7 @@ tr:nth-child(even) {
 .code {
     font-family: monospace;
     text-align: left;
-    padding-left: 9pt;
+    padding-left: 5pt;
 }
 
 /*** Buttons ***/
@@ -153,17 +153,17 @@ tr:nth-child(even) {
 
 /* Styling the button for a modern look */
 .toggle-button {
-    margin-bottom: 12px;
+    margin-bottom: 7px;
     background-color: #4CAF50; /* Green background */
     border: none;
     color: white;
-    padding: 8px 10px; /* Larger padding for a bigger button */
+    padding: 7px 9px; /* Larger padding for a bigger button */
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-family: Arial, sans-serif;
     font-weight: normal; /* Bold font weight */
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
     border-radius: 5px; /* Rounded corners */
     transition: background-color 0.3s; /* Smooth transition for background color */
@@ -195,4 +195,27 @@ tr:nth-child(even) {
     background-color: #d0d0d0;
     color: white;
     cursor: not-allowed;
+}
+
+/* Shrink the font sizes on smaller screens */
+@media screen and (max-width: 640px) {
+    .container {
+        font-size: 11px;
+        width: calc(min(100%, 1080px) - 10pt);
+    }
+    .toggle-button {
+        font-size: 11px;
+    }
+    .text-box {
+        margin-left: 0px;
+        margin-right: 0px;
+        margin-bottom: 3px;
+        font-size: 11px;
+    }
+    th.hideable, td.hideable {
+        display: none;
+    }
+    table, th, td {
+        font-size: 11px;
+    }
 }
