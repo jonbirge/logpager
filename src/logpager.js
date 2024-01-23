@@ -320,7 +320,7 @@ function jsonToHeatmap(jsonData) {
         .style("height", height + "px") // Set height using CSS
         .attr(
             "viewBox",
-            `${-margin.left} 0 ${width + margin.right + margin.left} ${height + margin.bottom + margin.top
+            `${-margin.left} 0 ${width + margin.right + margin.left + 25} ${height + margin.bottom + margin.top
             }`
         ) // Add viewBox
         .append("g")
