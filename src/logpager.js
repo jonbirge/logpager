@@ -143,7 +143,7 @@ function jsonToTable(jsonData) {
     const signal = controller.signal;
     let ips = [];
     const data = JSON.parse(jsonData);
-    let table = '<table id="log-table">';
+    let table = '<table id="log-table" class="log-table">';
 
     // write table headers from first row
     table += "<tr>";
