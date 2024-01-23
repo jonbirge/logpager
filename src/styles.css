@@ -83,7 +83,7 @@ a {
 }
 
 /* Style tables to have a smaller font size */
-.log-table, th, td {
+table, th, td {
     border: 1px solid black;
     margin-bottom: 9px;
     padding-left: 7px;
@@ -94,7 +94,7 @@ a {
 }
 
 /* Style the log table to responsively fit all screen sizes, and wrap text to avoid scrolling if possible */
-.log-table {
+table {
     width: 100%;
     text-align: center;
     text-wrap: pretty;
@@ -107,6 +107,11 @@ th {
     background-color: #777777;
     color: white;
     font-weight: bold;
+}
+
+/* Hidable columns */
+th.hideable, td.hideable {
+    display: table-cell;
 }
 
 /* Style alternating rows */
@@ -201,16 +206,16 @@ tr:nth-child(even) {
     .toggle-button {
         font-size: 11px;
     }
-    .log-table {
-        font-size: 9px;
-    }
-    table {
-        font-size: 9px;
-    }
     .text-box {
         margin-left: 0px;
         margin-right: 0px;
         margin-bottom: 3px;
+        font-size: 11px;
+    }
+    th.hideable, td.hideable {
+        display: none;
+    }
+    table, th, td {
         font-size: 11px;
     }
 }

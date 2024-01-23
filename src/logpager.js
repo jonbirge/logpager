@@ -148,18 +148,22 @@ function jsonToTable(jsonData) {
     // write table headers from first row
     table += "<tr>";
     for (let i = 0; i < data[0].length; i++) {
-        table += "<th>" + data[0][i] + "</th>";
         if (i == 0) {
+            table += "<th>" + data[0][i] + "</th>";
             if (hostNames) {
-                table += "<th>Host name</th>";
+                table += '<th class="hideable">Host name</th>';
             }
             if (orgNames) {
-                table += "<th>Org</th>";
+                table += '<th class="hideable">Org</th>';
             }
             if (geolocate) {
                 table +=
                 '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
             }
+        } else if (i == 2) {  // details
+            table += '<th class="hideable">' + data[0][i] + '</th>';
+        } else {
+            table += "<th>" + data[0][i] + "</th>";
         }
     }
     table += "</tr>";
@@ -185,12 +189,12 @@ function jsonToTable(jsonData) {
                 // Add new cell for Host name after the first cell
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;
-                    table += '<td id="' + hostnameid + '">-</td>';
+                    table += '<td class="hideable" id="' + hostnameid + '">-</td>';
                 }
                 // Add new cell for Organization name after the first cell
                 if (orgNames) {
                     const orgid = "org-" + ip;
-                    table += '<td id="' + orgid + '">-</td>';
+                    table += '<td class="hideable" id="' + orgid + '">-</td>';
                 }
                 // Add new cell for Geolocation after the first cell (maybe)
                 if (geolocate) {
@@ -209,7 +213,7 @@ function jsonToTable(jsonData) {
                     rawRequest.length > maxRequestLength
                         ? rawRequest.substring(0, maxRequestLength) + "..."
                         : rawRequest;
-                table += '<td class="code">' + truncRequest + "</td>";
+                table += '<td class="code hideable">' + truncRequest + "</td>";
             } else if (j == 3) {
                 // common status handling
                 const greenStatus = ["200", "304", "OK"];
