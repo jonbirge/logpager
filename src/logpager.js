@@ -57,15 +57,52 @@ if (search !== null) {  // search beats page
     };
 }
 
-// update utc time every second
+// update time sensitive elements every second
 function updateClock() {
+    // update UTC time
     const utc = document.getElementById("utc");
     let timeStr = new Date().toUTCString();
-    timeStr = timeStr.replace(" GMT", ""); // remove GMT from end of string
+    timeStr = timeStr.replace(" GMT", "");  // remove GMT from end of string
     utc.innerHTML = "UTC: " + timeStr;
+
+    // find all elements with id of the form timestamp:*
+    const timestampElements = document.querySelectorAll('[id^="timestamp:"]');
+
+    // update each timestamp element
+    timestampElements.forEach((element) => {
+        const timestamp = element.id.replace("timestamp:", "");
+        const dateObj = new Date(timestamp);
+        const timediff = timeDiff(dateObj, new Date());
+        element.innerHTML = timediff;
+    });
 }
 updateClock();
 setInterval(updateClock, 1000);
+
+// create a Date object from a log timestamp of the form DD/Mon/YYYY:HH:MM:SS
+function parseCLFDate(clfstamp) {
+    const date = clfstamp.replace(/:/, " "); // replace first : with space
+    const dateObj = new Date(date);
+    return dateObj;
+}
+
+// take two Date objects and return the difference in time in simple human-readable terms, such as "3 days" or "5 seconds"
+function timeDiff(date1, date2) {
+    const diff = date2 - date1;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    if (days > 2) {
+        return days + " days";
+    } else if (hours > 2) {
+        return hours + " hours";
+    } else if (minutes > 5) {
+        return minutes + " minutes";
+    } else {
+        return seconds + " seconds";
+    }
+}
 
 // pull the relevent log data from the server
 function pollLog() {
@@ -202,9 +239,12 @@ function jsonToTable(jsonData) {
                     table += '<td id="' + geoid + '">-</td>';
                 }
             } else if (j == 1) {
-                // remove the timezone from the timestamp
-                const timestamp = data[i][j].replace(/\s.*$/, "");
-                table += "<td>" + timestamp + "</td>";
+                const clfStamp = data[i][j].replace(/\s.*$/, "") + " GMT";  // remove the timezone
+                const dateStamp = parseCLFDate(clfStamp);
+                const timediff = timeDiff(dateStamp, new Date());
+                const jsonDate = dateStamp.toJSON();
+                table += "<td id=timestamp:" + jsonDate + ">"; 
+                table += timediff + "</td>";
             } else if (j == 2) {
                 // request
                 const rawRequest = data[i][j];
