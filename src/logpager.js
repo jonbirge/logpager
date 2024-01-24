@@ -57,12 +57,24 @@ if (search !== null) {  // search beats page
     };
 }
 
-// update utc time every second
+// update time sensitive elements every second
 function updateClock() {
+    // update UTC time
     const utc = document.getElementById("utc");
     let timeStr = new Date().toUTCString();
-    timeStr = timeStr.replace(" GMT", ""); // remove GMT from end of string
+    timeStr = timeStr.replace(" GMT", "");  // remove GMT from end of string
     utc.innerHTML = "UTC: " + timeStr;
+
+    // find all elements with id of the form timestamp:*
+    const timestampElements = document.querySelectorAll('[id^="timestamp:"]');
+
+    // update each timestamp element
+    timestampElements.forEach((element) => {
+        const timestamp = element.id.replace("timestamp:", "");
+        const dateObj = new Date(timestamp);
+        const timediff = timeDiff(dateObj, new Date());
+        element.innerHTML = timediff;
+    });
 }
 updateClock();
 setInterval(updateClock, 1000);
@@ -81,16 +93,15 @@ function timeDiff(date1, date2) {
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-    const extraSeconds = seconds - minutes * 60;
-    let timeStr;
-    if (days > 0) {
-        timeStr = days + " days";
-    } else if (hours > 0) {
-        timeStr = hours + " hours";
-    } else if (minutes > 0) {
-        timeStr = minutes + " minutes";
+    if (days > 2) {
+        return days + " days";
+    } else if (hours > 2) {
+        return hours + " hours";
+    } else if (minutes > 5) {
+        return minutes + " minutes";
+    } else {
+        return seconds + " seconds";
     }
-    return timeStr + ", " + extraSeconds + " seconds";  // just for testing...
 }
 
 // pull the relevent log data from the server
@@ -228,10 +239,12 @@ function jsonToTable(jsonData) {
                     table += '<td id="' + geoid + '">-</td>';
                 }
             } else if (j == 1) {
-                const clfstamp = data[i][j].replace(/\s.*$/, "") + " GMT";  // remove the timezone
-                const datestamp = parseCLFDate(clfstamp);
-                const timediff = timeDiff(datestamp, new Date());
-                table += "<td>" + timediff + "</td>";
+                const clfStamp = data[i][j].replace(/\s.*$/, "") + " GMT";  // remove the timezone
+                const dateStamp = parseCLFDate(clfStamp);
+                const timediff = timeDiff(dateStamp, new Date());
+                const jsonDate = dateStamp.toJSON();
+                table += "<td id=timestamp:" + jsonDate + ">"; 
+                table += timediff + "</td>";
             } else if (j == 2) {
                 // request
                 const rawRequest = data[i][j];
