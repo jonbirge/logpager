@@ -66,7 +66,8 @@ a {
     align-items: center;
     display: flex;
     justify-content: space-between;
-    margin: 0px;
+    margin-left: 3px;
+    margin-right: 3px;
     padding: 0px;
 }
 
@@ -80,6 +81,11 @@ a {
     margin-left: 11px;
     margin-right: 7px;
     font-size: 14px;
+}
+
+/* Status styling */
+.status {
+    margin: 5px;
 }
 
 /* Style tables to have a smaller font size */
@@ -119,18 +125,17 @@ tr:nth-child(even) {
     background-color: #f0f0f0;
 }
 
+/* Status colors */
 .green {
     font-weight: bold;
     color: black;
     background-color: rgb(128, 204, 128);
 }
-
 .red {
     font-weight: bold;
     color: black;
     background-color: rgb(252, 199, 199);
 }
-
 .gray {
     font-weight: bold;
     color: black;
@@ -198,7 +203,7 @@ tr:nth-child(even) {
 }
 
 /* Shrink the font sizes on smaller screens */
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 720px) {
     .container {
         font-size: 11px;
         width: calc(min(100%, 1080px) - 10pt);
@@ -211,6 +216,9 @@ tr:nth-child(even) {
         margin-right: 0px;
         margin-bottom: 3px;
         font-size: 11px;
+    }
+    .status {
+        margin: 1px;
     }
     th.hideable, td.hideable {
         display: none;
