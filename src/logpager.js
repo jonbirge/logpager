@@ -67,6 +67,32 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
+// create a Date object from a log timestamp of the form DD/Mon/YYYY:HH:MM:SS
+function parseCLFDate(clfstamp) {
+    const date = clfstamp.replace(/:/, " "); // replace first : with space
+    const dateObj = new Date(date);
+    return dateObj;
+}
+
+// take two Date objects and return the difference in time in simple human-readable terms, such as "3 days" or "5 seconds"
+function timeDiff(date1, date2) {
+    const diff = date2 - date1;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const extraSeconds = seconds - minutes * 60;
+    let timeStr;
+    if (days > 0) {
+        timeStr = days + " days";
+    } else if (hours > 0) {
+        timeStr = hours + " hours";
+    } else if (minutes > 0) {
+        timeStr = minutes + " minutes";
+    }
+    return timeStr + ", " + extraSeconds + " seconds";  // just for testing...
+}
+
 // pull the relevent log data from the server
 function pollLog() {
     console.log("pollLog: fetching page " + page + " of type " + logType);
@@ -202,9 +228,10 @@ function jsonToTable(jsonData) {
                     table += '<td id="' + geoid + '">-</td>';
                 }
             } else if (j == 1) {
-                // remove the timezone from the timestamp
-                const timestamp = data[i][j].replace(/\s.*$/, "");
-                table += "<td>" + timestamp + "</td>";
+                const clfstamp = data[i][j].replace(/\s.*$/, "") + " GMT";  // remove the timezone
+                const datestamp = parseCLFDate(clfstamp);
+                const timediff = timeDiff(datestamp, new Date());
+                table += "<td>" + timediff + "</td>";
             } else if (j == 2) {
                 // request
                 const rawRequest = data[i][j];
