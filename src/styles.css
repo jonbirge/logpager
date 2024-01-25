@@ -66,8 +66,8 @@ a {
     align-items: center;
     display: flex;
     justify-content: space-between;
-    margin-left: 3px;
-    margin-right: 3px;
+    margin-left: 0px;
+    margin-right: 0px;
     padding: 0px;
 }
 

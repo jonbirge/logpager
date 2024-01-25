@@ -59,12 +59,6 @@ if (search !== null) {  // search beats page
 
 // update time sensitive elements every second
 function updateClock() {
-    // update UTC time
-    const utc = document.getElementById("utc");
-    let timeStr = new Date().toUTCString();
-    timeStr = timeStr.replace(" GMT", "");  // remove GMT from end of string
-    utc.innerHTML = "UTC: " + timeStr;
-
     // find all elements with id of the form timestamp:*
     const timestampElements = document.querySelectorAll('[id^="timestamp:"]');
 

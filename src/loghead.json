@@ -1,6 +1,6 @@
 [
     "IP",
-    "Timestamp",
-    "Details",
-    "Stat"
+    "Age",
+    "Log Details",
+    "Status"
 ]

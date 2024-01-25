@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?version=11">
     <title>Log Pager</title>
 </head>
 
@@ -25,7 +25,6 @@
 
         <!-- search header -->
         <div class="search-header">
-            <span id="utc" class="status">Loading UTC...</span>
             <span id="status" class="status"></span>
             <span id="search-header">
                 <form id="search-form" class="search-form" onsubmit="uiSearch(); return false;">
@@ -62,11 +61,11 @@
         </div>
 
         <!-- version and copyright -->
-        <div>1.5b9</div>
+        <div>1.5b11</div>
 
     </div>
 
-    <script src="logpager.js?version=9"></script>
+    <script src="logpager.js?version=11"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 </body>
 
