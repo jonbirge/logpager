@@ -79,10 +79,12 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
-// create a Date object from a log timestamp of the form DD/Mon/YYYY:HH:MM:SS
+// create a Date object from a log timestamp of the form DD/Mon/YYYY:HH:MM:SS, assuming UTC timezone
 function parseCLFDate(clfstamp) {
-    const date = clfstamp.replace(/:/, " "); // replace first : with space
-    const dateObj = new Date(date);
+    const parts = clfstamp.split(/[:/]/); // split on : and /
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthIndex = months.indexOf(parts[1]);
+    const dateObj = new Date(Date.UTC(parts[2], monthIndex, parts[0], parts[3], parts[4], parts[5]));
     return dateObj;
 }
 
@@ -96,11 +98,11 @@ function timeDiff(date1, date2) {
     if (days > 2) {
         return days + " days";
     } else if (hours > 2) {
-        return hours + " hours";
+        return hours + " hrs";
     } else if (minutes > 5) {
-        return minutes + " minutes";
+        return minutes + " min";
     } else {
-        return seconds + " seconds";
+        return seconds + " sec";
     }
 }
 
@@ -188,10 +190,10 @@ function jsonToTable(jsonData) {
         if (i == 0) {
             table += "<th>" + data[0][i] + "</th>";
             if (hostNames) {
-                table += '<th class="hideable">Host name</th>';
+                table += '<th class="hideable">Domain name</th>';
             }
             if (orgNames) {
-                table += '<th class="hideable">Org</th>';
+                table += '<th class="hideable">Organization</th>';
             }
             if (geolocate) {
                 table +=
@@ -222,7 +224,6 @@ function jsonToTable(jsonData) {
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
                 table += ' <a class="blue" href="#" ' + whoisCall + ">whois</a></td>";
-
                 // Add new cell for Host name after the first cell
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;
@@ -239,8 +240,8 @@ function jsonToTable(jsonData) {
                     table += '<td id="' + geoid + '">-</td>';
                 }
             } else if (j == 1) {
-                const clfStamp = data[i][j].replace(/\s.*$/, "") + " GMT";  // remove the timezone
-                const dateStamp = parseCLFDate(clfStamp);
+                const clfStamp = data[i][j].replace(/\s.*$/, "");  // remove the timezone
+                const dateStamp = parseCLFDate(clfStamp);  // assume UTC
                 const timediff = timeDiff(dateStamp, new Date());
                 const jsonDate = dateStamp.toJSON();
                 table += "<td id=timestamp:" + jsonDate + ">"; 
@@ -632,14 +633,31 @@ function getHostNames(ips, signal) {
         fetch("rdns.php?ip=" + ip, { signal })
             .then((response) => response.text())
             .then((data) => {
-                // Get all cells with id of the form hostname-ip
-                const hostnameCells = document.querySelectorAll(
-                    '[id^="hostname-' + ip + '"]'
-                );
-                // set each cell in hostnameCells to data
-                hostnameCells.forEach((cell) => {
-                    cell.innerHTML = data;
-                });
+                // if data is in the form of an IP address, leave it alone. if it's in the form of a hostname, extract domain.tld
+                let hostname;
+                let whoisLink;
+                if (data.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/)) {
+                    // data is an IP address
+                    hostname = null;
+                } else {
+                    // data is a hostname, extract only the last two parts (domain.tld)
+                    const parts = data.split(".");
+                    hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
+                    console.log("domain: " + hostname);
+                }
+                if (hostname === null) {
+                    whoisLink = "-";
+                } else {
+                    // Get all cells with id of the form hostname-ipAddress
+                    const hostnameCells = document.querySelectorAll(
+                        '[id^="hostname-' + ip + '"]'
+                    );
+                    const whoisCall = 'onclick="whois(' + "'" + hostname + "'" + '); return false"';
+                    whoisLink = '<a class="blue" href="#" ' + whoisCall + '>' + hostname + '</a>';
+                    hostnameCells.forEach((cell) => {
+                        cell.innerHTML = whoisLink;
+                    });
+                }
                 fetchCount--;
             })
             .catch((error) => {
