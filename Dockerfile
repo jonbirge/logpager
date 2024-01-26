@@ -13,6 +13,15 @@ RUN chown -R nginx:nginx /var/www
 # Copy Nginx configuration file
 COPY default.conf /etc/nginx/http.d/default.conf
 
+# Copy test log files during testing
+ARG TESTLOGS=false
+RUN mkdir -p /var/testlogs
+COPY testlogs/* /var/testlogs/
+RUN chown -R nginx:nginx /var/testlogs
+RUN if [ "$TESTLOGS" = "true" ] ; then \
+    cp /var/testlogs/* / ; \
+    fi
+
 # Default /blacklist file and make writable by php-fpm
 RUN touch /blacklist
 RUN chmod a+w /blacklist
@@ -25,15 +34,6 @@ COPY entry.sh /entry.sh
 
 # Copy the source files to the Nginx web root
 COPY src/* /var/www/
-
-# Copy test log files during testing
-ARG TESTLOGS=false
-RUN mkdir -p /var/testlogs
-COPY testlogs/* /var/testlogs/
-RUN chown -R nginx:nginx /var/testlogs
-RUN if [ "$TESTLOGS" = "true" ] ; then \
-    cp /var/testlogs/* / ; \
-    fi
 
 # Expose standard HTTP port 
 EXPOSE 80
