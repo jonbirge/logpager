@@ -16,6 +16,7 @@ let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
 let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
 let tableLength = 0;  // used to decide when to reuse the table
+let geoCache = {};  // cache of geolocation data
 
 // get list of logs present on server and enable or disable tabs
 fetch("manifest.php")
@@ -636,6 +637,7 @@ function getHostNames(ips, signal) {
     fetchCount++;
     // Grab each ip address and send to rdns.php
     ips.forEach((ip) => {
+
         fetch("rdns.php?ip=" + ip, { signal })
             .then((response) => response.text())
             .then((data) => {
@@ -684,41 +686,53 @@ function getGeoLocations(ips, signal) {
     // Grab each ip address and send to ip-api.com
     let waitTime = 0;
     ips.forEach((ip) => {
-        setTimeout(
-            () => fetchGeoLocation(ip),
-            waitTime,
-            { signal }
-        );
-        waitTime += apiWait;
+        // check cache first
+        if (geoCache[ip]) {
+            updateGeoLocations(geoCache[ip], ip);
+        } else {
+            setTimeout(
+                () => fetchGeoLocation(ip),
+                waitTime,
+                { signal }
+            );
+            waitTime += apiWait;
+        }
     });
+
+    function updateGeoLocations(data, theIP) {
+        // update the table cells
+        if (geolocate) {
+            // Get all cells with id of the form geo-ipAddress
+            const geoCells = document.querySelectorAll(
+                '[id^="geo-' + theIP + '"]'
+            );
+            // set each cell in geoCells to data
+            geoCells.forEach((cell) => {
+                cell.innerHTML =
+                    data.city + ", " +
+                    data.region + ", " +
+                    data.countryCode;
+            });
+        }
+        if (orgNames) {
+            // Get all cells with id of the form org-ipAddress
+            const orgCells = document.querySelectorAll(
+                '[id^="org-' + theIP + '"]'
+            );
+            // set each cell in orgCells to data
+            orgCells.forEach((cell) => {
+                cell.innerHTML = data.org;
+            });
+        }
+    }
 
     function fetchGeoLocation(ip) {
         fetch("geo.php?ip=" + ip, { signal })
             .then((response) => response.json())
             .then((data) => {
-                if (geolocate) {
-                    // Get all cells with id of the form geo-ipAddress
-                    const geoCells = document.querySelectorAll(
-                        '[id^="geo-' + ip + '"]'
-                    );
-                    // set each cell in geoCells to data
-                    geoCells.forEach((cell) => {
-                        cell.innerHTML =
-                            data.city + ", " +
-                            data.region + ", " +
-                            data.countryCode;
-                    });
-                }
-                if (orgNames) {
-                    // Get all cells with id of the form org-ipAddress
-                    const orgCells = document.querySelectorAll(
-                        '[id^="org-' + ip + '"]'
-                    );
-                    // set each cell in orgCells to data
-                    orgCells.forEach((cell) => {
-                        cell.innerHTML = data.org;
-                    });
-                }
+                // cache the data
+                geoCache[ip] = data;
+                updateGeoLocations(data, ip);
                 fetchCount--;
             })
             .catch((error) => {
