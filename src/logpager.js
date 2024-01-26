@@ -17,6 +17,7 @@ let search = params.get("search");
 let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
 let tableLength = 0;  // used to decide when to reuse the table
 let geoCache = {};  // cache of geolocation data
+let hostnameCache = {};  // cache of hostnames
 
 // get list of logs present on server and enable or disable tabs
 fetch("manifest.php")
@@ -637,46 +638,56 @@ function getHostNames(ips, signal) {
     fetchCount++;
     // Grab each ip address and send to rdns.php
     ips.forEach((ip) => {
-
-        fetch("rdns.php?ip=" + ip, { signal })
-            .then((response) => response.text())
-            .then((data) => {
-                console.log("rdns: " + data);
-                // if data is in the form of an IP address, leave it alone. if it's in the form of a hostname, extract domain.tld
-                let hostname;
-                let whoisLink;
-                if (data.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/)) {
-                    // data is an IP address
-                    hostname = null;
-                } else {
-                    // data is a hostname, extract only the last two parts (domain.tld)
-                    const parts = data.split(".");
-                    hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
-                    console.log("domain: " + hostname);
-                }
-                if (hostname === null) {
-                    whoisLink = "-";
-                } else {
-                    // Get all cells with id of the form hostname-ipAddress
-                    const hostnameCells = document.querySelectorAll(
-                        '[id^="hostname-' + ip + '"]'
-                    );
-                    const whoisCall = 'onclick="whois(' + "'" + hostname + "'" + '); return false"';
-                    whoisLink = '<a class="blue" href="#" ' + whoisCall + '>' + hostname + '</a>';
-                    hostnameCells.forEach((cell) => {
-                        cell.innerHTML = whoisLink;
-                    });
-                }
-                fetchCount--;
-            })
-            .catch((error) => {
-                if (error.name === "AbortError") {
-                    console.log("Fetch safely aborted");
-                } else {
-                    console.log("Fetch error:", error);
-                }
-            });
+        // Check cache first
+        if (hostnameCache[ip]) {
+            updateHostNames(hostnameCache[ip], ip);
+        } else {
+            fetch("rdns.php?ip=" + ip, { signal })
+                .then((response) => response.text())
+                .then((data) => {
+                    console.log("rdns: " + data);
+                    // Cache the data
+                    hostnameCache[ip] = data;
+                    updateHostNames(data, ip);
+                    fetchCount--;
+                })
+                .catch((error) => {
+                    if (error.name === "AbortError") {
+                        console.log("Fetch safely aborted");
+                    } else {
+                        console.log("Fetch error:", error);
+                    }
+                });
+        }
     });
+
+    function updateHostNames(data, ip) {
+        // if data is in the form of an IP address, leave it alone. if it's in the form of a hostname, extract domain.tld
+        let hostname;
+        let whoisLink;
+        if (data.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/)) {
+            // data is an IP address
+            hostname = null;
+        } else {
+            // data is a hostname, extract only the last two parts (domain.tld)
+            const parts = data.split(".");
+            hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
+            console.log("domain: " + hostname);
+        }
+        if (hostname === null) {
+            whoisLink = "-";
+        } else {
+            // Get all cells with id of the form hostname-ipAddress
+            const hostnameCells = document.querySelectorAll(
+                '[id^="hostname-' + ip + '"]'
+            );
+            const whoisCall = 'onclick="whois(' + "'" + hostname + "'" + '); return false"';
+            whoisLink = '<a class="blue" href="#" ' + whoisCall + '>' + hostname + '</a>';
+            hostnameCells.forEach((cell) => {
+                cell.innerHTML = whoisLink;
+            });
+        }
+    }
 }
 
 // get geolocations and orgs from IP addresses using ip-api.com
@@ -699,12 +710,12 @@ function getGeoLocations(ips, signal) {
         }
     });
 
-    function updateGeoLocations(data, theIP) {
+    function updateGeoLocations(data, ip) {
         // update the table cells
         if (geolocate) {
             // Get all cells with id of the form geo-ipAddress
             const geoCells = document.querySelectorAll(
-                '[id^="geo-' + theIP + '"]'
+                '[id^="geo-' + ip + '"]'
             );
             // set each cell in geoCells to data
             geoCells.forEach((cell) => {
@@ -717,7 +728,7 @@ function getGeoLocations(ips, signal) {
         if (orgNames) {
             // Get all cells with id of the form org-ipAddress
             const orgCells = document.querySelectorAll(
-                '[id^="org-' + theIP + '"]'
+                '[id^="org-' + ip + '"]'
             );
             // set each cell in orgCells to data
             orgCells.forEach((cell) => {
