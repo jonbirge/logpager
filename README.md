@@ -20,7 +20,7 @@ directly, essentially running the kinds of local unix forensic commands a sysadm
 in a nice user interface and graphical form on the local browser.
 
 ## Demo
-A public instance may (or may not) be running at <https://nyc.birgefuller.com/logs/>
+A public demo of the current development branch may (or may not) be running at <https://nyc.birgefuller.com/logs/>
 
 ## Screenshots
 ![Screenshot 2024-01-21 122840](https://github.com/jonbirge/logpager/assets/660566/d2e5adb1-2308-476d-9c62-3888ceff5bc9)

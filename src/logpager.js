@@ -573,7 +573,7 @@ function doSearch() {
                 // write the search results to the log div
                 const logDiv = document.getElementById("log");
                 const pageSpan = document.getElementById("page");
-                logDiv.innerHTML = updateTable(data);
+                updateTable(data);
                 pageSpan.innerHTML = search;
 
                 // disable all other buttons and
