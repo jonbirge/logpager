@@ -15,6 +15,7 @@ let params = new URLSearchParams(window.location.search);
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
 let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
+let tableLength = 0;  // used to decide when to reuse the table
 
 // get list of logs present on server and enable or disable tabs
 fetch("manifest.php")
@@ -138,9 +139,8 @@ function pollLog() {
     fetch(logURL + "?page=" + page)
         .then((response) => response.text())
         .then((data) => {
-            const logDiv = document.getElementById("log");
             const pageSpan = document.getElementById("page");
-            logDiv.innerHTML = jsonToTable(data);
+            updateTable(data);
             if (page == 0) {
                 pageSpan.innerHTML = "Last page";
             } else {
@@ -172,38 +172,53 @@ function plotHeatmap(searchTerm) {
 }
 
 // Take JSON array of commond log data and write HTML table
-function jsonToTable(jsonData) {
+function updateTable(jsonData) {
+    const data = JSON.parse(jsonData);
+    const logDiv = document.getElementById("log");
     const signal = controller.signal;
     let ips = [];
-    const data = JSON.parse(jsonData);
-    let table = '<table id="log-table" class="log-table">';
+    let row;
+
+    // check to see if the table needs to be rebuilt
+    if (data.length != tableLength) {
+        console.log("updateTable: rebuilding table");
+        tableLength = data.length;
+        let table0 = '<table id="log-table" class="log-table">';
+        for (let i = 0; i < data.length; i++) {
+            table0 += '<tr id="row-' + i + '"></tr>';
+        }
+        table0 += "</table>";
+        logDiv.innerHTML = table0;
+    }
 
     // write table headers from first row
-    table += "<tr>";
+    let headrow = document.getElementById("row-0");
+    row = "";
     for (let i = 0; i < data[0].length; i++) {
         if (i == 0) {
-            table += "<th>" + data[0][i] + "</th>";
+            row += "<th>" + data[0][i] + "</th>";
             if (hostNames) {
-                table += '<th class="hideable">Domain name</th>';
+                row += '<th class="hideable">Domain name</th>';
             }
             if (orgNames) {
-                table += '<th class="hideable">Organization</th>';
+                row += '<th class="hideable">Organization</th>';
             }
             if (geolocate) {
-                table +=
+                row +=
                 '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
             }
         } else if (i == 2) {  // details
-            table += '<th class="hideable">' + data[0][i] + '</th>';
+            row += '<th class="hideable">' + data[0][i] + '</th>';
         } else {
-            table += "<th>" + data[0][i] + "</th>";
+            row += "<th>" + data[0][i] + "</th>";
         }
     }
-    table += "</tr>";
+    headrow.innerHTML = row;
 
     // write table rows from remaining rows
     for (let i = 1; i < data.length; i++) {
-        table += "<tr>";
+        rowElement = document.getElementById("row-" + i);
+        row = "";
         for (let j = 0; j < data[i].length; j++) {
             if (j == 0) {
                 // ip address
@@ -211,35 +226,35 @@ function jsonToTable(jsonData) {
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
                 const srchlink = "?type=" + logType + "&search=ip:" + ip;
-                table += "<td><a href=" + srchlink + ">" + ip + "</a><br>";
+                row += "<td><a href=" + srchlink + ">" + ip + "</a><br>";
                 // Create link string that calls blacklist(ip) function
                 const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
-                table += '<a class="blue" href="#" ' + blacklistCall + ">blacklist</a>";
+                row += '<a class="blue" href="#" ' + blacklistCall + ">blacklist</a>";
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
-                table += ' <a class="blue" href="#" ' + whoisCall + ">whois</a></td>";
+                row += ' <a class="blue" href="#" ' + whoisCall + ">whois</a></td>";
                 // Add new cell for Host name after the first cell
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;
-                    table += '<td class="hideable" id="' + hostnameid + '">-</td>';
+                    row += '<td class="hideable" id="' + hostnameid + '">-</td>';
                 }
                 // Add new cell for Organization name after the first cell
                 if (orgNames) {
                     const orgid = "org-" + ip;
-                    table += '<td class="hideable" id="' + orgid + '">-</td>';
+                    row += '<td class="hideable" id="' + orgid + '">-</td>';
                 }
                 // Add new cell for Geolocation after the first cell (maybe)
                 if (geolocate) {
                     const geoid = "geo-" + ip;
-                    table += '<td id="' + geoid + '">-</td>';
+                    row += '<td id="' + geoid + '">-</td>';
                 }
             } else if (j == 1) {
                 const clfStamp = data[i][j].replace(/\s.*$/, "");  // remove the timezone
                 const dateStamp = parseCLFDate(clfStamp);  // assume UTC
                 const timediff = timeDiff(dateStamp, new Date());
                 const jsonDate = dateStamp.toJSON();
-                table += "<td id=timestamp:" + jsonDate + ">"; 
-                table += timediff + "</td>";
+                row += "<td id=timestamp:" + jsonDate + ">"; 
+                row += timediff + "</td>";
             } else if (j == 2) {
                 // request
                 const rawRequest = data[i][j];
@@ -248,34 +263,31 @@ function jsonToTable(jsonData) {
                     rawRequest.length > maxRequestLength
                         ? rawRequest.substring(0, maxRequestLength) + "..."
                         : rawRequest;
-                table += '<td class="code hideable">' + truncRequest + "</td>";
+                row += '<td class="code hideable">' + truncRequest + "</td>";
             } else if (j == 3) {
                 // common status handling
                 const greenStatus = ["200", "304", "OK"];
                 const redStatus = ["308", "400", "401", "403", "404", "500", "FAIL"];
                 const status = data[i][j];
                 if (greenStatus.includes(status)) {
-                    table += '<td class="green">' + status + "</td>";
+                    row += '<td class="green">' + status + "</td>";
                 } else if (redStatus.includes(status)) {
-                    table += '<td class="red">' + status + "</td>";
+                    row += '<td class="red">' + status + "</td>";
                 } else {
-                    table += '<td class="gray">' + status + "</td>";
+                    row += '<td class="gray">' + status + "</td>";
                 } 
             } else {
                 // anything else
-                table += "<td>" + data[i][j] + "</td>";
+                row += "<td>" + data[i][j] + "</td>";
             }
         }
-        table += "</tr>";
+        rowElement.innerHTML = row;
     }
-    table += "</table>";
 
     // Get the host names from the IP addresses
     const ipSet = [...new Set(ips)]; // Get unique IP addresses
     if (hostNames) getHostNames(ipSet, signal);
     if (geolocate | orgNames) getGeoLocations(ipSet, signal);
-
-    return table;
 }
 
 // Function to send POST request to blacklist.php with a given IP address in the body of the POST
@@ -559,7 +571,7 @@ function doSearch() {
                 // write the search results to the log div
                 const logDiv = document.getElementById("log");
                 const pageSpan = document.getElementById("page");
-                logDiv.innerHTML = jsonToTable(data);
+                logDiv.innerHTML = updateTable(data);
                 pageSpan.innerHTML = search;
 
                 // disable all other buttons and
@@ -627,6 +639,7 @@ function getHostNames(ips, signal) {
         fetch("rdns.php?ip=" + ip, { signal })
             .then((response) => response.text())
             .then((data) => {
+                console.log("rdns: " + data);
                 // if data is in the form of an IP address, leave it alone. if it's in the form of a hostname, extract domain.tld
                 let hostname;
                 let whoisLink;
