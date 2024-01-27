@@ -10,6 +10,7 @@ function clfTail($searchDict, $page, $linesPerPage)
     $search = $searchDict['search'];
     $ip = $searchDict['ip'];
     $date = $searchDict['date'];
+    $stat = $searchDict['stat'];
 
     // build UNIX command
     if ($searchDict) {
@@ -23,6 +24,9 @@ function clfTail($searchDict, $page, $linesPerPage)
         }
         if ($date) {
             $grepSearch .= " -e $date";
+        }
+        if ($stat) {
+            $grepSearch .= " -e $stat";
         }
         $cmd = "grep $grepSearch $escFilePath | tac | head -n $linesPerPage";
     } else {
@@ -59,6 +63,16 @@ function clfTail($searchDict, $page, $linesPerPage)
 
         // If $date is set, skip this line if it doesn't contain $date
         if ($date !== null && strpos($matches[2], $date) === false) {
+            continue;
+        }
+
+        // If $stat is set, skip this line if it doesn't contain $stat
+        if ($stat !== null && strpos($matches[4], $stat) === false) {
+            continue;
+        }
+
+        // If $search is set, skip this line if it doesn't contain $search
+        if ($search !== null && strpos($line, $search) === false) {
             continue;
         }
 

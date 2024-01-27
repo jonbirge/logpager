@@ -12,6 +12,7 @@ function authHeatmap($searchDict)
     $search = $searchDict['search'];
     $ip = $searchDict['ip'];
     $dateStr = $searchDict['date'];
+    $stat = $searchDict['stat'];
 
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
@@ -47,9 +48,12 @@ function authHeatmap($searchDict)
         // Convert the timestamp to a DateTime object
         $date = DateTime::createFromFormat('d/M/Y:H:i:s', $timeStamp);
 
-        // if ($status !== 'FAIL') {
-        //     continue;
-        // }
+        // If $stat is set, check if $status matches $stat
+        if ($stat) {
+            if ($status !== $stat) {
+                continue;
+            }
+        }
 
         // If $ip is set, check if $data[0] contains $ip
         if ($ip) {
