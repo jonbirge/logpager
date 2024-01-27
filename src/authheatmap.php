@@ -2,14 +2,16 @@
 
 // Include the authparse.php file
 include 'authparse.php';
-include 'searchparse.php';
 
-function authHeatmap($search)
+function authHeatmap($searchDict)
 {
     // Log files to read
     $logFilePaths = getAuthLogFiles();
 
-    [$search, $ip, $dateStr] = parseSearch($search);
+    // Get search parameters
+    $search = $searchDict['search'];
+    $ip = $searchDict['ip'];
+    $dateStr = $searchDict['date'];
 
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";

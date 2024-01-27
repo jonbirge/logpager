@@ -1,22 +1,18 @@
 <?php
 
-// IP addresses to exclude from counts
-include 'searchparse.php';
-
-function clfTail($search, $page, $linesPerPage) {
+function clfTail($searchDict, $page, $linesPerPage)
+{
     // Path to the CLF log file
     $logFilePath = '/access.log';
     $escFilePath = escapeshellarg($logFilePath);
 
-    if ($search) {
-        $doSearch = true;
-    } else {
-        $doSearch = false;
-    }
-    [$search, $ip, $date] = parseSearch($search);
+    // get search parameters
+    $search = $searchDict['search'];
+    $ip = $searchDict['ip'];
+    $date = $searchDict['date'];
 
     // build UNIX command
-    if ($doSearch) {
+    if ($searchDict) {
         // build grep search command from $search, $ip, and $date
         $grepSearch = '';
         if ($search) {
@@ -73,5 +69,3 @@ function clfTail($search, $page, $linesPerPage) {
     // Output the array as JSON
     echo json_encode($logLines);
 }
-
-?>

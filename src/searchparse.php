@@ -1,6 +1,7 @@
 <?php
 
-function parseSearch($search) {
+function parseSearch($search)
+{
     // Check $search string for terms preceded by ip: or date:, and assume there is,
     // at most, one of each. Remove the terms from $string and set $ip and $date to
     // the values. If $string is empty afterwards, set it to null.
@@ -21,9 +22,14 @@ function parseSearch($search) {
         if ($search === '') {
             $search = null;
         }
+
+        // return as dictionary array
+        return array(
+            'search' => $search,
+            'ip' => $ip,
+            'date' => $dateStr
+        );
+    } else {
+        return null;
     }
-
-    return [$search, $ip, $dateStr];
 }
-
-?>

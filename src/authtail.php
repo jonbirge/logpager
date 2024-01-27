@@ -1,20 +1,17 @@
 <?php
 
 // Include the authparse.php file
-include 'searchparse.php';
 include 'authparse.php';
 
-function authTail($search, $page, $linesPerPage)
+function authTail($searchDict, $page, $linesPerPage)
 {
-    if ($search) {
-        $doSearch = true;
-    } else {
-        $doSearch = false;
-    }
-    [$search, $ip, $date] = parseSearch($search);
-
     // Path to the auth log file
     $logFilePaths = getAuthLogFiles();
+
+    // get search parameters
+    $search = $searchDict['search'];
+    $ip = $searchDict['ip'];
+    $date = $searchDict['date'];
 
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
@@ -31,7 +28,7 @@ function authTail($search, $page, $linesPerPage)
     $catCmd = 'cat ' . implode(' ', $logFilePaths);
 
     // build UNIX command
-    if ($doSearch) {
+    if ($searchDict) {
         $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tac ";
     } else {
         // compute the first and last line numbers
@@ -102,5 +99,3 @@ function authTail($search, $page, $linesPerPage)
     // Output the array as JSON
     echo json_encode($logLines);
 }
-
-?>
