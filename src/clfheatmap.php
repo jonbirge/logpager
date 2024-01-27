@@ -9,6 +9,7 @@ function clfHeatmap($searchDict)
     $search = $searchDict['search'];
     $ip = $searchDict['ip'];
     $dateStr = $searchDict['date'];
+    $stat = $searchDict['stat'];
 
     // Open the log file for reading
     $logFile = fopen($logFilePath, 'r');
@@ -42,6 +43,14 @@ function clfHeatmap($searchDict)
         // If $dateStr is set, check if $date contains $dateStr
         if ($dateStr) {
             if (strpos($timeStamp, $dateStr) === false) {
+                continue;
+            }
+        }
+
+        // If $stat is set, check if $status matches $stat
+        if ($stat) {
+            $status = $logEntry[5];
+            if ($status !== $stat) {
                 continue;
             }
         }

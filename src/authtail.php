@@ -12,6 +12,7 @@ function authTail($searchDict, $page, $linesPerPage)
     $search = $searchDict['search'];
     $ip = $searchDict['ip'];
     $date = $searchDict['date'];
+    $stat = $searchDict['stat'];
 
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
@@ -88,6 +89,13 @@ function authTail($searchDict, $page, $linesPerPage)
 
         // determine status based on $data[2]
         $status = getAuthLogStatus($data[2]);
+
+        // If $stat is set, check if $status matches $stat
+        if ($stat) {
+            if ($status !== $stat) {
+                continue;
+            }
+        }
 
         $logLines[] = [$data[0], $data[1], $data[2], $status];
         $lineCount++;
