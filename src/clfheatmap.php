@@ -1,7 +1,6 @@
 <?php
 
 // IP addresses to exclude from counts
-include 'exclude.php';
 include 'searchparse.php';
 
 // Get an optional 'ip' query string parameter
@@ -9,9 +8,6 @@ $search = $_GET['search'] ?? null;
 
 // Log file to read
 $logFilePath = '/access.log';
-
-// Get an array of IP addresses to exclude from counts
-$excludedIPs = getExcludedIPs();
 
 [$search, $ip, $dateStr] = parseSearch($search);
 
@@ -30,11 +26,6 @@ while (($line = fgets($logFile)) !== false) {
     // Extract the elements from the CLF log entry
     $logEntry = explode(' ', $line);
     $ipAddress = $logEntry[0];
-
-    // Skip this log entry if the IP address is in the excluded list
-    if (in_array($ipAddress, $excludedIPs)) {
-        continue;
-    }
 
     // Extract the timestamp from the CLF log entry
     $timeStamp = $logEntry[3];

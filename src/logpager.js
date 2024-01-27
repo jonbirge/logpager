@@ -132,13 +132,7 @@ function pollLog() {
     searchStatus.innerHTML = "";
 
     // get the log from the server
-    let logURL;
-    if (logType == "clf") {
-        logURL = "clftail.php";
-    } else {
-        logURL = "authtail.php";
-    }
-    fetch(logURL + "?page=" + page)
+    fetch("logtail.php?type=" + logType + "&page=" + page)
         .then((response) => response.text())
         .then((data) => {
             const pageSpan = document.getElementById("page");
