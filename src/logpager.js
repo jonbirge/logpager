@@ -196,14 +196,9 @@ function plotHeatmap(searchTerm) {
     console.log("plotHeatmap: plotting heatmap");
 
     // Build data query URL
-    let heatmapURL;
-    if (logType == "clf") {
-        heatmapURL = "clfheatmap.php";
-    } else {
-        heatmapURL = "authheatmap.php";
-    }
+    let heatmapURL = "heatmap.php?type=" + logType;
     if (searchTerm) {
-        heatmapURL += "?search=" + searchTerm;
+        heatmapURL += "&search=" + searchTerm;
     }
 
     // get summary data from server
