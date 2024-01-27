@@ -8,14 +8,7 @@ include 'searchparse.php';
 $search = $_GET['search'] ?? null;
 
 // Log files to read
-$logFilePaths = ['/auth.log.1', '/auth.log'];
-
-// Remove any log files that don't exist
-foreach ($logFilePaths as $key => $logFilePath) {
-    if (!file_exists($logFilePath)) {
-        unset($logFilePaths[$key]);
-    }
-}
+$logFilePaths = getAuthLogFiles();
 
 [$search, $ip, $dateStr] = parseSearch($search);
 
@@ -45,18 +38,17 @@ $logSummary = [];
 // Add each failed login attempt to the log summary
 while (($line = fgets($fp)) !== false) {
     $status = getAuthLogStatus($line);
-
-    if ($status !== 'FAIL') {
-        continue;
-    }
-
     $data = parseAuthLogLine($line);
-
+    
     // Extract the timestamp from the auth log entry
     $timeStamp = $data[1];
-
+    
     // Convert the timestamp to a DateTime object
     $date = DateTime::createFromFormat('d/M/Y:H:i:s', $timeStamp);
+
+    // if ($status !== 'FAIL') {
+    //     continue;
+    // }
 
     // If $ip is set, check if $data[0] contains $ip
     if ($ip) {
@@ -68,6 +60,13 @@ while (($line = fgets($fp)) !== false) {
     // If $date is set, check if $data[1] contains $date
     if ($date) {
         if (strpos($data[1], $dateStr) === false) {
+            continue;
+        }
+    }
+
+    // If $search is set, check if $line contains $search
+    if ($search) {
+        if (strpos($line, $search) === false) {
             continue;
         }
     }
