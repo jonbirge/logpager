@@ -26,9 +26,6 @@ RUN if [ "$TESTLOGS" = "true" ] ; then \
 RUN touch /blacklist
 RUN chmod a+w /blacklist
 
-# Copy exclusion list
-COPY excludes.json /
-
 # Startup script
 COPY entry.sh /entry.sh
 
@@ -40,4 +37,3 @@ EXPOSE 80
 
 # Start nginx and PHP-FPM
 CMD ["/entry.sh"]
-
