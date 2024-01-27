@@ -1,14 +1,14 @@
 <?php
 
-// IP addresses to exclude from counts
-include 'searchparse.php';
-
-function clfHeatmap($search)
+function clfHeatmap($searchDict)
 {
     // Log file to read
     $logFilePath = '/access.log';
 
-    [$search, $ip, $dateStr] = parseSearch($search);
+    // Get search parameters
+    $search = $searchDict['search'];
+    $ip = $searchDict['ip'];
+    $dateStr = $searchDict['date'];
 
     // Open the log file for reading
     $logFile = fopen($logFilePath, 'r');
