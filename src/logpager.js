@@ -145,7 +145,53 @@ function pollLog() {
         });
 }
 
-// plot heatmap of log entries by hour and day
+// search the log for a given string
+function searchLog(searchTerm) {
+    fetch("logtail.php?type=" + logType + "&search=" + searchTerm + "&n=" + 4096)
+            .then((response) => response.text())
+            .then((data) => {
+                // write the search results to the log div
+                const logDiv = document.getElementById("log");
+                const pageSpan = document.getElementById("page");
+                updateTable(data);
+                pageSpan.innerHTML = "search: " + searchTerm;
+
+                // disable all other buttons and...
+                const buttons = document.querySelectorAll("button");
+                buttons.forEach((button) => {
+                    button.disabled = true;
+                    button.classList.add("disabled");
+                });
+
+                // ...enable search button
+                const searchButton = document.getElementById("search-button");
+                searchButton.disabled = false;
+                searchButton.classList.remove("disabled");
+
+                // add a reset button to the left of the search text box if it doesn't exist
+                const resetButton = document.getElementById("reset-button");
+                if (resetButton === null) {
+                    const resetButton = document.createElement("button");
+                    resetButton.id = "reset-button";
+                    resetButton.innerHTML = "Reset";
+                    resetButton.classList.add("toggle-button");
+                    resetButton.onclick = resetSearch;
+                    const searchDiv = document.getElementById("search-header");
+                    searchDiv.insertBefore(resetButton, searchDiv.firstChild);
+                } else {
+                    resetButton.disabled = false;
+                    resetButton.classList.remove("disabled");
+                }
+
+                // report the number of results
+                const count = JSON.parse(data).length - 1;  // don't count header row
+                console.log("doSearch: " + count + " results");
+                const searchStatus = document.getElementById("status");
+                searchStatus.innerHTML = "<b>" + count + " items</b>";
+            });
+}
+
+// plot heatmap of log entries by hour and day, potentially including a search term
 function plotHeatmap(searchTerm) {
     console.log("plotHeatmap: plotting heatmap");
 
@@ -398,7 +444,7 @@ function jsonToHeatmap(jsonData) {
             const searchInput = document.getElementById("search-input");
             searchInput.value = searchTerm;
             // run the search
-            uiSearch();
+            handleSearchForm();
         });
 
     // Add legend
@@ -518,10 +564,10 @@ function buildTimestampSearch(date, hour) {
 }
 
 // uiSearch is called when the search button is clicked by user
-function uiSearch() {
+function handleSearchForm() {
     const searchInput = document.getElementById("search-input");
     search = searchInput.value;
-    console.log("uiSearch: searching for " + search);
+    console.log("handleSearchButton: searching for " + search);
 
     // add search term to URL
     const url = new URL(window.location.href);
@@ -532,7 +578,7 @@ function uiSearch() {
     doSearch();
 }
 
-// do search on log
+// execute search
 function doSearch() {
     const searchInput = document.getElementById("search-input");
     searchInput.value = search; // set search box to search term
@@ -551,61 +597,18 @@ function doSearch() {
     url.searchParams.delete("page");
     window.history.replaceState({}, "", url);
 
+    // clear whois and status divs
+    const whoisDiv = document.getElementById("whois");
+    whoisDiv.innerHTML = "";
+    const searchStatus = document.getElementById("status");
+    searchStatus.innerHTML = "";
+
     // run search on server
     if (search == "") {
         console.log("ERROR: search is empty!");
     } else {
-        let searchURL;
-        if (logType == "clf") {
-            searchURL = "clftail.php";
-        } else {
-            searchURL = "authtail.php";
-        }
-        fetch(searchURL + "?search=" + search + "&n=" + 2500)
-            .then((response) => response.text())
-            .then((data) => {
-                // write the search results to the log div
-                const logDiv = document.getElementById("log");
-                const pageSpan = document.getElementById("page");
-                updateTable(data);
-                pageSpan.innerHTML = search;
-
-                // disable all other buttons and
-                const buttons = document.querySelectorAll("button");
-                buttons.forEach((button) => {
-                    button.disabled = true;
-                    button.classList.add("disabled");
-                });
-
-                // enable search button
-                const searchButton = document.getElementById("search-button");
-                searchButton.disabled = false;
-                searchButton.classList.remove("disabled");
-
-                // add a reset button to the left of the search text box if it doesn't exist
-                const resetButton = document.getElementById("reset-button");
-                if (resetButton === null) {
-                    const resetButton = document.createElement("button");
-                    resetButton.id = "reset-button";
-                    resetButton.innerHTML = "Reset";
-                    resetButton.classList.add("toggle-button");
-                    resetButton.onclick = resetSearch;
-                    const searchDiv = document.getElementById("search-header");
-                    searchDiv.insertBefore(resetButton, searchDiv.firstChild);
-                } else {
-                    resetButton.disabled = false;
-                    resetButton.classList.remove("disabled");
-                }
-
-                // report the number of results
-                const count = JSON.parse(data).length - 1;  // don't count header row
-                console.log("doSearch: " + count + " results");
-                const searchStatus = document.getElementById("status");
-                searchStatus.innerHTML = "<b>" + count + " items</b>";
-
-                // update the heatmap with the search term
-                plotHeatmap(search);
-            });
+        searchLog(search);
+        plotHeatmap(search);
     }
 }
 

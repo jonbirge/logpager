@@ -33,7 +33,7 @@ while (($line = fgets($logFile)) !== false) {
     // Convert the timestamp to a DateTime object
     $date = DateTime::createFromFormat('[d/M/Y:H:i:s', $timeStamp);
 
-    // If $ip is set, check if $line contains $ip
+    // If $ip is set, check if $ipAddress contains $ip
     if ($ip) {
         if (strpos($ipAddress, $ip) === false) {
             continue;
@@ -43,6 +43,13 @@ while (($line = fgets($logFile)) !== false) {
     // If $dateStr is set, check if $date contains $dateStr
     if ($dateStr) {
         if (strpos($timeStamp, $dateStr) === false) {
+            continue;
+        }
+    }
+
+    // If $search is set, check if $line contains $search
+    if ($search) {
+        if (strpos($line, $search) === false) {
             continue;
         }
     }

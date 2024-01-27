@@ -1,5 +1,21 @@
 <?php
 
+// Return list of auth log files
+function getAuthLogFiles()
+{
+    // Log files to read
+    $logFilePaths = ['/auth.log'];
+
+    // Remove any log files that don't exist
+    foreach ($logFilePaths as $key => $logFilePath) {
+        if (!file_exists($logFilePath)) {
+            unset($logFilePaths[$key]);
+        }
+    }
+
+    return $logFilePaths;
+}
+
 // Determine status of auth log line
 function getAuthLogStatus($line)
 {

@@ -14,14 +14,7 @@ function authTail($search, $page, $linesPerPage)
     [$search, $ip, $date] = parseSearch($search);
 
     // Path to the auth log file
-    $logFilePaths = ['/auth.log'];
-
-    // Remove any log files that don't exist
-    foreach ($logFilePaths as $key => $logFilePath) {
-        if (!file_exists($logFilePath)) {
-            unset($logFilePaths[$key]);
-        }
-    }
+    $logFilePaths = getAuthLogFiles();
 
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
@@ -39,7 +32,7 @@ function authTail($search, $page, $linesPerPage)
 
     // build UNIX command
     if ($doSearch) {
-        $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tac";
+        $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tac ";
     } else {
         // compute the first and last line numbers
         $firstLine = $page * $linesPerPage + 1;
@@ -66,6 +59,7 @@ function authTail($search, $page, $linesPerPage)
     $logLines[] = $headers;
 
     // Process each line and add to the array
+    $lineCount = 0;
     foreach ($lines as $line) {
         $data = parseAuthLogLine($line);
 
@@ -99,6 +93,10 @@ function authTail($search, $page, $linesPerPage)
         $status = getAuthLogStatus($data[2]);
 
         $logLines[] = [$data[0], $data[1], $data[2], $status];
+        $lineCount++;
+        if ($lineCount >= $linesPerPage) {
+            break;
+        }
     }
 
     // Output the array as JSON

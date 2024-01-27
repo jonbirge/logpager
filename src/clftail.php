@@ -28,7 +28,7 @@ function clfTail($search, $page, $linesPerPage) {
         if ($date) {
             $grepSearch .= " -e $date";
         }
-        $cmd = "grep $grepSearch | tac | head -n $linesPerPage";
+        $cmd = "grep $grepSearch $escFilePath | tac | head -n $linesPerPage";
     } else {
         // compute the first and last line numbers
         $firstLine = $page * $linesPerPage + 1;
@@ -36,15 +36,12 @@ function clfTail($search, $page, $linesPerPage) {
         $cmd = "tail -n $lastLine $escFilePath | head -n $linesPerPage | tac";
     }
 
-    // execute UNIX command
+    // execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
-
-    // read the lines from UNIX pipe
     $lines = [];
     while ($line = fgets($fp)) {
         $lines[] = $line;
     }
-
     pclose($fp);
 
     // Read in CLF header name array from clfhead.json
