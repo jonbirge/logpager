@@ -52,6 +52,20 @@
     color: #333;
 }
 
+/* Heading styles */
+h1 {
+    font-size: 24px;
+    margin-top: 24px;
+    margin-bottom: 12px;
+}
+
+h2 {
+    font-size: 20px;
+    font-weight: normal;
+    margin-top: 12px;
+    margin-bottom: 6px;
+}
+
 /* Make links black by default */
 a {
     color: black;
@@ -83,7 +97,7 @@ a {
     font-size: 14px;
 }
 
-/* Status styling */
+/* Status text styling */
 .status {
     margin: 5px;
 }
@@ -96,16 +110,20 @@ table, th, td {
     padding-right: 7px;
     padding-top: 3px;
     padding-bottom: 3px;
-    font-size: 12px;
 }
 
-/* Style the log table to responsively fit all screen sizes, and wrap text to avoid scrolling if possible */
+/* General table style */
 table {
-    width: 100%;
-    text-align: center;
     text-wrap: pretty;
     word-wrap: break-word;
     border-collapse: collapse;
+}
+
+/* Style the log table to have a smaller font size and be centered */
+table.log {
+    font-size: 12px;
+    width: 100%;
+    text-align: center;
 }
 
 /* Style the table header row */

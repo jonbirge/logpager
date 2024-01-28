@@ -220,7 +220,7 @@ function updateTable(jsonData) {
     if (data.length != tableLength) {
         console.log("updateTable: rebuilding table");
         tableLength = data.length;
-        let table0 = '<table id="log-table" class="log-table">';
+        let table0 = '<table id="log-table" class="log">';
         for (let i = 0; i < data.length; i++) {
             table0 += '<tr id="row-' + i + '"></tr>';
         }
@@ -266,10 +266,13 @@ function updateTable(jsonData) {
                 row += "<td><a href=" + srchlink + ">" + ip + "</a><br>";
                 // Create link string that calls blacklist(ip) function
                 const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
-                row += '<a class="blue" href="#" ' + blacklistCall + ">blacklist</a>";
+                row += '<a class="blue" href="#" ' + blacklistCall + ">blacklist</a> | ";
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
-                row += ' <a class="blue" href="#" ' + whoisCall + ">whois</a></td>";
+                row += ' <a class="blue" href="#" ' + whoisCall + ">whois</a> | ";
+                // Create link string that opens a new tab with trace?ip=ip
+                const traceLink = 'onclick="window.open(' + "'trace.php?ip=" + ip + "'" + '); return false"';
+                row += ' <a class="blue" href="#" ' + traceLink + ">trace</a></td>";
                 // Add new cell for Host name after the first cell
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;
