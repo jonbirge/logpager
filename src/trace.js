@@ -89,8 +89,8 @@ function runTrace() {
                 if (data.indexOf("END_OF_FILE") !== -1) {
                     clearInterval(tracePollInterval);
                     traceDiv.innerHTML = data;
-                    //traceButtonDiv.innerHTML = "<p><button class='toggle-button' onclick='runTrace()'>Run trace again</button></p>";
-                    //fetch('cleantrace.php?id=' + uniqueID);
+                    traceButtonDiv.innerHTML = "<p><button class='toggle-button' onclick='runTrace()'>Run trace again</button></p>";
+                    fetch('cleantrace.php?id=' + uniqueID);
                 } else {
                     traceDiv.innerHTML = data;
                 }

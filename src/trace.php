@@ -40,9 +40,9 @@ header("Pragma: no-cache");
 
         <!--
             -->
-        <h2>ping to target</h2>
+        <h2>High-rate ping</h2>
         <div id="ping-button">
-            <button class="toggle-button green" onclick="runPing()">Run ping test</button>
+            <button class="toggle-button green" onclick="runPing()">Run ping</button>
         </div>
         <div id="ping-chart" class="responsive-div">
             <!-- This is where the chart will go -->
@@ -50,7 +50,7 @@ header("Pragma: no-cache");
 
         <!--
             -->
-        <h2>route to target</h2>
+        <h2>Route to target</h2>
         <div id="trace-button">
             <button class="toggle-button green" onclick="runTrace()">Run traceroute</button>
         </div>
