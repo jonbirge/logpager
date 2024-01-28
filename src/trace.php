@@ -33,7 +33,8 @@ header("Pragma: no-cache");
             </tr>
             <!-- query the ipinfo.io API for the target IP's information and put all data into a table -->
             <?php
-            $ipinfo = file_get_contents("http://ipinfo.io/$target_ip/json");
+            $ipURL = "http://ip-api.com/json/$target_ip?fields=57409535";
+            $ipinfo = file_get_contents($ipURL);
             $ipinfo = json_decode($ipinfo, true);
             foreach ($ipinfo as $key => $value) {
                 echo "<tr><td><b>$key</b></td><td>$value</td></tr>";
