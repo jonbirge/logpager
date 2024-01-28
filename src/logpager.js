@@ -376,7 +376,7 @@ function jsonToHeatmap(jsonData) {
     // Set dimensions for the heatmap
     const cellSize = 11; // size of each tile
     const ratio = 1; // width to height ratio
-    const margin = { top: 25, right: 50, bottom: 50, left: 50 };
+    const margin = { top: 0, right: 50, bottom: 50, left: 50 };
     const width = ratio * Object.keys(jsonData).length * cellSize;
     const height = 24 * cellSize;  // 24 hours
 
@@ -524,6 +524,16 @@ function jsonToHeatmap(jsonData) {
         .attr("transform", "rotate(-90)")
         .style("font-size", "14px")
         .text("Hour of the day");
+
+    // Add title by writing to the "heatmap-title" element
+    let titleText;
+    if (search) {
+        titleText = "Search results by time";
+    } else {
+        titleText = "Log entries by time";
+    }
+    const titleHTMLElement = document.getElementById("heatmap-title");
+    titleHTMLElement.innerHTML = titleText;
 
     // Center the chart in the div
     d3.select("#heatmap")
