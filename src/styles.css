@@ -1,6 +1,6 @@
 /* Style the main page container */
 .container {
-    font-family: 'Roboto Flex', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     font-weight: 400; /* Normal font weight */
     margin: auto;
@@ -15,6 +15,7 @@
 
 /* Style the links to look like tabs */
 .tab {
+    font-size: 15px;
     display: inline-block;
     padding: 7px 17px;
     margin-left: 3px;
@@ -26,7 +27,6 @@
     border-top-left-radius: 5px;
     background-color: #f0f0f0;
     text-decoration: none;
-    font-size: 15px;
     color: #555;
 }
 
@@ -37,13 +37,13 @@
 
 /* Style the selected tab */
 .tab.selected {
+    font-weight: 600;
+    font-size: 16px;
     border-color: #333;
     border-bottom: 2px solid white;
     border-top: 3px solid #333;
     margin-bottom: -1px;
     background-color: white;
-    font-weight: 600;
-    font-size: 16px;
     color: black;
 }
 
@@ -94,9 +94,10 @@ a {
 
 /* Text box with 16pt font and wide left and right margins */
 .text-box {
+    font-family: inherit;
+    font-size: inherit;
     margin-left: 11px;
     margin-right: 7px;
-    font-size: 14px;
 }
 
 /* Status text styling */
@@ -178,6 +179,11 @@ tr:nth-child(even) {
 
 /* Styling the button for a modern look */
 .toggle-button {
+    /* font-family: 'DM Sans', 'Inter', sans-serif; */
+    /* font-size: 14px; */
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 500; /* Bold font weight */
     margin-bottom: 7px;
     background-color: #4CAF50; /* Green background */
     border: none;
@@ -186,9 +192,6 @@ tr:nth-child(even) {
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-family: 'Roboto Flex', sans-serif;
-    font-weight: 500; /* Bold font weight */
-    font-size: 14px;
     cursor: pointer;
     border-radius: 5px; /* Rounded corners */
     transition: background-color 0.3s; /* Smooth transition for background color */
