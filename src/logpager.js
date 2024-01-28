@@ -118,12 +118,13 @@ function pollLog() {
         page = 0; // reset page
     }
 
-    // reset the URL
+    // reset the URL and search
     const url = new URL(window.location.href);
     url.searchParams.delete("search");
     url.searchParams.set("type", logType);
     url.searchParams.set("page", page);
     window.history.replaceState({}, "", url);
+    search = null;
 
     // clear whois and status divs
     const whoisDiv = document.getElementById("whois");
