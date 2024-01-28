@@ -1,7 +1,8 @@
 /* Style the main page container */
 .container {
-    font-family: sans-serif;
-    font-size: 14px; /* Slightly smaller font size */
+    font-family: 'Roboto Flex', sans-serif;
+    font-size: 14px;
+    font-weight: 400; /* Normal font weight */
     margin: auto;
     width: calc(min(100%, 1080px) - 40pt); /* Responsive width */
 }
@@ -25,7 +26,7 @@
     border-top-left-radius: 5px;
     background-color: #f0f0f0;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 15px;
     color: #555;
 }
 
@@ -41,8 +42,8 @@
     border-top: 3px solid #333;
     margin-bottom: -1px;
     background-color: white;
-    font-weight: bold;
-    font-size: 15px;
+    font-weight: 600;
+    font-size: 16px;
     color: black;
 }
 
@@ -57,6 +58,7 @@ h1 {
     font-size: 24px;
     margin-top: 24px;
     margin-bottom: 12px;
+    font-weight: 500;
 }
 
 h2 {
@@ -130,7 +132,7 @@ table.log {
 th {
     background-color: #777777;
     color: white;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 /* Hidable columns */
@@ -145,24 +147,24 @@ tr:nth-child(even) {
 
 /* Status colors */
 .green {
-    font-weight: bold;
+    font-weight: 600;
     color: black;
     background-color: rgb(128, 204, 128);
 }
 .red {
-    font-weight: bold;
+    font-weight: 600;
     color: black;
     background-color: rgb(252, 199, 199);
 }
 .gray {
-    font-weight: bold;
+    font-weight: 500;
     color: black;
     background-color: lightgray;
 }
 
 /* Monospace font for request column */
 .code {
-    font-family: monospace;
+    font-family: 'Roboto Mono', monospace;
     text-align: left;
     padding-left: 7pt;
 }
@@ -184,8 +186,8 @@ tr:nth-child(even) {
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-family: Arial, sans-serif;
-    font-weight: normal; /* Bold font weight */
+    font-family: 'Roboto Flex', sans-serif;
+    font-weight: 500; /* Bold font weight */
     font-size: 14px;
     cursor: pointer;
     border-radius: 5px; /* Rounded corners */
