@@ -633,6 +633,7 @@ function resetSearch() {
     });
     searchButton.innerHTML = "Search";
     searchInput.value = "";
+    search = null;
     resetButton.remove();
     pollLog();
     plotHeatmap();
