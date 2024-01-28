@@ -2,17 +2,14 @@
 FROM alpine:latest
 
 # Install nginx and PHP
-RUN apk update && apk upgrade
-RUN apk add nginx php83-fpm whois tcptraceroute
-RUN apk cache purge
+# RUN apk update && apk upgrade
+RUN apk add --no-cache nginx php83-fpm whois tcptraceroute
 
 # Set tcptraceroute as setuid root
 RUN chmod u+s /usr/bin/tcptraceroute
 
 # Setup Nginx web root
-RUN rm -rf /var/www
-RUN mkdir -p /var/www
-RUN chown -R nginx:nginx /var/www
+RUN rm -rf /var/www && mkdir -p /var/www && chown -R nginx:nginx /var/www
 
 # Copy Nginx configuration file
 COPY default.conf /etc/nginx/http.d/default.conf
@@ -27,8 +24,7 @@ RUN if [ "$TESTLOGS" = "true" ] ; then \
     fi
 
 # Default /blacklist file and make writable by php-fpm
-RUN touch /blacklist
-RUN chmod a+w /blacklist
+RUN touch /blacklist && chmod a+w /blacklist
 
 # Startup script
 COPY entry.sh /entry.sh
