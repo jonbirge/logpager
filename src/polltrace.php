@@ -17,6 +17,12 @@ if (file_exists($tempFile)) {
     // Start the HTML table
     echo "<table>";
 
+    // Write header row
+    echo "<tr>";
+    echo "<th>#</th>";
+    echo "<th>Router</th>";
+    echo "<th>Ping</th>";
+
     // Read each line of the text file
     while (!feof($handle)) {
         $line = trim(fgets($handle));

@@ -55,15 +55,15 @@
 /* Heading styles */
 h1 {
     font-size: 24px;
-    margin-top: 12px;
-    margin-bottom: 6px;
+    margin-top: 24px;
+    margin-bottom: 12px;
 }
 
 h2 {
     font-size: 20px;
     font-weight: normal;
-    margin-top: 6px;
-    margin-bottom: 4px;
+    margin-top: 12px;
+    margin-bottom: 6px;
 }
 
 /* Make links black by default */

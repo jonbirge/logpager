@@ -32,7 +32,7 @@ header("Pragma: no-cache");
             $ipinfo = file_get_contents("http://ipinfo.io/$target_ip/json");
             $ipinfo = json_decode($ipinfo, true);
             foreach ($ipinfo as $key => $value) {
-                echo "<tr><td>$key</td><td>$value</td></tr>";
+                echo "<tr><td><b>$key</b></td><td>$value</td></tr>";
             }
             ?>
         </table>
