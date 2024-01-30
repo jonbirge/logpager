@@ -10,7 +10,7 @@ LOCK_FILE="/tmp/trace_output_$UNIQUE_ID.lock"
 touch "$LOCK_FILE"
 
 # Write results to temporary file
-tcptraceroute -q 1 -f 3 $TARGET_HOST > $OUT_FILE
+tcptraceroute -N -q 1 -f 3 $TARGET_HOST > $OUT_FILE
 
 # Delete the lock file to indicate completion
 rm "$LOCK_FILE"
