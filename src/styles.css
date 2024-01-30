@@ -15,7 +15,7 @@
 
 /* Style the links to look like tabs */
 .tab {
-    font-size: 15px;
+    font-size: 1.05em;
     display: inline-block;
     padding: 7px 17px;
     margin-left: 3px;
@@ -38,7 +38,7 @@
 /* Style the selected tab */
 .tab.selected {
     font-weight: 600;
-    font-size: 16px;
+    font-size: 1.1em;
     border-color: #333;
     border-bottom: 2px solid white;
     border-top: 3px solid #333;
@@ -58,12 +58,12 @@ h1 {
     font-size: 24px;
     margin-top: 24px;
     margin-bottom: 12px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 h2 {
     font-size: 20px;
-    font-weight: normal;
+    font-weight: 500;
     margin-top: 12px;
     margin-bottom: 6px;
 }
@@ -133,7 +133,7 @@ table.log {
 th {
     background-color: #777777;
     color: white;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 /* Hidable columns */

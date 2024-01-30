@@ -4,7 +4,7 @@ const hostNames = true; // pull hostnames from external service?
 const orgNames = true; // pull organization names from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
-const maxRequestLength = 38; // truncation length of log details
+const maxRequestLength = 42; // truncation length of log details
 
 // global variables
 let pollInterval;

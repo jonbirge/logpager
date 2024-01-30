@@ -49,7 +49,7 @@ header("Pragma: no-cache");
         <div id="ping-button">
             <button class="toggle-button green" onclick="runPing()">Run ping</button>
         </div>
-        <div id="ping-chart" class="responsive-div">
+        <div id="ping-chart">
             <!-- This is where the chart will go -->
         </div>
 
