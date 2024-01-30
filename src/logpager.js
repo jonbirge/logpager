@@ -267,13 +267,13 @@ function updateTable(jsonData) {
                 row += "<td><a href=" + srchlink + ">" + ip + "</a><br>";
                 // Create link string that calls blacklist(ip) function
                 const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
-                row += '<a class="blue" href="#" ' + blacklistCall + ">blacklist</a> | ";
+                row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button> ";
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
-                row += ' <a class="blue" href="#" ' + whoisCall + ">whois</a> | ";
+                row += ' <button class="toggle-button tight" ' + whoisCall + ">whois</button> ";
                 // Create link string that opens a new tab with trace?ip=ip
                 const traceLink = 'onclick="window.open(' + "'trace.php?ip=" + ip + "'" + '); return false"';
-                row += ' <a class="blue" href="#" ' + traceLink + ">trace</a></td>";
+                row += ' <button class="toggle-button tight" ' + traceLink + ">return fire</button></td>";
                 // Add new cell for Host name after the first cell
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;

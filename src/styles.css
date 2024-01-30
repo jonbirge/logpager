@@ -71,6 +71,7 @@ h2 {
 /* Make links black by default */
 a {
     color: black;
+    font-weight: 500;
 }
 
 .blue {
@@ -124,7 +125,7 @@ table {
 
 /* Style the log table to have a smaller font size and be centered */
 table.log {
-    font-size: 12px;
+    font-size: 12.5px;
     width: 100%;
     text-align: center;
 }
@@ -179,8 +180,6 @@ tr:nth-child(even) {
 
 /* Styling the button for a modern look */
 .toggle-button {
-    /* font-family: 'DM Sans', 'Inter', sans-serif; */
-    /* font-size: 14px; */
     font-family: inherit;
     font-size: inherit;
     font-weight: 500; /* Bold font weight */
@@ -197,9 +196,17 @@ tr:nth-child(even) {
     transition: background-color 0.3s; /* Smooth transition for background color */
 }
 
-/* Change background color on hover to a brighter green */
 .toggle-button:hover {
     background-color: #5CDB60;
+}
+
+.toggle-button.tight {
+    font-size: 0.9em;
+    font-weight: 300;
+    background-color: #546a8a;
+    padding: 1px 3px;
+    border-radius: 3px;
+    margin-top: 2px;
 }
 
 .toggle-button.red {
@@ -211,7 +218,7 @@ tr:nth-child(even) {
 }
 
 .toggle-button.gray {
-    background-color: rgb(69, 69, 69);
+    background-color: rgb(70, 70, 70);
 }
 
 .toggle-button.gray:hover {
