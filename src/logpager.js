@@ -158,11 +158,12 @@ function searchLog(searchTerm) {
                 pageSpan.innerHTML = "search: " + searchTerm;
 
                 // disable all other buttons and...
-                const buttons = document.querySelectorAll("buttons");
-                buttons.forEach((button) => {
-                    button.disabled = true;
-                    button.classList.add("disabled");
-                });
+                const buttonDiv = document.getElementById("buttons");
+                const buttons = buttonDiv.getElementsByTagName("button");
+                for (let i = 0; i < buttons.length; i++) {
+                    buttons[i].disabled = true;
+                    buttons[i].classList.add("disabled");
+                }
 
                 // ...enable search button
                 const searchButton = document.getElementById("search-button");
