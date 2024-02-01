@@ -158,7 +158,7 @@ function searchLog(searchTerm) {
                 pageSpan.innerHTML = "search: " + searchTerm;
 
                 // disable all other buttons and...
-                const buttons = document.querySelectorAll("button");
+                const buttons = document.querySelectorAll("buttons");
                 buttons.forEach((button) => {
                     button.disabled = true;
                     button.classList.add("disabled");
@@ -264,7 +264,7 @@ function updateTable(jsonData) {
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
                 const srchlink = "?type=" + logType + "&search=ip:" + ip;
-                row += '<td><a href=" + srchlink + ">" + ip + "</a><br>';
+                row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
                 // Create link string that calls blacklist(ip) function
                 const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
