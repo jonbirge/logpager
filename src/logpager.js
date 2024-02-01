@@ -99,7 +99,7 @@ function timeDiff(date1, date2) {
     } else if (minutes > 5) {
         return minutes + " min";
     } else {
-        return seconds + " sec";
+        return seconds + "<br>sec";
     }
 }
 
@@ -264,16 +264,18 @@ function updateTable(jsonData) {
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
                 const srchlink = "?type=" + logType + "&search=ip:" + ip;
-                row += "<td><a href=" + srchlink + ">" + ip + "</a><br>";
+                row += '<td><a href=" + srchlink + ">" + ip + "</a><br>';
+                row += '<nobr>';
                 // Create link string that calls blacklist(ip) function
                 const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
-                row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button> ";
+                row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
-                row += ' <button class="toggle-button tight" ' + whoisCall + ">whois</button> ";
+                row += ' <button class="toggle-button tight" ' + whoisCall + ">whois</button>";
                 // Create link string that opens a new tab with trace?ip=ip
                 const traceLink = 'onclick="window.open(' + "'trace.php?ip=" + ip + "'" + '); return false"';
-                row += ' <button class="toggle-button tight" ' + traceLink + ">return fire</button></td>";
+                row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
+                row += "</nobr></td>";
                 // Add new cell for Host name after the first cell
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;
@@ -294,7 +296,7 @@ function updateTable(jsonData) {
                 const dateStamp = parseCLFDate(clfStamp);  // assume UTC
                 const timediff = timeDiff(dateStamp, new Date());
                 const jsonDate = dateStamp.toJSON();
-                row += "<td id=timestamp:" + jsonDate + ">"; 
+                row += '<td id=timestamp:' + jsonDate + '>'; 
                 row += timediff + "</td>";
             } else if (j == 2) {
                 // request
