@@ -63,15 +63,15 @@ h1 {
 
 h2 {
     font-size: 20px;
-    font-weight: 500;
     margin-top: 12px;
     margin-bottom: 6px;
+    font-weight: 500;
 }
 
-/* Make links black by default */
+/* Make links bold & black */
 a {
     color: black;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .blue {
