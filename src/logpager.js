@@ -378,7 +378,9 @@ function updateSearchTable(jsonData) {
         rowElement = document.getElementById("row-" + i);
         row = "";
         for (let j = 0; j < data[i].length; j++) {
-            if (j == 1) {
+            if (j == 0) {
+                row += "<td><b>" + data[i][j] + "</b></td>";
+            } else if (j == 1) {
                 // ip address
                 const ip = data[i][j];
                 ips.push(ip);

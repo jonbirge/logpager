@@ -3,15 +3,15 @@
 include 'searchparse.php';
 
 // Get parameters from URL
-$type = $_GET['type'] ?? "auth";  // auth or clf
-$search = $_GET['search'] ?? "publickey";  // search string
+$type = $_GET['type'] ?? "clf";  // auth or clf
+$search = $_GET['search'] ?? "404";  // search string
 
 $searchDict = parseSearch($search);
 
 switch ($type) {
     case 'clf':
-        // include 'clfsearch.php';
-        // clfSearch($searchDict);
+        include 'clfsearch.php';
+        clfSearch($searchDict);
         break;
     case 'auth':
         include 'authsearch.php';
