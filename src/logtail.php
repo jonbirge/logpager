@@ -12,9 +12,9 @@ $searchDict = parseSearch($search);
 
 switch ($type) {
     case 'clf':
-        //include 'clftail.php';
-        //clfTail($page, $linesPerPage);
-        //break;
+        include 'clftail.php';
+        clfTail($page, $linesPerPage);
+        break;
     case 'auth':
         include 'authtail.php';
         authTail($page, $linesPerPage);
