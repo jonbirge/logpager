@@ -47,7 +47,7 @@ function searchStats($logLines)
     foreach ($logLines as $line) {
         $ip = $line[0];  // string
         $date = $line[1];  // DateTime object
-        $status = $line[3];  // string
+        $status = $line[2];  // string
 
         if (!array_key_exists($ip, $ipDict)) {
             $ipDict[$ip] = ['totalCount' => 0, 'lastDate' => null, 'failCount' => 0];

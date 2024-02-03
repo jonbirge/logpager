@@ -73,49 +73,10 @@ function clfSearch($searchDict)
             echo "Error parsing date: $theDate\n";
         }
 
-        $logLines[] = [$data[1], $dateObj, $data[2], $data[4]];
+        $logLines[] = [$data[1], $dateObj, $data[4]];
     }
 
-    // Create an array indexed by IP address
-    $ipDict = [];
-    foreach ($logLines as $line) {
-        $ip = $line[0];  // string
-        $date = $line[1];  // DateTime object
-        $status = $line[3];  // string
-
-        if (!array_key_exists($ip, $ipDict)) {
-            $ipDict[$ip] = ['totalCount' => 0, 'lastDate' => null, 'failCount' => 0];
-        }
-
-        $ipDict[$ip]['totalCount'] += 1;
-
-        // Update lastDate if the current date is more recent
-        if ($ipDict[$ip]['lastDate'] === null || $date > $ipDict[$ip]['lastDate']) {
-            $ipDict[$ip]['lastDate'] = $date;
-        }
-        
-        if ($status === 'FAIL') {
-            $ipDict[$ip]['failCount'] += 1;
-        }
-    }
-
-    // Read in CLF header name array from searchhead.json
-    $headers = json_decode(file_get_contents('searchhead.json'), true);
-
-    // Write out the $ipDict as a table with the columns: Total, IP, Last, Fail
-    $searchLines = [];
-    foreach ($ipDict as $ip => $data) {
-        $dateStr = $data['lastDate'] === null ? '-' : $data['lastDate']->format('d/M/Y:H:i:s');
-        $searchLines[] = [$data['totalCount'], $ip, $dateStr, $data['failCount']];
-    }
-
-    // Sort $searchLines by the first column (Total) assuming they are integers
-    usort($searchLines, function ($a, $b) {
-        return $b[0] - $a[0];
-    });
-
-    // Add the header to the top of the array
-    array_unshift($searchLines, $headers);
+    $searchLines = searchStats($logLines);
 
     // Output the log lines as JSON
     echo json_encode($searchLines);
