@@ -3,16 +3,10 @@
 // Include the authparse.php file
 include 'authparse.php';
 
-function authTail($searchDict, $page, $linesPerPage)
+function authTail($page, $linesPerPage)
 {
     // Path to the auth log file
     $logFilePaths = getAuthLogFiles();
-
-    // get search parameters
-    $search = $searchDict['search'];
-    $ip = $searchDict['ip'];
-    $date = $searchDict['date'];
-    $stat = $searchDict['stat'];
 
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
@@ -29,14 +23,9 @@ function authTail($searchDict, $page, $linesPerPage)
     $catCmd = 'cat ' . implode(' ', $logFilePaths);
 
     // build UNIX command
-    if ($searchDict) {
-        $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tac ";
-    } else {
-        // compute the first and last line numbers
-        $firstLine = $page * $linesPerPage + 1;
-        $lastLine = $firstLine + ($linesPerPage - 1);
-        $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage | tac";
-    }
+    $firstLine = $page * $linesPerPage + 1;
+    $lastLine = $firstLine + ($linesPerPage - 1);
+    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage | tac";
 
     // execute the UNIX command
     $fp = popen($cmd, 'r');
@@ -61,41 +50,8 @@ function authTail($searchDict, $page, $linesPerPage)
     foreach ($lines as $line) {
         $data = parseAuthLogLine($line);
 
-        if ($data === false) {
-            $logLines[] = ['-', '-', $line, 'ERROR'];
-            continue;
-        }
-
-        // If $search is set, check if $data[2] contains $search
-        if ($search) {
-            if (strpos($data[2], $search) === false) {
-                continue;
-            }
-        }
-
-        // If $ip is set, check if $data[0] contains $ip
-        if ($ip) {
-            if (strpos($data[0], $ip) === false) {
-                continue;
-            }
-        }
-
-        // If $date is set, check if $data[1] contains $date
-        if ($date) {
-            if (strpos($data[1], $date) === false) {
-                continue;
-            }
-        }
-
         // determine status based on $data[2]
         $status = getAuthLogStatus($data[2]);
-
-        // If $stat is set, check if $status matches $stat
-        if ($stat) {
-            if ($status !== $stat) {
-                continue;
-            }
-        }
 
         $logLines[] = [$data[0], $data[1], $data[2], $status];
         $lineCount++;

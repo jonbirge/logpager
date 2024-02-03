@@ -14,7 +14,7 @@ let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
-let logType = params.get("type") !== null ? params.get("type") : "clf";  // "clf" or "auth"
+let logType = params.get("type") !== null ? params.get("type") : "auth";  // "clf" or "auth"
 let tableLength = 0;  // used to decide when to reuse the table
 let geoCache = {};  // cache of geolocation data
 let hostnameCache = {};  // cache of hostnames
@@ -148,49 +148,49 @@ function pollLog() {
 
 // search the log for a given string
 function searchLog(searchTerm) {
-    fetch("logtail.php?type=" + logType + "&search=" + searchTerm + "&n=" + 4096)
-            .then((response) => response.text())
-            .then((data) => {
-                // write the search results to the log div
-                const logDiv = document.getElementById("log");
-                const pageSpan = document.getElementById("page");
-                updateTable(data);
-                pageSpan.innerHTML = "search: " + searchTerm;
+    // disable all other buttons and...
+    const buttonDiv = document.getElementById("buttons");
+    const buttons = Array.from(buttonDiv.getElementsByTagName("button"));
+    buttons.forEach((button) => {
+        button.disabled = true;
+        button.classList.add("disabled");
+    });
 
-                // disable all other buttons and...
-                const buttonDiv = document.getElementById("buttons");
-                const buttons = buttonDiv.getElementsByTagName("button");
-                for (let i = 0; i < buttons.length; i++) {
-                    buttons[i].disabled = true;
-                    buttons[i].classList.add("disabled");
-                }
+    // ...enable search button
+    const searchButton = document.getElementById("search-button");
+    searchButton.disabled = false;
+    searchButton.classList.remove("disabled");
 
-                // ...enable search button
-                const searchButton = document.getElementById("search-button");
-                searchButton.disabled = false;
-                searchButton.classList.remove("disabled");
+    // add a reset button to the left of the search text box if it doesn't exist
+    const resetButton = document.getElementById("reset-button");
+    if (resetButton === null) {
+        const resetButton = document.createElement("button");
+        resetButton.id = "reset-button";
+        resetButton.innerHTML = "Reset";
+        resetButton.classList.add("toggle-button");
+        resetButton.onclick = resetSearch;
+        const searchDiv = document.getElementById("search-header");
+        searchDiv.insertBefore(resetButton, searchDiv.firstChild);
+    } else {
+        resetButton.disabled = false;
+        resetButton.classList.remove("disabled");
+    }
 
-                // add a reset button to the left of the search text box if it doesn't exist
-                const resetButton = document.getElementById("reset-button");
-                if (resetButton === null) {
-                    const resetButton = document.createElement("button");
-                    resetButton.id = "reset-button";
-                    resetButton.innerHTML = "Reset";
-                    resetButton.classList.add("toggle-button");
-                    resetButton.onclick = resetSearch;
-                    const searchDiv = document.getElementById("search-header");
-                    searchDiv.insertBefore(resetButton, searchDiv.firstChild);
-                } else {
-                    resetButton.disabled = false;
-                    resetButton.classList.remove("disabled");
-                }
+    // run the search on the server
+    fetch("logsearch.php?type=" + logType + "&search=" + searchTerm)
+        .then((response) => response.text())
+        .then((data) => {
+            // write the search results to the log div
+            const pageSpan = document.getElementById("page");
+            updateSearchTable(data);
+            pageSpan.innerHTML = "searching " + searchTerm;
 
-                // report the number of results
-                const count = JSON.parse(data).length - 1;  // don't count header row
-                console.log("doSearch: " + count + " results");
-                const searchStatus = document.getElementById("status");
-                searchStatus.innerHTML = "<b>" + count + " items</b>";
-            });
+            // report the number of results
+            const count = JSON.parse(data).length - 1;  // don't count header row
+            console.log("doSearch: " + count + " results");
+            const searchStatus = document.getElementById("status");
+            searchStatus.innerHTML = "<b>" + count + " items</b>";
+        });
 }
 
 // plot heatmap of log entries by hour and day, potentially including a search term
@@ -320,6 +320,106 @@ function updateTable(jsonData) {
                 } else {
                     row += '<td class="gray">' + status + "</td>";
                 } 
+            } else {
+                // anything else
+                row += "<td>" + data[i][j] + "</td>";
+            }
+        }
+        rowElement.innerHTML = row;
+    }
+
+    // Get the host names from the IP addresses
+    const ipSet = [...new Set(ips)]; // Get unique IP addresses
+    if (hostNames) getHostNames(ipSet, signal);
+    if (geolocate | orgNames) getGeoLocations(ipSet, signal);
+}
+
+// Take JSON array of commond log data and write HTML table
+function updateSearchTable(jsonData) {
+    const data = JSON.parse(jsonData);
+    const logDiv = document.getElementById("log");
+    const signal = controller.signal;
+    let ips = [];
+    let row;
+
+    // initialize the table
+    tableLength = 0;
+    let table0 = '<table id="log-table" class="log">';
+    for (let i = 0; i < data.length; i++) {
+        table0 += '<tr id="row-' + i + '"></tr>';
+    }
+    table0 += "</table>";
+    logDiv.innerHTML = table0;
+
+    // write table headers from first row
+    let headrow = document.getElementById("row-0");
+    row = "";
+    for (let i = 0; i < data[0].length; i++) {
+        if (i == 1) {
+            row += "<th>" + data[0][i] + "</th>";
+            if (hostNames) {
+                row += '<th class="hideable">Domain name</th>';
+            }
+            if (orgNames) {
+                row += '<th class="hideable">Organization</th>';
+            }
+            if (geolocate) {
+                row +=
+                '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
+            }
+        } else {
+            row += "<th>" + data[0][i] + "</th>";
+        }
+    }
+    headrow.innerHTML = row;
+
+    // write table rows from remaining rows
+    for (let i = 1; i < data.length; i++) {
+        rowElement = document.getElementById("row-" + i);
+        row = "";
+        for (let j = 0; j < data[i].length; j++) {
+            if (j == 0) {
+                row += "<td><b>" + data[i][j] + "</b></td>";
+            } else if (j == 1) {
+                // ip address
+                const ip = data[i][j];
+                ips.push(ip);
+                // Add cell for IP address with link to search for ip address
+                const srchlink = "?type=" + logType + "&search=ip:" + ip;
+                row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
+                row += '<nobr>';
+                // Create link string that calls blacklist(ip) function
+                const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
+                row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button>";
+                // Create link string that calls whois(ip) function
+                const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
+                row += ' <button class="toggle-button tight" ' + whoisCall + ">whois</button>";
+                // Create link string that opens a new tab with trace?ip=ip
+                const traceLink = 'onclick="window.open(' + "'trace.php?ip=" + ip + "'" + '); return false"';
+                row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
+                row += "</nobr></td>";
+                // Add new cell for Host name after the first cell
+                if (hostNames) {
+                    const hostnameid = "hostname-" + ip;
+                    row += '<td class="hideable" id="' + hostnameid + '">-</td>';
+                }
+                // Add new cell for Organization name after the first cell
+                if (orgNames) {
+                    const orgid = "org-" + ip;
+                    row += '<td class="hideable" id="' + orgid + '">-</td>';
+                }
+                // Add new cell for Geolocation after the first cell (maybe)
+                if (geolocate) {
+                    const geoid = "geo-" + ip;
+                    row += '<td id="' + geoid + '">-</td>';
+                }
+            } else if (j == 2) {  // last date
+                const clfStamp = data[i][j].replace(/\s.*$/, "");  // remove the timezone
+                const dateStamp = parseCLFDate(clfStamp);  // assume UTC
+                const timediff = timeDiff(dateStamp, new Date());
+                const jsonDate = dateStamp.toJSON();
+                row += '<td id=timestamp:' + jsonDate + '>'; 
+                row += timediff + "</td>";
             } else {
                 // anything else
                 row += "<td>" + data[i][j] + "</td>";
@@ -655,7 +755,7 @@ function getHostNames(ips, signal) {
             fetch("rdns.php?ip=" + ip, { signal })
                 .then((response) => response.text())
                 .then((data) => {
-                    console.log("rdns: " + data);
+                    console.log("rdns rx: " + data);
                     // Cache the data
                     hostnameCache[ip] = data;
                     updateHostNames(data, ip);
@@ -709,6 +809,7 @@ function getGeoLocations(ips, signal) {
     ips.forEach((ip) => {
         // check cache first
         if (geoCache[ip]) {
+            console.log("cached geo: " + ip);
             updateGeoLocations(geoCache[ip], ip);
         } else {
             setTimeout(
@@ -751,6 +852,7 @@ function getGeoLocations(ips, signal) {
         fetch("geo.php?ip=" + ip, { signal })
             .then((response) => response.json())
             .then((data) => {
+                console.log("geo rx: " + ip);
                 // cache the data
                 geoCache[ip] = data;
                 updateGeoLocations(data, ip);
