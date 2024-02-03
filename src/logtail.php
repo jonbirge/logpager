@@ -12,12 +12,12 @@ $searchDict = parseSearch($search);
 
 switch ($type) {
     case 'clf':
-        include 'clftail.php';
-        clfTail($searchDict, $page, $linesPerPage);
-        break;
+        //include 'clftail.php';
+        //clfTail($page, $linesPerPage);
+        //break;
     case 'auth':
         include 'authtail.php';
-        authTail($searchDict, $page, $linesPerPage);
+        authTail($page, $linesPerPage);
         break;
     default:
         echo "<p>Invalid log type: $type</p>";
