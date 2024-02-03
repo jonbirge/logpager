@@ -755,7 +755,7 @@ function getHostNames(ips, signal) {
             fetch("rdns.php?ip=" + ip, { signal })
                 .then((response) => response.text())
                 .then((data) => {
-                    console.log("rdns: " + data);
+                    console.log("rdns rx: " + data);
                     // Cache the data
                     hostnameCache[ip] = data;
                     updateHostNames(data, ip);
@@ -809,6 +809,7 @@ function getGeoLocations(ips, signal) {
     ips.forEach((ip) => {
         // check cache first
         if (geoCache[ip]) {
+            console.log("cached geo: " + ip);
             updateGeoLocations(geoCache[ip], ip);
         } else {
             setTimeout(
@@ -851,6 +852,7 @@ function getGeoLocations(ips, signal) {
         fetch("geo.php?ip=" + ip, { signal })
             .then((response) => response.json())
             .then((data) => {
+                console.log("geo rx: " + ip);
                 // cache the data
                 geoCache[ip] = data;
                 updateGeoLocations(data, ip);
