@@ -76,6 +76,19 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
+// enable the search button when something is typed in the search box
+document.getElementById("search-input").oninput = function () {
+    const searchButton = document.getElementById("search-button");
+    // if the search box is empty, disable the search button
+    if (this.value === "") {
+        searchButton.disabled = true;
+        searchButton.classList.add("disabled");
+    } else {
+        searchButton.disabled = false;
+        searchButton.classList.remove("disabled");
+    }
+};
+
 // create a Date object from a log timestamp of the form DD/Mon/YYYY:HH:MM:SS, assuming UTC timezone
 function parseCLFDate(clfstamp) {
     const parts = clfstamp.split(/[:/]/); // split on : and /
