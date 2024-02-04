@@ -742,15 +742,25 @@ function resetSearch() {
     const searchInput = document.getElementById("search-input");
     const searchButton = document.getElementById("search-button");
     const resetButton = document.getElementById("reset-button");
-    const buttons = document.querySelectorAll("button");
+
+    // enable all other buttons and...
+    const buttonDiv = document.getElementById("buttons");
+    const buttons = Array.from(buttonDiv.getElementsByTagName("button"));
     buttons.forEach((button) => {
         button.disabled = false;
         button.classList.remove("disabled");
     });
-    searchButton.innerHTML = "Search";
-    searchInput.value = "";
+    
+    // disable search button
+    searchButton.disabled = true;
+    searchButton.classList.add("disabled");
+
+    // clear search box and remove reset button
     search = null;
+    searchInput.value = "";
     resetButton.remove();
+
+    // load the log
     pollLog();
     plotHeatmap();
 }
