@@ -792,7 +792,7 @@ function getHostNames(ips, signal) {
                 '[id^="hostname-' + ip + '"]'
             );
             const whoisCall = 'onclick="whois(' + "'" + hostname + "'" + '); return false"';
-            whoisLink = '<a class="blue" href="#" ' + whoisCall + '>' + hostname + '</a>';
+            whoisLink = '<a href="#" ' + whoisCall + '>' + hostname + '</a>';
             hostnameCells.forEach((cell) => {
                 cell.innerHTML = whoisLink;
             });
