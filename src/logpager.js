@@ -219,7 +219,7 @@ function plotHeatmap(searchTerm) {
     // get summary data from server
     console.log("plotHeatmap: fetching " + heatmapURL);
     fetch(heatmapURL)
-        .then( (response) => response.json() )
+        .then((response) => response.json())
         .then(jsonToHeatmap);
 }
 
@@ -257,7 +257,7 @@ function updateTable(jsonData) {
             }
             if (geolocate) {
                 row +=
-                '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
+                    '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
             }
         } else if (i == 2) {  // details
             row += '<th class="hideable">' + data[0][i] + '</th>';
@@ -293,24 +293,24 @@ function updateTable(jsonData) {
                 // Add new cell for Host name after the first cell
                 if (hostNames) {
                     const hostnameid = "hostname-" + ip;
-                    row += '<td class="hideable" id="' + hostnameid + '">-</td>';
+                    row += '<td class="hideable" id="' + hostnameid + '"></td>';
                 }
                 // Add new cell for Organization name after the first cell
                 if (orgNames) {
                     const orgid = "org-" + ip;
-                    row += '<td class="hideable" id="' + orgid + '">-</td>';
+                    row += '<td class="hideable" id="' + orgid + '"></td>';
                 }
                 // Add new cell for Geolocation after the first cell (maybe)
                 if (geolocate) {
                     const geoid = "geo-" + ip;
-                    row += '<td id="' + geoid + '">-</td>';
+                    row += '<td id="' + geoid + '"></td>';
                 }
             } else if (j == 1) {
                 const clfStamp = data[i][j].replace(/\s.*$/, "");  // remove the timezone
                 const dateStamp = parseCLFDate(clfStamp);  // assume UTC
                 const timediff = timeDiff(dateStamp, new Date());
                 const jsonDate = dateStamp.toJSON();
-                row += '<td id=timestamp:' + jsonDate + '>'; 
+                row += '<td id=timestamp:' + jsonDate + '>';
                 row += timediff + "</td>";
             } else if (j == 2) {
                 // request
@@ -332,7 +332,7 @@ function updateTable(jsonData) {
                     row += '<td class="red">' + status + "</td>";
                 } else {
                     row += '<td class="gray">' + status + "</td>";
-                } 
+                }
             } else {
                 // anything else
                 row += "<td>" + data[i][j] + "</td>";
@@ -378,7 +378,7 @@ function updateSearchTable(jsonData) {
             }
             if (geolocate) {
                 row +=
-                '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
+                    '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
             }
         } else {
             row += "<th>" + data[0][i] + "</th>";
@@ -431,7 +431,7 @@ function updateSearchTable(jsonData) {
                 const dateStamp = parseCLFDate(clfStamp);  // assume UTC
                 const timediff = timeDiff(dateStamp, new Date());
                 const jsonDate = dateStamp.toJSON();
-                row += '<td id=timestamp:' + jsonDate + '>'; 
+                row += '<td id=timestamp:' + jsonDate + '>';
                 row += timediff + "</td>";
             } else {
                 // anything else
@@ -470,7 +470,7 @@ function jsonToHeatmap(jsonData) {
     if (svgElement) {
         svgElement.remove();
     }
-    
+
     // Process the data to work with D3 library
     let processedData = [];
     Object.keys(jsonData).forEach((date) => {
@@ -760,34 +760,29 @@ function getHostNames(ips, signal) {
     console.log("Getting host names for " + ips);
     fetchCount++;
     // Grab each ip address and send to rdns.php
+    let rdnsWaitTime = 0;
     ips.forEach((ip) => {
         // Check cache first
         if (hostnameCache[ip]) {
             updateHostNames(hostnameCache[ip], ip);
         } else {
-            fetch("rdns.php?ip=" + ip, { signal })
-                .then((response) => response.text())
-                .then((data) => {
-                    console.log("rdns rx: " + data);
-                    // Cache the data
-                    hostnameCache[ip] = data;
-                    updateHostNames(data, ip);
-                    fetchCount--;
-                })
-                .catch((error) => {
-                    if (error.name === "AbortError") {
-                        console.log("Fetch safely aborted");
-                    } else {
-                        console.log("Fetch error:", error);
-                    }
-                });
+            setTimeout(
+                () => fetchRDNS(ip),
+                rdnsWaitTime,
+                { signal }
+            );
+            rdnsWaitTime += apiWait;
         }
     });
 
     function updateHostNames(data, ip) {
-        // if data is in the form of an IP address, leave it alone. if it's in the form of a hostname, extract domain.tld
+        // Get all cells with id of the form hostname-ipAddress
+        const hostnameCells = document.querySelectorAll(
+            '[id^="hostname-' + ip + '"]'
+        );
         let hostname;
         let whoisLink;
+        // if data is in the form of an IP address, leave it alone. if it's in the form of a hostname, extract domain.tld
         if (data.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/)) {
             // data is an IP address
             hostname = null;
@@ -800,16 +795,31 @@ function getHostNames(ips, signal) {
         if (hostname === null) {
             whoisLink = "-";
         } else {
-            // Get all cells with id of the form hostname-ipAddress
-            const hostnameCells = document.querySelectorAll(
-                '[id^="hostname-' + ip + '"]'
-            );
             const whoisCall = 'onclick="whois(' + "'" + hostname + "'" + '); return false"';
             whoisLink = '<a href="#" ' + whoisCall + '>' + hostname + '</a>';
-            hostnameCells.forEach((cell) => {
-                cell.innerHTML = whoisLink;
-            });
         }
+        hostnameCells.forEach((cell) => {
+            cell.innerHTML = whoisLink;
+        });
+    }
+
+    function fetchRDNS(ip) {
+        fetch("rdns.php?ip=" + ip, { signal })
+            .then((response) => response.text())
+            .then((data) => {
+                console.log("rdns rx: " + data);
+                // cache the data
+                hostnameCache[ip] = data;
+                updateHostNames(data, ip);
+                fetchCount--;
+            })
+            .catch((error) => {
+                if (error.name === "AbortError") {
+                    console.log("Fetch safely aborted");
+                } else {
+                    console.log("Fetch error:", error);
+                }
+            });
     }
 }
 
@@ -818,7 +828,7 @@ function getGeoLocations(ips, signal) {
     console.log("Getting geolocations for " + ips);
     fetchCount++;
     // Grab each ip address and send to ip-api.com
-    let waitTime = 0;
+    let geoWaitTime = 0;
     ips.forEach((ip) => {
         // check cache first
         if (geoCache[ip]) {
@@ -827,10 +837,10 @@ function getGeoLocations(ips, signal) {
         } else {
             setTimeout(
                 () => fetchGeoLocation(ip),
-                waitTime,
+                geoWaitTime,
                 { signal }
             );
-            waitTime += apiWait;
+            geoWaitTime += apiWait;
         }
     });
 
@@ -841,23 +851,35 @@ function getGeoLocations(ips, signal) {
             const geoCells = document.querySelectorAll(
                 '[id^="geo-' + ip + '"]'
             );
-            // set each cell in geoCells to data
-            geoCells.forEach((cell) => {
-                cell.innerHTML =
-                    data.city + ", " +
-                    data.region + ", " +
-                    data.countryCode;
-            });
+            if (data !== null) {
+                // set each cell in geoCells to data
+                geoCells.forEach((cell) => {
+                    cell.innerHTML =
+                        data.city + ", " +
+                        data.region + ", " +
+                        data.countryCode;
+                });
+            } else {
+                geoCells.forEach((cell) => {
+                    cell.innerHTML = "-";
+                });
+            }
         }
         if (orgNames) {
             // Get all cells with id of the form org-ipAddress
             const orgCells = document.querySelectorAll(
                 '[id^="org-' + ip + '"]'
             );
-            // set each cell in orgCells to data
-            orgCells.forEach((cell) => {
-                cell.innerHTML = data.org;
-            });
+            if (data !== null) {
+                // set each cell in orgCells to data
+                orgCells.forEach((cell) => {
+                    cell.innerHTML = data.org;
+                });
+            } else {
+                orgCells.forEach((cell) => {
+                    cell.innerHTML = "-";
+                });
+            }
         }
     }
 
@@ -876,6 +898,7 @@ function getGeoLocations(ips, signal) {
                     console.log("Fetch safely aborted");
                 } else {
                     console.log("Fetch error:", error);
+                    updateGeoLocations(null, ip);
                 }
             });
     }
