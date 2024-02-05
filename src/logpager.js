@@ -286,8 +286,8 @@ function updateTable(jsonData) {
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
                 row += ' <button class="toggle-button tight" ' + whoisCall + ">whois</button>";
-                // Create link string that opens a new tab with trace?ip=ip
-                const traceLink = 'onclick="window.open(' + "'trace.php?ip=" + ip + "'" + '); return false"';
+                // Create link string that opens a new tab with intel.php?ip=ip
+                const traceLink = 'onclick="window.open(' + "'intel.php?ip=" + ip + "'" + '); return false"';
                 row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
                 row += "</nobr></td>";
                 // Add new cell for Host name after the first cell
@@ -407,8 +407,8 @@ function updateSearchTable(jsonData) {
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
                 row += ' <button class="toggle-button tight" ' + whoisCall + ">whois</button>";
-                // Create link string that opens a new tab with trace?ip=ip
-                const traceLink = 'onclick="window.open(' + "'trace.php?ip=" + ip + "'" + '); return false"';
+                // Create link string that opens a new tab with intel.php?ip=ip
+                const traceLink = 'onclick="window.open(' + "'intel.php?ip=" + ip + "'" + '); return false"';
                 row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
                 row += "</nobr></td>";
                 // Add new cell for Host name after the first cell

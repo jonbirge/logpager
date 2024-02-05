@@ -14,7 +14,7 @@ header("Pragma: no-cache");
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Roboto+Mono&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="styles.css?version=19">
+    <link rel="stylesheet" type="text/css" href="styles.css?version=25">
     <?php
     $target_ip = $_GET['ip'];
     echo "<title>Target intel: $target_ip</title>"
@@ -41,7 +41,7 @@ header("Pragma: no-cache");
             }
             ?>
         </table>
-        <button class="toggle-button" onclick="runAll()">Run all traces...</button>
+        <button class="toggle-button" onclick="runAll()">Execute all...</button>
 
         <!--
             -->
@@ -64,7 +64,7 @@ header("Pragma: no-cache");
         </div>
     </div>
 
-    <script src="trace.js"></script>
+    <script src="intel.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 
