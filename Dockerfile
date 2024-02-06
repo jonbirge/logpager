@@ -3,10 +3,11 @@ FROM alpine:latest
 
 # Install nginx and PHP
 # RUN apk update && apk upgrade
-RUN apk add --no-cache nginx php83-fpm whois tcptraceroute
+RUN apk add --no-cache nginx php83-fpm whois tcptraceroute nmap
 
-# Set tcptraceroute as setuid root
+# setuid root
 RUN chmod u+s /usr/bin/tcptraceroute
+RUN chmod u+s /usr/bin/nmap
 
 # Setup Nginx web root
 RUN rm -rf /var/www && mkdir -p /var/www && chown -R nginx:nginx /var/www
