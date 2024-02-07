@@ -26,7 +26,7 @@ if ($handle) {
     }
 
     // Convert the line array to JSON format and output it, making sure to escape any special characters
-    echo json_encode($scanLines, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+    echo json_encode($scanLines);
 } else {
     // Error handling in case the file cannot be opened
     echo "Error: Unable to open the file.";

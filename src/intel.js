@@ -2,17 +2,35 @@
 let params = new URLSearchParams(window.location.search);
 let targetIP = params.get('ip');
 
-function runScan() {
+function runScan(mode) {
     const uniqueID = Math.random().toString(36).substr(2, 9);
     const scanDiv = document.getElementById('scan');
-    const scanButtonDiv = document.getElementById('scan-button');
+    const scanButtonDiv = document.getElementById('scan-buttons');
+    let initialButtons = scanButtonDiv.innerHTML;
     let scanPollInterval;
     let waitCount = 0;
+
+    let scanURL;
+    if (mode === 'deep') {
+        scanURL = 'startscan.php?ip=' + targetIP + '&id=' + uniqueID + '&mode=deep';
+    } else {
+        scanURL = 'startscan.php?ip=' + targetIP + '&id=' + uniqueID + '&mode=quick';
+    }
+    console.log("runScan: " + scanURL);
+    scanButtonDiv.innerHTML = "<p><b>Starting port scan...</b></p>";
+    fetch(scanURL)
+    .then(response => {
+        if (response.ok) {
+            scanPollInterval = setInterval(pollScanServer, 1000);
+        } else {
+            scanDiv.innerHTML = '<p>Error starting port scan script</p>';
+        }
+    });
 
     function pollScanServer() {
         // write message to scanButtonDiv each time we poll
         waitCount++;
-        scanButtonDiv.innerHTML = "Running port scan" + ".".repeat(waitCount % 4);
+        scanButtonDiv.innerHTML = "<p><b>Running port scan" + ".".repeat(waitCount % 4) + "</b></p>";
 
         fetch('pollscan.php?id=' + uniqueID)
             .then(response => response.text())
@@ -21,7 +39,7 @@ function runScan() {
                 var scanData = JSON.parse(data);
                 var scanDone = false;
 
-                // Check to see if the last element is -1, and if it is, remove it
+                // Check to see if the last element is the EOF token, and if it is, remove it
                 if (scanData[scanData.length - 1] === "EOF") {
                     scanData.pop();
                     scanDone = true;
@@ -34,21 +52,10 @@ function runScan() {
                 if (scanDone) {
                     clearInterval(scanPollInterval);
                     fetch('cleanscan.php?id=' + uniqueID);
-                    scanButtonDiv.innerHTML = "<button class='toggle-button' onclick='runScan()'>Execute scan again</button>";
+                    scanButtonDiv.innerHTML = initialButtons;
                 }
             });
     }
-
-    fetch('startscan.php?ip=' + targetIP + '&id=' + uniqueID)
-        .then(response => {
-            console.log("Starting port scan...");
-            scanButtonDiv.innerHTML = "<p>Running port scan...</p>";
-            if (response.ok) {
-                scanPollInterval = setInterval(pollScanServer, 1000);
-            } else {
-                scanDiv.innerHTML = '<p>Error starting port scan script</p>';
-            }
-        });
 }
 
 function runPing() {
@@ -165,6 +172,7 @@ function runTrace() {
 }
 
 function runAll() {
+    runScan();
     runPing();
     runTrace();
 }

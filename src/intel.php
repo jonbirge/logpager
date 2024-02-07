@@ -44,14 +44,15 @@ header("Pragma: no-cache");
         <button class="toggle-button" onclick="runAll()">Execute all...</button>
 
         <h2>Port scan</h2>
-        <div id="scan-button">
-            <button class="toggle-button green" onclick="runScan()">Execute port scan</button>
+        <div id="scan-buttons">
+            <button class="toggle-button green" onclick="runScan('quick')">Quick port scan</button>
+            <button class="toggle-button green" onclick="runScan('deep')">Deep port scan</button>
         </div>
         <div id="scan" class="scan">
             <!-- This is where the scan will go -->
         </div>
 
-        <h2>High-rate ping</h2>
+        <h2>Ping timing</h2>
         <div id="ping-button">
             <button class="toggle-button green" onclick="runPing()">Ping target</button>
         </div>
@@ -59,7 +60,7 @@ header("Pragma: no-cache");
             <!-- This is where the chart will go -->
         </div>
 
-        <h2>TCP trace route</h2>
+        <h2>TCP route trace</h2>
         <div id="trace-button">
             <button class="toggle-button green" onclick="runTrace()">Execute traceroute</button>
         </div>
@@ -68,11 +69,11 @@ header("Pragma: no-cache");
         </div>
 
         <!-- version and copyright -->
-        <div style="margin-top: 50px;">1.6b7</div>
+        <div style="margin-top: 50px;">1.7b1</div>
     </div>
 
 
-    <script src="intel.js?version=33"></script>
+    <script src="intel.js?version=37"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 
