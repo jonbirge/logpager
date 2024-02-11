@@ -25,6 +25,8 @@ function clfHeatmap($searchDict)
     while (($line = fgets($logFile)) !== false) {
         // Extract the elements from the CLF log entry
         $logEntry = explode(' ', $line);
+
+        // Extract the IP address from the CLF log entry
         $ipAddress = $logEntry[0];
 
         // Extract the timestamp from the CLF log entry
@@ -49,7 +51,7 @@ function clfHeatmap($searchDict)
 
         // If $stat is set, check if $status matches $stat
         if ($stat) {
-            $status = $logEntry[5];
+            $status = $logEntry[8];
             if ($status !== $stat) {
                 continue;
             }
