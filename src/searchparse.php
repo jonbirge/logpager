@@ -60,7 +60,7 @@ function searchStats($logLines)
             $ipDict[$ip]['lastDate'] = $date;
         }
         
-        if ($status === 'FAIL') {
+        if ($status === 'FAIL' || $status === '404' || $status === '403') {
             $ipDict[$ip]['failCount'] += 1;
         }
     }
