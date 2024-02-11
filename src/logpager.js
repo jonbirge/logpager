@@ -10,7 +10,6 @@ const maxRequestLength = 42; // truncation length of log details
 let pollInterval;
 let polling = false;
 let controller;
-let fetchCount = 0;
 let params = new URLSearchParams(window.location.search);
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
@@ -121,12 +120,10 @@ function pollLog() {
     console.log("pollLog: fetching page " + page + " of type " + logType);
 
     // abort any pending fetches
-    if (fetchCount > 0) {
-        console.log("Aborting " + fetchCount + " fetches");
+    if (controller) {
         controller.abort();
     }
     controller = new AbortController();
-    fetchCount = 0;
     if (page < 0) {
         page = 0; // reset page
     }
@@ -161,6 +158,17 @@ function pollLog() {
 
 // search the log for a given string
 function searchLog(searchTerm) {
+    console.log("searchLog: searching for " + searchTerm);
+
+    // abort any pending fetches
+    if (controller) {
+        controller.abort();
+    }
+    controller = new AbortController();
+    if (page < 0) {
+        page = 0; // reset page
+    }
+
     // disable all other buttons and...
     const buttonDiv = document.getElementById("buttons");
     const buttons = Array.from(buttonDiv.getElementsByTagName("button"));
@@ -710,12 +718,10 @@ function doSearch() {
     console.log("doSearch: searching for " + search);
 
     // abort any pending fetches
-    if (fetchCount > 0) {
-        console.log("Aborting " + fetchCount + " fetches");
+    if (controller) {
         controller.abort();
     }
     controller = new AbortController();
-    fetchCount = 0;
 
     // remove any page parameter from URL
     const url = new URL(window.location.href);
@@ -768,7 +774,6 @@ function resetSearch() {
 // get host names from IP addresses
 function getHostNames(ips, signal) {
     console.log("Getting host names for " + ips);
-    fetchCount++;
     // Grab each ip address and send to rdns.php
     let rdnsWaitTime = 0;
     ips.forEach((ip) => {
@@ -821,11 +826,10 @@ function getHostNames(ips, signal) {
                 // cache the data
                 hostnameCache[ip] = data;
                 updateHostNames(data, ip);
-                fetchCount--;
             })
             .catch((error) => {
                 if (error.name === "AbortError") {
-                    console.log("Fetch safely aborted");
+                    console.log("rdns aborted for " + ip);
                 } else {
                     console.log("Fetch error:", error);
                 }
@@ -836,7 +840,6 @@ function getHostNames(ips, signal) {
 // get geolocations and orgs from IP addresses using ip-api.com
 function getGeoLocations(ips, signal) {
     console.log("Getting geolocations for " + ips);
-    fetchCount++;
     // Grab each ip address and send to ip-api.com
     let geoWaitTime = 0;
     ips.forEach((ip) => {
@@ -901,11 +904,10 @@ function getGeoLocations(ips, signal) {
                 // cache the data
                 geoCache[ip] = data;
                 updateGeoLocations(data, ip);
-                fetchCount--;
             })
             .catch((error) => {
                 if (error.name === "AbortError") {
-                    console.log("Fetch safely aborted");
+                    console.log("geo fetch aborted for " + ip);
                 } else {
                     console.log("Fetch error:", error);
                     updateGeoLocations(null, ip);
