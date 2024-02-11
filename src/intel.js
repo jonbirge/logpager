@@ -2,6 +2,62 @@
 let params = new URLSearchParams(window.location.search);
 let targetIP = params.get('ip');
 
+function runScan(mode) {
+    const uniqueID = Math.random().toString(36).substr(2, 9);
+    const scanDiv = document.getElementById('scan');
+    const scanButtonDiv = document.getElementById('scan-buttons');
+    let initialButtons = scanButtonDiv.innerHTML;
+    let scanPollInterval;
+    let waitCount = 0;
+
+    let scanURL;
+    if (mode === 'deep') {
+        scanURL = 'startscan.php?ip=' + targetIP + '&id=' + uniqueID + '&mode=deep';
+    } else {
+        scanURL = 'startscan.php?ip=' + targetIP + '&id=' + uniqueID + '&mode=quick';
+    }
+    console.log("runScan: " + scanURL);
+    scanButtonDiv.innerHTML = "<p><b>Starting port scan...</b></p>";
+    fetch(scanURL)
+    .then(response => {
+        if (response.ok) {
+            scanPollInterval = setInterval(pollScanServer, 1000);
+        } else {
+            scanDiv.innerHTML = '<p>Error starting port scan script</p>';
+        }
+    });
+
+    function pollScanServer() {
+        // write message to scanButtonDiv each time we poll
+        waitCount++;
+        scanButtonDiv.innerHTML = "<p><b>Running port scan" + ".".repeat(waitCount % 4) + "</b></p>";
+
+        fetch('pollscan.php?id=' + uniqueID)
+            .then(response => response.text())
+            .then(data => {
+                // Parsing JSON data
+                var scanData = JSON.parse(data);
+                var scanDone = false;
+
+                // Check to see if the last element is the EOF token, and if it is, remove it
+                if (scanData[scanData.length - 1] === "EOF") {
+                    scanData.pop();
+                    scanDone = true;
+                    console.log("EOF encountered. Scan done.");
+                }
+
+                // Put the data into a <pre> tag inside the scanDiv
+                scanDiv.innerHTML = "<pre>" + scanData.join("") + "</pre>";
+
+                if (scanDone) {
+                    clearInterval(scanPollInterval);
+                    fetch('cleanscan.php?id=' + uniqueID);
+                    scanButtonDiv.innerHTML = initialButtons;
+                }
+            });
+    }
+}
+
 function runPing() {
     const uniqueID = Math.random().toString(36).substr(2, 9);
     const pingDiv = document.getElementById('ping-button');
@@ -81,15 +137,20 @@ function runTrace() {
     const traceDiv = document.getElementById('trace');
     const traceButtonDiv = document.getElementById('trace-button');
     let tracePollInterval;
+    let waitCount = 0;
 
     function pollTraceServer() {
+        // write message to traceButtonDiv each time we poll
+        waitCount++;
+        traceButtonDiv.innerHTML = "Running traceroute" + ".".repeat(waitCount % 4);
+
         fetch('polltrace.php?id=' + uniqueID)
             .then(response => response.text())
             .then(data => {
                 if (data.indexOf("END_OF_FILE") !== -1) {
                     clearInterval(tracePollInterval);
                     traceDiv.innerHTML = data;
-                    traceButtonDiv.innerHTML = "<p><button class='toggle-button' onclick='runTrace()'>Run trace again</button></p>";
+                    traceButtonDiv.innerHTML = "<button class='toggle-button' onclick='runTrace()'>Run trace again</button>";
                     fetch('cleantrace.php?id=' + uniqueID);
                 } else {
                     traceDiv.innerHTML = data;
@@ -101,7 +162,7 @@ function runTrace() {
     console.log(traceURL);
     fetch(traceURL)
         .then(response => {
-            traceButtonDiv.innerHTML = "<p>Running traceroute...</p>";
+            traceButtonDiv.innerHTML = "Running traceroute...";
             if (response.ok) {
                 tracePollInterval = setInterval(pollTraceServer, 1000);
             } else {
@@ -111,6 +172,7 @@ function runTrace() {
 }
 
 function runAll() {
+    runScan();
     runPing();
     runTrace();
 }
