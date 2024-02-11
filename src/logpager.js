@@ -5,6 +5,7 @@ const orgNames = true; // pull organization names from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
 const maxRequestLength = 42; // truncation length of log details
+const maxSearchLength = 64; // truncation length of search results
 
 // global variables
 let pollInterval;
@@ -210,7 +211,7 @@ function searchLog(searchTerm) {
             const count = JSON.parse(data).length - 1;  // don't count header row
             console.log("doSearch: " + count + " results");
             const searchStatus = document.getElementById("status");
-            searchStatus.innerHTML = "<b>" + count + " items</b>";
+            searchStatus.innerHTML = "<b>" + count + " items found</b>";
         });
 }
 
@@ -363,10 +364,13 @@ function updateSearchTable(jsonData) {
     let ips = [];
     let row;
 
+    // get length of the data, and limit it to maxSearchLength
+    const dataLength = data.length > maxSearchLength ? maxSearchLength : data.length;
+
     // initialize the table
-    tableLength = 0;
+    tableLength = 0;  // reset table length
     let table0 = '<table id="log-table" class="log">';
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < dataLength; i++) {
         table0 += '<tr id="row-' + i + '"></tr>';
     }
     table0 += "</table>";
@@ -395,7 +399,7 @@ function updateSearchTable(jsonData) {
     headrow.innerHTML = row;
 
     // write table rows from remaining rows
-    for (let i = 1; i < data.length; i++) {
+    for (let i = 1; i < dataLength; i++) {
         rowElement = document.getElementById("row-" + i);
         row = "";
         for (let j = 0; j < data[i].length; j++) {
