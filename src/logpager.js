@@ -5,6 +5,7 @@ const orgNames = true; // pull organization names from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
 const maxRequestLength = 42; // truncation length of log details
+const maxSearchLength = 64; // truncation length of search results
 
 // global variables
 let pollInterval;
@@ -13,6 +14,7 @@ let controller;
 let params = new URLSearchParams(window.location.search);
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
+let summary = params.get("summary");  // applies to search
 let logType = params.get("type") !== null ? params.get("type") : "auth";  // "clf" or "auth"
 let tableLength = 0;  // used to decide when to reuse the table
 let geoCache = {};  // cache of geolocation data
@@ -48,8 +50,9 @@ fetch("manifest.php")
 
 // decide what to do on page load
 if (search !== null) {  // search beats page
-    console.log("page load: searching for " + search + "...");
-    window.onload = doSearch;
+    console.log("page load: searching for " + search + ", summary: " + summary);
+    let doSummary = !(summary === "false");
+    window.onload = doSearch(search, doSummary);
 } else {
     console.log("page load: loading " + logType + " log...");
     // on window load run pollServer() and plotHeatmap()
@@ -131,6 +134,7 @@ function pollLog() {
     // reset the URL and search
     const url = new URL(window.location.href);
     url.searchParams.delete("search");
+    url.searchParams.delete("summary");
     url.searchParams.set("type", logType);
     url.searchParams.set("page", page);
     window.history.replaceState({}, "", url);
@@ -157,7 +161,7 @@ function pollLog() {
 }
 
 // search the log for a given string
-function searchLog(searchTerm) {
+function searchLog(searchTerm, doSummary) {
     console.log("searchLog: searching for " + searchTerm);
 
     // abort any pending fetches
@@ -198,19 +202,27 @@ function searchLog(searchTerm) {
     }
 
     // run the search on the server
-    fetch("logsearch.php?type=" + logType + "&search=" + searchTerm)
+    let summaryStr = doSummary ? "true" : "false";
+    fetch("logsearch.php?type=" + logType + "&search=" + searchTerm + "&summary=" + summaryStr)
         .then((response) => response.text())
         .then((data) => {
             // write the search results to the log div
             const pageSpan = document.getElementById("page");
-            updateSearchTable(data);
             pageSpan.innerHTML = "searching " + searchTerm;
-
+            
+            if (summary == null || summary === "true") {
+                console.log("searchLog: summary table");
+                updateSummaryTable(data);
+            } else {
+                console.log("searchLog: full table");
+                updateTable(data);
+            }
+            
             // report the number of results
             const count = JSON.parse(data).length - 1;  // don't count header row
             console.log("doSearch: " + count + " results");
             const searchStatus = document.getElementById("status");
-            searchStatus.innerHTML = "<b>" + count + " items</b>";
+            searchStatus.innerHTML = "<b>" + count + " items found</b>";
         });
 }
 
@@ -356,17 +368,20 @@ function updateTable(jsonData) {
 }
 
 // Take JSON array of commond log data and write HTML table
-function updateSearchTable(jsonData) {
+function updateSummaryTable(jsonData) {
     const data = JSON.parse(jsonData);
     const logDiv = document.getElementById("log");
     const signal = controller.signal;
     let ips = [];
     let row;
 
+    // get length of the data, and limit it to maxSearchLength
+    const dataLength = data.length > maxSearchLength ? maxSearchLength : data.length;
+
     // initialize the table
-    tableLength = 0;
+    tableLength = 0;  // reset table length
     let table0 = '<table id="log-table" class="log">';
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < dataLength; i++) {
         table0 += '<tr id="row-' + i + '"></tr>';
     }
     table0 += "</table>";
@@ -395,7 +410,7 @@ function updateSearchTable(jsonData) {
     headrow.innerHTML = row;
 
     // write table rows from remaining rows
-    for (let i = 1; i < data.length; i++) {
+    for (let i = 1; i < dataLength; i++) {
         rowElement = document.getElementById("row-" + i);
         row = "";
         for (let j = 0; j < data[i].length; j++) {
@@ -406,7 +421,7 @@ function updateSearchTable(jsonData) {
                 const ip = data[i][j];
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
-                const srchlink = "?type=" + logType + "&search=ip:" + ip;
+                const srchlink = "?type=" + logType + "&summary=false&search=ip:" + ip;
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
                 // Create link string that calls blacklist(ip) function
@@ -700,6 +715,7 @@ function buildTimestampSearch(date, hour) {
 function handleSearchForm() {
     const searchInput = document.getElementById("search-input");
     search = searchInput.value;
+    summary = "true";
     console.log("handleSearchButton: searching for " + search);
 
     // add search term to URL
@@ -712,10 +728,10 @@ function handleSearchForm() {
 }
 
 // execute search
-function doSearch() {
+function doSearch(searchTerm, doSummary) {
     const searchInput = document.getElementById("search-input");
-    searchInput.value = search; // set search box to search term
-    console.log("doSearch: searching for " + search);
+    searchInput.value = searchTerm; // set search box to search term
+    console.log("doSearch: searching for " + searchTerm);
 
     // abort any pending fetches
     if (controller) {
@@ -738,8 +754,8 @@ function doSearch() {
     if (search == "") {
         console.log("ERROR: search is empty!");
     } else {
-        searchLog(search);
-        plotHeatmap(search);
+        searchLog(searchTerm, doSummary);
+        plotHeatmap(searchTerm);
     }
 }
 
@@ -763,6 +779,7 @@ function resetSearch() {
 
     // clear search box and remove reset button
     search = null;
+    summary = null;
     searchInput.value = "";
     resetButton.remove();
 
@@ -822,7 +839,7 @@ function getHostNames(ips, signal) {
         fetch("rdns.php?ip=" + ip, { signal })
             .then((response) => response.text())
             .then((data) => {
-                console.log("rdns rx: " + data);
+                // console.log("rdns rx: " + data);
                 // cache the data
                 hostnameCache[ip] = data;
                 updateHostNames(data, ip);
@@ -900,7 +917,7 @@ function getGeoLocations(ips, signal) {
         fetch("geo.php?ip=" + ip, { signal })
             .then((response) => response.json())
             .then((data) => {
-                console.log("geo rx: " + ip);
+                // console.log("geo rx: " + ip);
                 // cache the data
                 geoCache[ip] = data;
                 updateGeoLocations(data, ip);
