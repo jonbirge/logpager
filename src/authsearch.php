@@ -3,7 +3,7 @@
 // Include the authparse.php file
 include 'authparse.php';
 
-function authSearch($searchDict)
+function authSearch($searchDict, $doSummary = true)
 {
     // Path to the auth log file
     $logFilePaths = getAuthLogFiles();
@@ -86,14 +86,23 @@ function authSearch($searchDict)
             }
         }
 
-        // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object
-        $theDate = $data[1];
-        $dateObj = DateTime::createFromFormat('d/M/Y:H:i:s', $theDate);
-
-        $logLines[] = [$data[0], $dateObj, $status];
+        if ($doSummary) {
+            // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object
+            // this is required by the searchStats() function
+            $theDate = $data[1];
+            $dateObj = DateTime::createFromFormat('d/M/Y:H:i:s', $theDate);
+            $logLines[] = [$data[0], $dateObj, $status];
+        } else {
+            $logLines[] = [$data[0], $data[1], $data[2], $status];
+        }
     }
 
-    $searchLines = searchStats($logLines);
+    // If $doSummary is true, summarize the log lines
+    if ($doSummary) {
+        $searchLines = searchStats($logLines);
+    } else {
+        $searchLines = searchLines($logLines);
+    }
 
     // Output the log lines as JSON
     echo json_encode($searchLines);

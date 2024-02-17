@@ -40,6 +40,17 @@ function parseSearch($search)
     }
 }
 
+function searchLines($logLines)
+{
+    // Read in CLF header name array from searchhead.json
+    $headers = json_decode(file_get_contents('loghead.json'), true);
+
+    // Add the header to the top of the array
+    array_unshift($logLines, $headers);
+
+    return $logLines;
+}
+
 function searchStats($logLines)
 {
     // Create an array indexed by IP address

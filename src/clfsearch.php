@@ -1,6 +1,6 @@
 <?php
 
-function clfSearch($searchDict)
+function clfSearch($searchDict, $doSummary = true)
 {
     // Path to the CLF log file
     $logFilePath = '/access.log';
@@ -64,19 +64,27 @@ function clfSearch($searchDict)
             continue;
         }
 
-        // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object,  ignoring the timezone part
-        $theDate = $data[2];
-        // remove time zone from $theDate
-        $theDate = preg_replace('/\s+\S+$/', '', $theDate);
-        $dateObj = DateTime::createFromFormat('d/M/Y:H:i:s', $theDate);
-        if ($dateObj === false) {
-            echo "Error parsing date: $theDate\n";
+        if ($doSummary) {
+            // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object,  ignoring the timezone part
+            $theDate = $data[2];
+            // remove time zone from $theDate
+            $theDate = preg_replace('/\s+\S+$/', '', $theDate);
+            $dateObj = DateTime::createFromFormat('d/M/Y:H:i:s', $theDate);
+            if ($dateObj === false) {
+                echo "Error parsing date: $theDate\n";
+            }
+            $logLines[] = [$data[1], $dateObj, $data[4]];
+        } else {
+            $logLines[] = array_map('htmlspecialchars', array_slice($data, 1));
         }
-
-        $logLines[] = [$data[1], $dateObj, $data[4]];
     }
 
-    $searchLines = searchStats($logLines);
+    // If $doSummary is true, summarize the log lines
+    if ($doSummary) {
+        $searchLines = searchStats($logLines);
+    } else {
+        $searchLines = searchLines($logLines);
+    }
 
     // Output the log lines as JSON
     echo json_encode($searchLines);
