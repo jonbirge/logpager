@@ -1,7 +1,7 @@
 # logforensic
 
 ## About
-Lightweight security log audit and forensic interface written using PHP and JS,
+Lightweight security log auditing and forensics written using PHP and JavaScript,
 intended to provide a dashboard for understanding security threats. Displays log
 events as heatmap using tile plot generated with D3, allowing user to click on a
 given period to drill down into the log. Performs asynchronous geolocation and
@@ -9,11 +9,12 @@ reverse DNS resolution. Clicking on IP address in log shows all events from that
 IP, with a heatmap showing history of that IP.
 
 ## Approach
-The approach is to treat the log file itself as truth (rather than have a
-separate process and database) and run UNIX tool commands on the host (within
-the container) to rapidly extract data from the log file directly, essentially
-running the kinds of local unix forensic commands a sysadmin would, formatting
-the results in a nice user interface and graphical form on the local browser.
+The approach is to treat the log file itself as truth and run UNIX tool commands
+on the host (within a Docker container) to extract data from the log file
+directly, essentially running the kinds of local unix forensic commands a
+sysadmin would. These commands are scripted using PHP, with the data formatting
+done locally in the browser using JavaScript. This approach is intended to
+minimize the impact on the server.
 
 ## Demo
 A public demo of the current development branch may (or may not) be running

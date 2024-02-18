@@ -65,7 +65,6 @@ function loadManifest() {
             document.getElementById("authtab").classList.add("selected");
             document.getElementById("clftab").classList.remove("selected");
         }
-        console.log("logType: " + logType);
     });
 }
 
@@ -235,8 +234,6 @@ function searchLog(searchTerm, doSummary) {
 
 // plot heatmap of log entries by hour and day, potentially including a search term
 function plotHeatmap(searchTerm) {
-    console.log("plotHeatmap: plotting heatmap");
-
     // Build data query URL
     let heatmapURL = "heatmap.php?type=" + logType;
     if (searchTerm) {
@@ -256,7 +253,7 @@ function loadBlacklist() {
         .then((response) => response.json())
         .then((data) => {
             blacklist = data;
-            console.log("loadBlacklist: " + JSON.stringify(blacklist));
+            // console.log("loadBlacklist: " + JSON.stringify(blacklist));
         });
 }
 
@@ -858,7 +855,6 @@ function getHostNames(ips, signal) {
             // data is a hostname, extract only the last two parts (domain.tld)
             const parts = data.split(".");
             hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
-            console.log("domain: " + hostname);
         }
         if (hostname === null) {
             whoisLink = "-";
