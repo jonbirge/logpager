@@ -171,8 +171,27 @@ function runTrace() {
         });
 }
 
+// run whois query on IP address string using the ARIN.net web service. the
+// response is a JSON object containing the whois information.
+function runWhois() {
+    const whoisDiv = document.getElementById("whois");
+    fetch("whois.php?ip=" + targetIP)
+        .then((response) => response.text())
+        .then((data) => {
+            // remove whois button
+            document.getElementById("whois-button").innerHTML = "";
+            // remove comment lines from whois data
+            data = data.replace(/^#.*$/gm, "");
+            // remove all blank lines from whois data
+            data = data.replace(/^\s*[\r\n]/gm, "");
+            // output to whois div
+            whoisDiv.innerHTML = data;
+        });
+}
+
 function runAll() {
     runScan();
     runPing();
     runTrace();
+    runWhois(targetIP);
 }
