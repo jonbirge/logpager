@@ -321,10 +321,9 @@ function updateTable(jsonData) {
                 if (blacklist.includes(ip)) {
                     row += '<button class="toggle-button tight disabled">block</button>';
                 } else {
-                    const blacklistCall =
-                        'onclick="blacklistAdd(' + "'" + ip + "'" + '); this.disabled = true; this.classList.add('
-                        + "'disabled'" + ');"';
-                    row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button>";
+                    const blacklistCall = 'onclick="blacklistAdd(' + "'" + ip + "'" + ');"';
+                    const blacklistid = 'id="block-' + ip + '"';
+                    row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 }
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
@@ -423,8 +422,7 @@ function updateSummaryTable(jsonData) {
                 row += '<th class="hideable">Organization</th>';
             }
             if (geolocate) {
-                row +=
-                    '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
+                row += '<th>Geolocation</th>';
             }
         } else {
             row += "<th>" + data[0][i] + "</th>";
@@ -447,14 +445,13 @@ function updateSummaryTable(jsonData) {
                 const srchlink = "?type=" + logType + "&summary=false&search=ip:" + ip;
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
-                // Create link string that calls blacklist(ip) function
+                // Create link string that calls blacklistAdd(ip) function
                 if (blacklist.includes(ip)) {
                     row += '<button class="toggle-button tight disabled">block</button>';
                 } else {
-                    const blacklistCall =
-                        'onclick="blacklistAdd(' + "'" + ip + "'" + '); this.disabled = true; this.classList.add('
-                        + "'disabled'" + ');"';
-                    row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button>";
+                    const blacklistCall = 'onclick="blacklistAdd(' + "'" + ip + "'" + ');"';
+                    const blacklistid = 'id="block-' + ip + '"';
+                    row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 }
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
@@ -502,6 +499,9 @@ function updateSummaryTable(jsonData) {
 // Function to send POST request to blacklist.php with a given IP address in the body of the POST
 function blacklistAdd(ip) {
     console.log("blacklist: add " + ip);
+    // update blacklist cache manually
+    blacklist.push(ip);
+    // send the IP address to the server
     var formData = new FormData();
     formData.append('ip', ip);
     fetch("blacklist.php", {
@@ -510,8 +510,15 @@ function blacklistAdd(ip) {
     })
         .then((response) => response.text())
         .then((data) => {
+            // update status div
             const status = document.getElementById("status");
             status.innerHTML = data;
+            // disable all block buttons with id of the form block-ipAddress
+            const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
+            blockButtons.forEach((button) => {
+                button.disabled = true;
+                button.classList.add("disabled");
+            });
         });
 }
 
