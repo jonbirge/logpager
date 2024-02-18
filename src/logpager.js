@@ -6,6 +6,7 @@ const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
 const maxRequestLength = 42; // truncation length of log details
 const maxSearchLength = 64; // truncation length of search results
+const maxGeoRequests = 64; // maximum number of IPs to geolocate at once
 
 // global variables
 let pollInterval;
@@ -869,17 +870,24 @@ function getHostNames(ips, signal) {
 
 // get geolocations and orgs from IP addresses using ip-api.com
 function getGeoLocations(ips, signal) {
+    // take only the first maxGeoRequests IP addresses
+    ips = ips.slice(0, maxGeoRequests);
     console.log("Getting geolocations for " + ips);
     // Grab each ip address and send to ip-api.com
     let geoWaitTime = 0;
     ips.forEach((ip) => {
+        // is this the last IP address?
+        const ipindex = ips.indexOf(ip);
         // check cache first
         if (geoCache[ip]) {
             console.log("cached geo: " + ip);
             updateGeoLocations(geoCache[ip], ip);
         } else {
             setTimeout(
-                () => fetchGeoLocation(ip),
+                () => {
+                    console.log("fetching geo", ipindex);
+                    fetchGeoLocation(ip);
+                },
                 geoWaitTime,
                 { signal }
             );
@@ -933,13 +941,14 @@ function getGeoLocations(ips, signal) {
                 // console.log("geo rx: " + ip);
                 // cache the data
                 geoCache[ip] = data;
+                // update the table cells
                 updateGeoLocations(data, ip);
             })
             .catch((error) => {
                 if (error.name === "AbortError") {
                     console.log("geo fetch aborted for " + ip);
                 } else {
-                    console.log("Fetch error:", error);
+                    console.log("Fetch error: ", error);
                     updateGeoLocations(null, ip);
                 }
             });
