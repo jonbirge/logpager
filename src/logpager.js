@@ -19,9 +19,29 @@ let logType = params.get("type") !== null ? params.get("type") : "auth";  // "cl
 let tableLength = 0;  // used to decide when to reuse the table
 let geoCache = {};  // cache of geolocation data
 let hostnameCache = {};  // cache of hostnames
+let blacklist = {};  // cache of blacklisted IPs
 
-// get list of logs present on server and enable or disable tabs
-fetch("manifest.php")
+// start initial data fetches
+loadManifest();
+loadBlacklist();
+
+// decide what to do on page load
+if (search !== null) {  // search beats page
+    console.log("page load: searching for " + search + ", summary: " + summary);
+    let doSummary = !(summary === "false");
+    window.onload = doSearch(search, doSummary);
+} else {
+    console.log("page load: loading " + logType + " log...");
+    // on window load run pollServer() and plotHeatmap()
+    window.onload = () => {
+        pollLog();
+        plotHeatmap();
+    };
+}
+
+// load the log manifest and update the log type tabs
+function loadManifest() {
+    fetch("manifest.php")
     .then((response) => response.json())
     .then((data) => {
         const haveCLF = data.includes("access.log");
@@ -47,19 +67,6 @@ fetch("manifest.php")
         }
         console.log("logType: " + logType);
     });
-
-// decide what to do on page load
-if (search !== null) {  // search beats page
-    console.log("page load: searching for " + search + ", summary: " + summary);
-    let doSummary = !(summary === "false");
-    window.onload = doSearch(search, doSummary);
-} else {
-    console.log("page load: loading " + logType + " log...");
-    // on window load run pollServer() and plotHeatmap()
-    window.onload = () => {
-        pollLog();
-        plotHeatmap();
-    };
 }
 
 // update time sensitive elements every second
@@ -243,6 +250,16 @@ function plotHeatmap(searchTerm) {
         .then(jsonToHeatmap);
 }
 
+// update blacklist from server
+function loadBlacklist() {
+    fetch("blacklist.php")
+        .then((response) => response.json())
+        .then((data) => {
+            blacklist = data;
+            console.log("loadBlacklist: " + JSON.stringify(blacklist));
+        });
+}
+
 // Take JSON array of commond log data and write HTML table
 function updateTable(jsonData) {
     const data = JSON.parse(jsonData);
@@ -277,7 +294,7 @@ function updateTable(jsonData) {
             }
             if (geolocate) {
                 row +=
-                    '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
+                    '<th>Geolocation<br>(from <a href=https://www.ip-api.com>ip-api</a>)</th>';
             }
         } else if (i == 2) {  // details
             row += '<th class="hideable">' + data[0][i] + '</th>';
@@ -301,8 +318,13 @@ function updateTable(jsonData) {
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
                 // Create link string that calls blacklist(ip) function
-                const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
-                row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button>";
+                if (blacklist.includes(ip)) {
+                    console.log("disabling block: " + ip);
+                    row += '<button class="toggle-button tight disabled">block</button>';
+                } else {
+                    const blacklistCall = 'onclick="blacklistAdd(' + "'" + ip + "'" + '); return false"';
+                    row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button>";
+                }
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
                 row += ' <button class="toggle-button tight" ' + whoisCall + ">whois</button>";
@@ -425,7 +447,7 @@ function updateSummaryTable(jsonData) {
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
                 // Create link string that calls blacklist(ip) function
-                const blacklistCall = 'onclick="blacklist(' + "'" + ip + "'" + '); return false"';
+                const blacklistCall = 'onclick="blacklistAdd(' + "'" + ip + "'" + '); return false"';
                 row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
@@ -471,7 +493,7 @@ function updateSummaryTable(jsonData) {
 }
 
 // Function to send POST request to blacklist.php with a given IP address in the body of the POST
-function blacklist(ip) {
+function blacklistAdd(ip) {
     console.log("blacklist: add " + ip);
     var formData = new FormData();
     formData.append('ip', ip);
