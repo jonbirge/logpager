@@ -714,17 +714,17 @@ function buildTimestampSearch(date, hour) {
 // uiSearch is called when the search button is clicked by user
 function handleSearchForm() {
     const searchInput = document.getElementById("search-input");
-    search = searchInput.value;
-    summary = "true";
-    console.log("handleSearchButton: searching for " + search);
+    let  searchStr = searchInput.value;
+    console.log("handleSearchButton: searching for " + searchStr);
 
     // add search term to URL
     const url = new URL(window.location.href);
-    url.searchParams.set("search", search);
+    url.searchParams.set("search", searchStr);
     url.searchParams.delete("page");
+    url.searchParams.delete("summary");
     window.history.replaceState({}, "", url);
 
-    doSearch();
+    doSearch(searchStr, true);
 }
 
 // execute search
