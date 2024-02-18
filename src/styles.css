@@ -206,6 +206,12 @@ tr:nth-child(even) {
     margin-bottom: 2px;
 }
 
+/* Light gray style with white text for disabled buttons */
+.toggle-button.tight.disabled {
+    background-color: #d0d0d0;
+    cursor: not-allowed;
+}
+
 .toggle-button.red {
     background-color: red;
 }
