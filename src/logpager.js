@@ -294,7 +294,7 @@ function updateTable(jsonData) {
             }
             if (geolocate) {
                 row +=
-                    '<th>Geolocation<br>(from <a href=https://www.ip-api.com>ip-api</a>)</th>';
+                    '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
             }
         } else if (i == 2) {  // details
             row += '<th class="hideable">' + data[0][i] + '</th>';
@@ -319,10 +319,11 @@ function updateTable(jsonData) {
                 row += '<nobr>';
                 // Create link string that calls blacklist(ip) function
                 if (blacklist.includes(ip)) {
-                    console.log("disabling block: " + ip);
                     row += '<button class="toggle-button tight disabled">block</button>';
                 } else {
-                    const blacklistCall = 'onclick="blacklistAdd(' + "'" + ip + "'" + '); return false"';
+                    const blacklistCall =
+                        'onclick="blacklistAdd(' + "'" + ip + "'" + '); this.disabled = true; this.classList.add('
+                        + "'disabled'" + ');"';
                     row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 }
                 // Create link string that calls whois(ip) function
@@ -447,8 +448,14 @@ function updateSummaryTable(jsonData) {
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
                 // Create link string that calls blacklist(ip) function
-                const blacklistCall = 'onclick="blacklistAdd(' + "'" + ip + "'" + '); return false"';
-                row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button>";
+                if (blacklist.includes(ip)) {
+                    row += '<button class="toggle-button tight disabled">block</button>';
+                } else {
+                    const blacklistCall =
+                        'onclick="blacklistAdd(' + "'" + ip + "'" + '); this.disabled = true; this.classList.add('
+                        + "'disabled'" + ');"';
+                    row += '<button class="toggle-button tight" ' + blacklistCall + ">block</button>";
+                }
                 // Create link string that calls whois(ip) function
                 const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
                 row += ' <button class="toggle-button tight" ' + whoisCall + ">whois</button>";
