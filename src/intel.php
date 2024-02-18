@@ -52,20 +52,28 @@ header("Pragma: no-cache");
             <!-- This is where the scan will go -->
         </div>
 
-        <h2>Ping timing</h2>
-        <div id="ping-button">
-            <button class="toggle-button green" onclick="runPing()">Ping target</button>
+        <h2>Whois</h2>
+        <div id="whois-button">
+            <button class="toggle-button green" onclick="runWhois()">Execute whois</button>
         </div>
-        <div id="ping-chart">
-            <!-- This is where the chart will go -->
+        <div id="whois" class="whois">
+            <!-- This is where the whois will go -->
         </div>
-
+        
         <h2>TCP route trace</h2>
         <div id="trace-button">
             <button class="toggle-button green" onclick="runTrace()">Execute traceroute</button>
         </div>
         <div id="trace" class="trace">
             <!-- This is where the traceroute will go -->
+        </div>
+       
+        <h2>Ping timing</h2>
+        <div id="ping-button">
+            <button class="toggle-button green" onclick="runPing()">Ping target</button>
+        </div>
+        <div id="ping-chart">
+            <!-- This is where the chart will go -->
         </div>
 
         <!-- version and copyright -->
