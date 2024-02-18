@@ -147,9 +147,7 @@ function pollLog() {
     window.history.replaceState({}, "", url);
     search = null;
 
-    // clear whois and status divs
-    const whoisDiv = document.getElementById("whois");
-    whoisDiv.innerHTML = "";
+    // clear status divs
     const searchStatus = document.getElementById("status");
     searchStatus.innerHTML = "";
 
@@ -325,9 +323,6 @@ function updateTable(jsonData) {
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 }
-                // Create link string that calls whois(ip) function
-                const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
-                row += ' <button class="toggle-button tight" ' + whoisCall + ">whois</button>";
                 // Create link string that opens a new tab with intel.php?ip=ip
                 const traceLink = 'onclick="window.open(' + "'intel.php?ip=" + ip + "'" + '); return false"';
                 row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
@@ -453,9 +448,6 @@ function updateSummaryTable(jsonData) {
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 }
-                // Create link string that calls whois(ip) function
-                const whoisCall = 'onclick="whois(' + "'" + ip + "'" + '); return false"';
-                row += ' <button class="toggle-button tight" ' + whoisCall + ">whois</button>";
                 // Create link string that opens a new tab with intel.php?ip=ip
                 const traceLink = 'onclick="window.open(' + "'intel.php?ip=" + ip + "'" + '); return false"';
                 row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
@@ -780,9 +772,7 @@ function doSearch(searchTerm, doSummary) {
     url.searchParams.delete("page");
     window.history.replaceState({}, "", url);
 
-    // clear whois and status divs
-    const whoisDiv = document.getElementById("whois");
-    whoisDiv.innerHTML = "";
+    // clear status divs
     const searchStatus = document.getElementById("status");
     searchStatus.innerHTML = "";
 
@@ -849,7 +839,6 @@ function getHostNames(ips, signal) {
             '[id^="hostname-' + ip + '"]'
         );
         let hostname;
-        let whoisLink;
         // if data is in the form of an IP address, leave it alone. if it's in the form of a hostname, extract domain.tld
         if (data.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/)) {
             // data is an IP address
@@ -858,17 +847,8 @@ function getHostNames(ips, signal) {
             // data is a hostname, extract only the last two parts (domain.tld)
             const parts = data.split(".");
             hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
-            console.log("domain: " + hostname);
+            // console.log("domain: " + hostname);
         }
-        if (hostname === null) {
-            whoisLink = "-";
-        } else {
-            const whoisCall = 'onclick="whois(' + "'" + hostname + "'" + '); return false"';
-            whoisLink = '<a href="#" ' + whoisCall + '>' + hostname + '</a>';
-        }
-        hostnameCells.forEach((cell) => {
-            cell.innerHTML = whoisLink;
-        });
     }
 
     function fetchRDNS(ip) {
@@ -1003,25 +983,4 @@ function runWatch() {
         watchButton.innerHTML = "Stop";
         watchButton.classList.add("red");
     }
-}
-
-// run whois query on IP address string using the ARIN.net web service. the
-// response is a JSON object containing the whois information.
-function whois(ip) {
-    const whoisDiv = document.getElementById("whois");
-    whoisDiv.innerHTML = "<h2>Whois " + ip + "...</h2>";
-    fetch("whois.php?ip=" + ip)
-        .then((response) => response.text())
-        .then((data) => {
-            // remove comment lines from whois data
-            data = data.replace(/^#.*$/gm, "");
-
-            // remove all blank lines from whois data
-            data = data.replace(/^\s*[\r\n]/gm, "");
-
-            // output to whois div
-            whoisHTML = "<h2>Whois " + ip + "</h2>";
-            whoisHTML += data;
-            whoisDiv.innerHTML = whoisHTML;
-        });
 }
