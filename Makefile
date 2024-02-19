@@ -1,6 +1,6 @@
 # Define variables
 IMAGE_NAME=logpager
-VERSION=1.7b
+VERSION=1.7
 DOCKER_HUB_USER=jonbirge
 
 # Derived variables

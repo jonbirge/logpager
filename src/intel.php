@@ -12,8 +12,7 @@ header("Pragma: no-cache");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Roboto+Mono&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="styles.css">
     <?php
     // get the target IP from the URL ip parameter. if it's not there use client ip
@@ -71,7 +70,7 @@ header("Pragma: no-cache");
         <div id="whois" class="whois">
             <!-- This is where the whois will go -->
         </div>
-        
+
         <h2>TCP route trace</h2>
         <div id="trace-button">
             <button class="toggle-button green" onclick="runTrace()">Execute traceroute</button>
@@ -79,7 +78,7 @@ header("Pragma: no-cache");
         <div id="trace" class="trace">
             <!-- This is where the traceroute will go -->
         </div>
-       
+
         <h2>Ping timing</h2>
         <div id="ping-button">
             <button class="toggle-button green" onclick="runPing()">Ping target</button>
@@ -89,7 +88,7 @@ header("Pragma: no-cache");
         </div>
 
         <!-- version and copyright -->
-        <div style="margin-top: 50px;">1.7b3</div>
+        <div style="margin-top: 50px;">1.7</div>
     </div>
 
     <script src="intel.js"></script>
