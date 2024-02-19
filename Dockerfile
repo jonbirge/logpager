@@ -1,6 +1,11 @@
 # Alpine Linux as the base image
 FROM alpine:latest
 
+# Labels
+LABEL org.opencontainers.image.source=https://github.com/jonbirge/logpager
+LABEL org.opencontainers.image.description="Web-based log file forensics tool"
+LABEL org.opencontainers.image.licenses=MIT
+
 # Install nginx, PHP and others
 RUN apk update && apk upgrade
 RUN apk add --no-cache nginx php83-fpm

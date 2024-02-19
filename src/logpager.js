@@ -885,7 +885,7 @@ function getGeoLocations(ips, signal) {
         } else {
             setTimeout(
                 () => {
-                    console.log("fetching geo", ipindex);
+                    // console.log("fetching geo", ipindex);
                     fetchGeoLocation(ip);
                 },
                 geoWaitTime,
