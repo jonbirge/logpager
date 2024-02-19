@@ -14,17 +14,29 @@ header("Pragma: no-cache");
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Roboto+Mono&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="styles.css?version=25">
+    <link rel="stylesheet" type="text/css" href="styles.css">
     <?php
-    $target_ip = $_GET['ip'];
+    // get the target IP from the URL ip parameter. if it's not there use client ip
+    if (!isset($_GET['ip'])) {
+        $target_ip = $_SERVER['HTTP_X_REAL_IP'] ? $_SERVER['HTTP_X_REAL_IP'] : $_SERVER['REMOTE_ADDR'];
+    } else {
+        $target_ip = $_GET['ip'];
+    }
     echo "<title>Target intel: $target_ip</title>"
     ?>
 </head>
 
-<body>
+<body data-ip="<?php echo $target_ip; ?>">
     <div class="container">
         <?php
-        echo "<h1>Target intel: $target_ip</h1>"
+        echo "<h1>Target intel: $target_ip</h1>";
+        // echo each element of $_SERVER
+        // echo "<h2>Server information</h2>";
+        // echo "<table>";
+        // foreach ($_SERVER as $key => $value) {
+        //     echo "<tr><td><b>$key</b></td><td>$value</td></tr>";
+        // }
+        // echo "</table>";
         ?>
         <table>
             <tr>
@@ -77,11 +89,10 @@ header("Pragma: no-cache");
         </div>
 
         <!-- version and copyright -->
-        <div style="margin-top: 50px;">1.7b1</div>
+        <div style="margin-top: 50px;">1.7b3</div>
     </div>
 
-
-    <script src="intel.js?version=37"></script>
+    <script src="intel.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 

@@ -1,6 +1,5 @@
 // global params
-let params = new URLSearchParams(window.location.search);
-let targetIP = params.get('ip');
+let targetIP = document.body.dataset.ip;
 
 function runScan(mode) {
     const uniqueID = Math.random().toString(36).substr(2, 9);
@@ -171,8 +170,6 @@ function runTrace() {
         });
 }
 
-// run whois query on IP address string using the ARIN.net web service. the
-// response is a JSON object containing the whois information.
 function runWhois() {
     const whoisDiv = document.getElementById("whois");
     fetch("whois.php?ip=" + targetIP)
