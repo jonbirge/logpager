@@ -7,7 +7,7 @@ const apiWait = 200; // milliseconds to wait between external API calls
 const maxRequestLength = 48; // truncation length of log details
 const maxSearchLength = 128; // truncation length of summary search results
 const maxLogLength = 512; // truncation length of regular search results
-const maxGeoRequests = 128; // maximum number of IPs to geolocate at once (TODO: remove this)
+const maxGeoRequests = 128; // maximum number of IPs to geolocate at once
 
 // TODO: move these to a config file
 // global variables
@@ -27,6 +27,8 @@ let blacklist = {};  // cache of blacklisted IPs
 // start initial data fetches
 loadManifest();
 loadBlacklist();
+updateClock();
+setInterval(updateClock, 1000);
 
 // decide what to do on page load
 if (search !== null) {  // search beats page
@@ -84,8 +86,6 @@ function updateClock() {
         element.innerHTML = timediff;
     });
 }
-updateClock();
-setInterval(updateClock, 1000);
 
 // enable the search button when something is typed in the search box
 document.getElementById("search-input").oninput = function () {
@@ -167,17 +167,20 @@ function pollLog() {
         });
 }
 
-// search the log for a given string
+// TODO: come up with a better name for this that is complementary to searchHeatmap
+// search the log and return table of results
 function searchLog(searchTerm, doSummary) {
     console.log("searchLog: searching for " + searchTerm);
 
     // abort any pending fetches
-    if (controller) {
-        controller.abort();
-    }
-    controller = new AbortController();
+    // if (controller) {
+    //     controller.abort();
+    // }
+    // controller = new AbortController();
+
+    // reset page
     if (page < 0) {
-        page = 0; // reset page
+        page = 0;
     }
 
     // disable all other buttons and...
@@ -215,19 +218,28 @@ function searchLog(searchTerm, doSummary) {
         .then((data) => {
             // write the search results to the log div
             const pageSpan = document.getElementById("page");
-            pageSpan.innerHTML = "searching " + searchTerm;
-            
+            const dataLength = JSON.parse(data).length - 1;  // don't count header row
             if (summary == null || summary === "true") {
                 console.log("searchLog: summary table");
+                if (dataLength > maxSearchLength) {
+                    pageSpan.innerHTML = "first " + maxSearchLength + " summary results";
+                } else {
+                    pageSpan.innerHTML = "summary results";
+                }
                 updateSummaryTable(data);
             } else {
                 console.log("searchLog: full table");
+                if (dataLength > maxLogLength) {
+                    pageSpan.innerHTML = "first " + maxLogLength + " search results";
+                } else {
+                    pageSpan.innerHTML = "search results";
+                }
                 updateTable(data);
             }
             
             // report the number of results
             const count = JSON.parse(data).length - 1;  // don't count header row
-            console.log("doSearch: " + count + " results");
+            console.log("search: " + count + " results");
             const searchStatus = document.getElementById("status");
             searchStatus.innerHTML = "<b>" + count + " items found</b>";
         });
