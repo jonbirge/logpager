@@ -4,10 +4,12 @@ const hostNames = true; // pull hostnames from external service?
 const orgNames = true; // pull organization names from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
-const maxRequestLength = 42; // truncation length of log details
-const maxSearchLength = 64; // truncation length of search results
-const maxGeoRequests = 64; // maximum number of IPs to geolocate at once
+const maxRequestLength = 48; // truncation length of log details
+const maxSearchLength = 128; // truncation length of summary search results
+const maxLogLength = 512; // truncation length of regular search results
+const maxGeoRequests = 128; // maximum number of IPs to geolocate at once (TODO: remove this)
 
+// TODO: move these to a config file
 // global variables
 let pollInterval;
 let polling = false;
@@ -246,7 +248,7 @@ function plotHeatmap(searchTerm) {
         .then(jsonToHeatmap);
 }
 
-// update blacklist from server
+// update blacklist cache from server
 function loadBlacklist() {
     fetch("blacklist.php")
         .then((response) => response.json())
@@ -264,8 +266,11 @@ function updateTable(jsonData) {
     let ips = [];
     let row;
 
+    // set dataLength to the minimum of data.length and maxLogLength
+    const dataLength = Math.min(data.length, maxLogLength);
+
     // check to see if the table needs to be rebuilt
-    if (data.length != tableLength) {
+    if (dataLength != tableLength) {
         console.log("updateTable: rebuilding table");
         tableLength = data.length;
         let table0 = '<table id="log-table" class="log">';
@@ -301,7 +306,7 @@ function updateTable(jsonData) {
     headrow.innerHTML = row;
 
     // write table rows from remaining rows
-    for (let i = 1; i < data.length; i++) {
+    for (let i = 1; i < dataLength; i++) {
         rowElement = document.getElementById("row-" + i);
         row = "";
         for (let j = 0; j < data[i].length; j++) {
@@ -390,8 +395,8 @@ function updateSummaryTable(jsonData) {
     let ips = [];
     let row;
 
-    // get length of the data, and limit it to maxSearchLength
-    const dataLength = data.length > maxSearchLength ? maxSearchLength : data.length;
+    // set dataLength to the minimum of data.length and maxSearchLength
+    const dataLength = Math.min(data.length, maxSearchLength);
 
     // initialize the table
     tableLength = 0;  // reset table length
