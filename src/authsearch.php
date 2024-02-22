@@ -5,6 +5,9 @@ include 'authparse.php';
 
 function authSearch($searchDict, $doSummary = true)
 {
+    // Parameters
+    $maxItems = 1024;  // Maximum number of items to return
+
     // Path to the auth log file
     $logFilePaths = getAuthLogFiles();
 
@@ -86,6 +89,7 @@ function authSearch($searchDict, $doSummary = true)
             }
         }
 
+        $lineCount++;
         if ($doSummary) {
             // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object
             // this is required by the searchStats() function
@@ -94,16 +98,19 @@ function authSearch($searchDict, $doSummary = true)
             $logLines[] = [$data[0], $dateObj, $status];
         } else {
             $logLines[] = [$data[0], $data[1], $data[2], $status];
+            if ($lineCount >= $maxItems) break;
         }
-    }
+    }  // end foreach
 
     // If $doSummary is true, summarize the log lines
     if ($doSummary) {
         $searchLines = searchStats($logLines);
+        // take the first $maxItems items
+        $searchLines = array_slice($searchLines, 0, $maxItems);
     } else {
         $searchLines = searchLines($logLines);
     }
 
-    // Output the log lines as JSON
+    // Output the log lines in JSON
     echo json_encode($searchLines);
 }
