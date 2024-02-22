@@ -4,10 +4,12 @@ const hostNames = true; // pull hostnames from external service?
 const orgNames = true; // pull organization names from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
-const maxRequestLength = 42; // truncation length of log details
-const maxSearchLength = 64; // truncation length of search results
-const maxGeoRequests = 64; // maximum number of IPs to geolocate at once
+const maxRequestLength = 48; // truncation length of log details
+const maxSearchLength = 128; // truncation length of summary search results
+const maxLogLength = 512; // truncation length of regular search results
+const maxGeoRequests = 128; // maximum number of IPs to geolocate at once
 
+// TODO: move these to a config file
 // global variables
 let pollInterval;
 let polling = false;
@@ -25,6 +27,8 @@ let blacklist = {};  // cache of blacklisted IPs
 // start initial data fetches
 loadManifest();
 loadBlacklist();
+updateClock();
+setInterval(updateClock, 1000);
 
 // decide what to do on page load
 if (search !== null) {  // search beats page
@@ -82,8 +86,6 @@ function updateClock() {
         element.innerHTML = timediff;
     });
 }
-updateClock();
-setInterval(updateClock, 1000);
 
 // enable the search button when something is typed in the search box
 document.getElementById("search-input").oninput = function () {
@@ -165,17 +167,20 @@ function pollLog() {
         });
 }
 
-// search the log for a given string
+// TODO: come up with a better name for this that is complementary to searchHeatmap
+// search the log and return table of results
 function searchLog(searchTerm, doSummary) {
     console.log("searchLog: searching for " + searchTerm);
 
     // abort any pending fetches
-    if (controller) {
-        controller.abort();
-    }
-    controller = new AbortController();
+    // if (controller) {
+    //     controller.abort();
+    // }
+    // controller = new AbortController();
+
+    // reset page
     if (page < 0) {
-        page = 0; // reset page
+        page = 0;
     }
 
     // disable all other buttons and...
@@ -213,19 +218,28 @@ function searchLog(searchTerm, doSummary) {
         .then((data) => {
             // write the search results to the log div
             const pageSpan = document.getElementById("page");
-            pageSpan.innerHTML = "searching " + searchTerm;
-            
+            const dataLength = JSON.parse(data).length - 1;  // don't count header row
             if (summary == null || summary === "true") {
                 console.log("searchLog: summary table");
+                if (dataLength > maxSearchLength) {
+                    pageSpan.innerHTML = "first " + maxSearchLength + " summary results";
+                } else {
+                    pageSpan.innerHTML = "summary results";
+                }
                 updateSummaryTable(data);
             } else {
                 console.log("searchLog: full table");
+                if (dataLength > maxLogLength) {
+                    pageSpan.innerHTML = "first " + maxLogLength + " search results";
+                } else {
+                    pageSpan.innerHTML = "search results";
+                }
                 updateTable(data);
             }
             
             // report the number of results
             const count = JSON.parse(data).length - 1;  // don't count header row
-            console.log("doSearch: " + count + " results");
+            console.log("search: " + count + " results");
             const searchStatus = document.getElementById("status");
             searchStatus.innerHTML = "<b>" + count + " items found</b>";
         });
@@ -246,7 +260,7 @@ function plotHeatmap(searchTerm) {
         .then(jsonToHeatmap);
 }
 
-// update blacklist from server
+// update blacklist cache from server
 function loadBlacklist() {
     fetch("blacklist.php")
         .then((response) => response.json())
@@ -264,8 +278,11 @@ function updateTable(jsonData) {
     let ips = [];
     let row;
 
+    // set dataLength to the minimum of data.length and maxLogLength
+    const dataLength = Math.min(data.length, maxLogLength);
+
     // check to see if the table needs to be rebuilt
-    if (data.length != tableLength) {
+    if (dataLength != tableLength) {
         console.log("updateTable: rebuilding table");
         tableLength = data.length;
         let table0 = '<table id="log-table" class="log">';
@@ -301,7 +318,7 @@ function updateTable(jsonData) {
     headrow.innerHTML = row;
 
     // write table rows from remaining rows
-    for (let i = 1; i < data.length; i++) {
+    for (let i = 1; i < dataLength; i++) {
         rowElement = document.getElementById("row-" + i);
         row = "";
         for (let j = 0; j < data[i].length; j++) {
@@ -390,8 +407,8 @@ function updateSummaryTable(jsonData) {
     let ips = [];
     let row;
 
-    // get length of the data, and limit it to maxSearchLength
-    const dataLength = data.length > maxSearchLength ? maxSearchLength : data.length;
+    // set dataLength to the minimum of data.length and maxSearchLength
+    const dataLength = Math.min(data.length, maxSearchLength);
 
     // initialize the table
     tableLength = 0;  // reset table length

@@ -2,6 +2,9 @@
 
 function clfSearch($searchDict, $doSummary = true)
 {
+    // Maximum number of items to return
+    $maxItems = 1024;
+
     // Path to the CLF log file
     $logFilePath = '/access.log';
     $escFilePath = escapeshellarg($logFilePath);
@@ -40,6 +43,7 @@ function clfSearch($searchDict, $doSummary = true)
     $logLines = [];
 
     // Process each line and add to the array
+    $lineCount = 0;
     foreach ($lines as $line) {
         // Extract the CLF fields from the line
         preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $data);
@@ -64,6 +68,7 @@ function clfSearch($searchDict, $doSummary = true)
             continue;
         }
 
+        $lineCount++;
         if ($doSummary) {
             // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object,  ignoring the timezone part
             $theDate = $data[2];
@@ -76,12 +81,15 @@ function clfSearch($searchDict, $doSummary = true)
             $logLines[] = [$data[1], $dateObj, $data[4]];
         } else {
             $logLines[] = array_map('htmlspecialchars', array_slice($data, 1));
+            if ($lineCount >= $maxItems) break;
         }
     }
 
     // If $doSummary is true, summarize the log lines
     if ($doSummary) {
         $searchLines = searchStats($logLines);
+        // take the first $maxItems items
+        $searchLines = array_slice($searchLines, 0, $maxItems);
     } else {
         $searchLines = searchLines($logLines);
     }

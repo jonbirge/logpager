@@ -27,15 +27,12 @@ function authTail($page, $linesPerPage)
     $lastLine = $firstLine + ($linesPerPage - 1);
     $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage | tac";
 
-    // execute the UNIX command
-    $fp = popen($cmd, 'r');
-
     // read the lines from UNIX pipe
+    $fp = popen($cmd, 'r');
     $lines = [];
     while ($line = fgets($fp)) {
         $lines[] = $line;
     }
-
     pclose($fp);
 
     // Read in CLF header name array from clfhead.json
