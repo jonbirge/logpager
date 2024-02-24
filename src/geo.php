@@ -7,7 +7,7 @@ header("Cache-Control: max-age=86400, must-revalidate");
 $ipAddress = $_GET['ip'];
 
 // Send ip address to ip-api.com geolocation API
-$locJSON = file_get_contents("http://ip-api.com/json/$ipAddress?fields=57409535");
+$locJSON = file_get_contents("http://ip-api.com/json/$ipAddress?fields=17563647");
 
 // Return answer
 echo $locJSON;
