@@ -29,13 +29,6 @@ header("Pragma: no-cache");
     <div class="container">
         <?php
         echo "<h1>Target intel: $target_ip</h1>";
-        // echo each element of $_SERVER
-        // echo "<h2>Server information</h2>";
-        // echo "<table>";
-        // foreach ($_SERVER as $key => $value) {
-        //     echo "<tr><td><b>$key</b></td><td>$value</td></tr>";
-        // }
-        // echo "</table>";
         ?>
         <table>
             <tr>
@@ -44,7 +37,7 @@ header("Pragma: no-cache");
             </tr>
             <!-- query the ipinfo.io API for the target IP's information and put all data into a table -->
             <?php
-            $ipURL = "http://ip-api.com/json/$target_ip?fields=57409535";
+            $ipURL = "http://ip-api.com/json/$target_ip?fields=17563647";
             $ipinfo = file_get_contents($ipURL);
             $ipinfo = json_decode($ipinfo, true);
             foreach ($ipinfo as $key => $value) {
@@ -86,9 +79,6 @@ header("Pragma: no-cache");
         <div id="ping-chart">
             <!-- This is where the chart will go -->
         </div>
-
-        <!-- version and copyright -->
-        <div style="margin-top: 50px;">1.7</div>
     </div>
 
     <script src="intel.js"></script>

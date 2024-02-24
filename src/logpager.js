@@ -1,7 +1,5 @@
 // hard-wired settings
 const geolocate = true; // pull IP geolocation from external service?
-const hostNames = true; // pull hostnames from external service?
-const orgNames = true; // pull organization names from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
 const maxRequestLength = 48; // truncation length of log details
@@ -44,33 +42,46 @@ if (search !== null) {  // search beats page
     };
 }
 
+// enable the search button when something is typed in the search box
+document.getElementById("search-input").oninput = function () {
+    const searchButton = document.getElementById("search-button");
+    // if the search box is empty, disable the search button
+    if (this.value === "") {
+        searchButton.disabled = true;
+        searchButton.classList.add("disabled");
+    } else {
+        searchButton.disabled = false;
+        searchButton.classList.remove("disabled");
+    }
+};
+
 // load the log manifest and update the log type tabs
 function loadManifest() {
     fetch("manifest.php")
-    .then((response) => response.json())
-    .then((data) => {
-        const haveCLF = data.includes("access.log");
-        const haveAuth = data.includes("auth.log");
-        if (!haveCLF) {
-            document.getElementById("clftab").style.display = 'none';
-            logType = "auth";  // because clf is default
-        } else {
-            document.getElementById("clftab").style.display = '';
-        }
-        if (!haveAuth) {
-            document.getElementById("authtab").style.display = 'none';
-        } else {
-            document.getElementById("authtab").style.display = '';
-        }
-        // highlight the current log type
-        if (logType == "clf") {
-            document.getElementById("clftab").classList.add("selected");
-            document.getElementById("authtab").classList.remove("selected");
-        } else {
-            document.getElementById("authtab").classList.add("selected");
-            document.getElementById("clftab").classList.remove("selected");
-        }
-    });
+        .then((response) => response.json())
+        .then((data) => {
+            const haveCLF = data.includes("access.log");
+            const haveAuth = data.includes("auth.log");
+            if (!haveCLF) {
+                document.getElementById("clftab").style.display = 'none';
+                logType = "auth";  // because clf is default
+            } else {
+                document.getElementById("clftab").style.display = '';
+            }
+            if (!haveAuth) {
+                document.getElementById("authtab").style.display = 'none';
+            } else {
+                document.getElementById("authtab").style.display = '';
+            }
+            // highlight the current log type
+            if (logType == "clf") {
+                document.getElementById("clftab").classList.add("selected");
+                document.getElementById("authtab").classList.remove("selected");
+            } else {
+                document.getElementById("authtab").classList.add("selected");
+                document.getElementById("clftab").classList.remove("selected");
+            }
+        });
 }
 
 // update time sensitive elements every second
@@ -86,19 +97,6 @@ function updateClock() {
         element.innerHTML = timediff;
     });
 }
-
-// enable the search button when something is typed in the search box
-document.getElementById("search-input").oninput = function () {
-    const searchButton = document.getElementById("search-button");
-    // if the search box is empty, disable the search button
-    if (this.value === "") {
-        searchButton.disabled = true;
-        searchButton.classList.add("disabled");
-    } else {
-        searchButton.disabled = false;
-        searchButton.classList.remove("disabled");
-    }
-};
 
 // create a Date object from a log timestamp of the form DD/Mon/YYYY:HH:MM:SS, assuming UTC timezone
 function parseCLFDate(clfstamp) {
@@ -129,7 +127,7 @@ function timeDiff(date1, date2) {
 
 // pull the relevent log data from the server
 function pollLog() {
-    console.log("pollLog: fetching page " + page + " of type " + logType);
+    console.log("***** pollLog: fetching page " + page + " of type " + logType);
 
     // abort any pending fetches
     if (controller) {
@@ -236,7 +234,7 @@ function searchLog(searchTerm, doSummary) {
                 }
                 updateTable(data);
             }
-            
+
             // report the number of results
             const count = JSON.parse(data).length - 1;  // don't count header row
             console.log("search: " + count + " results");
@@ -299,15 +297,10 @@ function updateTable(jsonData) {
     for (let i = 0; i < data[0].length; i++) {
         if (i == 0) {
             row += "<th>" + data[0][i] + "</th>";
-            if (hostNames) {
-                row += '<th class="hideable">Domain name</th>';
-            }
-            if (orgNames) {
-                row += '<th class="hideable">Organization</th>';
-            }
             if (geolocate) {
-                row +=
-                    '<th>Geolocation<br>(from <a href=https://www.ip-api.com style="color: white">ip-api</a>)</th>';
+                row += '<th class="hideable">Domain name</th>';
+                row += '<th class="hideable">Organization</th>';
+                row += '<th>Geolocation</th>';
             }
         } else if (i == 2) {  // details
             row += '<th class="hideable">' + data[0][i] + '</th>';
@@ -343,17 +336,11 @@ function updateTable(jsonData) {
                 row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
                 row += "</nobr></td>";
                 // Add new cell for Host name after the first cell
-                if (hostNames) {
+                if (geolocate) {
                     const hostnameid = "hostname-" + ip;
                     row += '<td class="hideable" id="' + hostnameid + '"></td>';
-                }
-                // Add new cell for Organization name after the first cell
-                if (orgNames) {
                     const orgid = "org-" + ip;
                     row += '<td class="hideable" id="' + orgid + '"></td>';
-                }
-                // Add new cell for Geolocation after the first cell (maybe)
-                if (geolocate) {
                     const geoid = "geo-" + ip;
                     row += '<td id="' + geoid + '"></td>';
                 }
@@ -395,8 +382,7 @@ function updateTable(jsonData) {
 
     // Get the host names from the IP addresses
     const ipSet = [...new Set(ips)]; // Get unique IP addresses
-    if (hostNames) getHostNames(ipSet, signal);
-    if (geolocate | orgNames) getGeoLocations(ipSet, signal);
+    if (geolocate) getGeoLocations(ipSet, signal);
 }
 
 // Take JSON array of commond log data and write HTML table
@@ -425,13 +411,9 @@ function updateSummaryTable(jsonData) {
     for (let i = 0; i < data[0].length; i++) {
         if (i == 1) {
             row += "<th>" + data[0][i] + "</th>";
-            if (hostNames) {
-                row += '<th class="hideable">Domain name</th>';
-            }
-            if (orgNames) {
-                row += '<th class="hideable">Organization</th>';
-            }
             if (geolocate) {
+                row += '<th class="hideable">Domain name</th>';
+                row += '<th class="hideable">Organization</th>';
                 row += '<th>Geolocation</th>';
             }
         } else {
@@ -468,17 +450,11 @@ function updateSummaryTable(jsonData) {
                 row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
                 row += "</nobr></td>";
                 // Add new cell for Host name after the first cell
-                if (hostNames) {
+                if (geolocate) {
                     const hostnameid = "hostname-" + ip;
                     row += '<td class="hideable" id="' + hostnameid + '">-</td>';
-                }
-                // Add new cell for Organization name after the first cell
-                if (orgNames) {
                     const orgid = "org-" + ip;
                     row += '<td class="hideable" id="' + orgid + '">-</td>';
-                }
-                // Add new cell for Geolocation after the first cell (maybe)
-                if (geolocate) {
                     const geoid = "geo-" + ip;
                     row += '<td id="' + geoid + '">-</td>';
                 }
@@ -499,8 +475,7 @@ function updateSummaryTable(jsonData) {
 
     // Get the host names from the IP addresses
     const ipSet = [...new Set(ips)]; // Get unique IP addresses
-    if (hostNames) getHostNames(ipSet, signal);
-    if (geolocate | orgNames) getGeoLocations(ipSet, signal);
+    if (geolocate) getGeoLocations(ipSet, signal);
 }
 
 // Function to send POST request to blacklist.php with a given IP address in the body of the POST
@@ -757,7 +732,7 @@ function buildTimestampSearch(date, hour) {
 // uiSearch is called when the search button is clicked by user
 function handleSearchForm() {
     const searchInput = document.getElementById("search-input");
-    let  searchStr = searchInput.value;
+    let searchStr = searchInput.value;
     console.log("handleSearchButton: searching for " + searchStr);
 
     // add search term to URL
@@ -813,7 +788,7 @@ function resetSearch() {
         button.disabled = false;
         button.classList.remove("disabled");
     });
-    
+
     // disable search button
     searchButton.disabled = true;
     searchButton.classList.add("disabled");
@@ -827,62 +802,6 @@ function resetSearch() {
     // load the log
     pollLog();
     plotHeatmap();
-}
-
-// get host names from IP addresses
-function getHostNames(ips, signal) {
-    console.log("Getting host names for " + ips);
-    // Grab each ip address and send to rdns.php
-    let rdnsWaitTime = 0;
-    ips.forEach((ip) => {
-        // Check cache first
-        if (hostnameCache[ip]) {
-            updateHostNames(hostnameCache[ip], ip);
-        } else {
-            setTimeout(
-                () => fetchRDNS(ip),
-                rdnsWaitTime,
-                { signal }
-            );
-            rdnsWaitTime += apiWait;
-        }
-    });
-
-    function updateHostNames(data, ip) {
-        // Get all cells with id of the form hostname-ipAddress
-        const hostnameCells = document.querySelectorAll(
-            '[id^="hostname-' + ip + '"]'
-        );
-        let hostname;
-        // if data is in the form of an IP address, leave it alone. if it's in the form of a hostname, extract domain.tld
-        if (data.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/)) {
-            // data is an IP address
-            hostname = null;
-        } else {
-            // data is a hostname, extract only the last two parts (domain.tld)
-            const parts = data.split(".");
-            hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
-            // console.log("domain: " + hostname);
-        }
-    }
-
-    function fetchRDNS(ip) {
-        fetch("rdns.php?ip=" + ip, { signal })
-            .then((response) => response.text())
-            .then((data) => {
-                // console.log("rdns rx: " + data);
-                // cache the data
-                hostnameCache[ip] = data;
-                updateHostNames(data, ip);
-            })
-            .catch((error) => {
-                if (error.name === "AbortError") {
-                    console.log("rdns aborted for " + ip);
-                } else {
-                    console.log("Fetch error:", error);
-                }
-            });
-    }
 }
 
 // get geolocations and orgs from IP addresses using ip-api.com
@@ -913,42 +832,55 @@ function getGeoLocations(ips, signal) {
     });
 
     function updateGeoLocations(data, ip) {
-        // update the table cells
-        if (geolocate) {
-            // Get all cells with id of the form geo-ipAddress
-            const geoCells = document.querySelectorAll(
-                '[id^="geo-' + ip + '"]'
-            );
-            if (data !== null) {
-                // set each cell in geoCells to data
-                geoCells.forEach((cell) => {
-                    cell.innerHTML =
-                        data.city + ", " +
-                        data.region + ", " +
-                        data.countryCode;
-                });
+        // Get all cells with id of the form geo-ipAddress
+        const geoCells = document.querySelectorAll(
+            '[id^="geo-' + ip + '"]'
+        );
+        const hostnameCells = document.querySelectorAll(
+            '[id^="hostname-' + ip + '"]'
+        );
+        const orgCells = document.querySelectorAll(
+            '[id^="org-' + ip + '"]'
+        );
+        if (data !== null) {
+            // set each cell in geoCells to data
+            geoCells.forEach((cell) => {
+                cell.innerHTML =
+                    data.city + ", " +
+                    data.region + ", " +
+                    data.countryCode;
+            })
+            // get rDNS and set hostname
+            let hostname;
+            if (data.reverse == "") {
+                // no reverse DNS entry
+                hostname = "N/A";
             } else {
-                geoCells.forEach((cell) => {
-                    cell.innerHTML = "-";
-                });
+                // extract domain.tld from reverse DNS entry
+                const parts = data.reverse.split(".");
+                hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
             }
+            // set each cell in hostnameCells to hostname
+            hostnameCells.forEach((cell) => {
+                cell.innerHTML = hostname;
+            });
+            // set each cell in orgCells to data
+            const orgname = data.org.length != 0 ? data.org : "N/A";
+            orgCells.forEach((cell) => {
+                cell.innerHTML = orgname;
+            });
+        } else {
+            geoCells.forEach((cell) => {
+                cell.innerHTML = "N/A";
+            });
+            orgCells.forEach((cell) => {
+                cell.innerHTML = "N/A";
+            });
+            hostnameCells.forEach((cell) => {
+                cell.innerHTML = "N/A";
+            });
         }
-        if (orgNames) {
-            // Get all cells with id of the form org-ipAddress
-            const orgCells = document.querySelectorAll(
-                '[id^="org-' + ip + '"]'
-            );
-            if (data !== null) {
-                // set each cell in orgCells to data
-                orgCells.forEach((cell) => {
-                    cell.innerHTML = data.org;
-                });
-            } else {
-                orgCells.forEach((cell) => {
-                    cell.innerHTML = "-";
-                });
-            }
-        }
+
     }
 
     function fetchGeoLocation(ip) {
@@ -965,7 +897,7 @@ function getGeoLocations(ips, signal) {
                 if (error.name === "AbortError") {
                     console.log("geo fetch aborted for " + ip);
                 } else {
-                    console.log("Fetch error: ", error);
+                    console.log("fetch error:", ip, error);
                     updateGeoLocations(null, ip);
                 }
             });
