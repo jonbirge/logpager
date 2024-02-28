@@ -9,7 +9,7 @@ function clfTail($page, $linesPerPage)
     // build UNIX command
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "tail -n $lastLine $escFilePath | head -n $linesPerPage | tac";
+    $cmd = "nl $escFilePath | (echo 'BEGIN'; cat) | tail -n $lastLine | head -n $linesPerPage | tac";
 
     // execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
@@ -28,8 +28,15 @@ function clfTail($page, $linesPerPage)
 
     // Process each line and add to the array
     foreach ($lines as $line) {
-        // Extract the CLF fields from the line
-        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $matches);
+        // check to see if $line is the BEGIN line
+        if (strpos($line, 'BEGIN') === 0) {
+            // repeat the string "END" in an array the size of $headers
+            $logLines[] = array_fill(0, count($headers), 'END');
+            break;
+        }
+
+        // Extract the CLF fields from the line, including the line number
+        preg_match('/^\s*(\d+)\s+(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $matches);
 
         // Go through each match and add to the array with htmlspecialchars()
         $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));

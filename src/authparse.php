@@ -61,11 +61,9 @@ function convertCLFDate($date)
 // Parse auth log file into standard format
 function parseAuthLogLine($line)
 {
-    // Current year
-    $year = date('Y');
-
     // Check to see if the first character is a letter or a number (to determine
     // which kind of time stamp is used)
+    $year = date('Y');
     if (preg_match('/^[a-zA-Z]/', $line)) {
         // Extract the month, day, and time from the line
         if (!preg_match('/(\S+)\s+(\d+) (\d+):(\d+):(\d+)/', $line, $matches)) {

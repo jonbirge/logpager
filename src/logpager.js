@@ -155,13 +155,7 @@ function pollLog() {
     fetch("logtail.php?type=" + logType + "&page=" + page)
         .then((response) => response.text())
         .then((data) => {
-            const pageSpan = document.getElementById("page");
             updateTable(data);
-            if (page == 0) {
-                pageSpan.innerHTML = "Last page";
-            } else {
-                pageSpan.innerHTML = "Page " + page + " from end";
-            }
         });
 }
 
@@ -295,14 +289,14 @@ function updateTable(jsonData) {
     let headrow = document.getElementById("row-0");
     row = "";
     for (let i = 0; i < data[0].length; i++) {
-        if (i == 0) {
+        if (i == 1) {
             row += "<th>" + data[0][i] + "</th>";
             if (geolocate) {
                 row += '<th class="hideable">Domain name</th>';
                 row += '<th class="hideable">Organization</th>';
                 row += '<th>Geolocation</th>';
             }
-        } else if (i == 2) {  // details
+        } else if (i == 3) {  // details
             row += '<th class="hideable">' + data[0][i] + '</th>';
         } else {
             row += "<th>" + data[0][i] + "</th>";
@@ -315,7 +309,7 @@ function updateTable(jsonData) {
         rowElement = document.getElementById("row-" + i);
         row = "";
         for (let j = 0; j < data[i].length; j++) {
-            if (j == 0) {
+            if (j == 1) {
                 // ip address
                 const ip = data[i][j];
                 ips.push(ip);
@@ -344,14 +338,14 @@ function updateTable(jsonData) {
                     const geoid = "geo-" + ip;
                     row += '<td id="' + geoid + '"></td>';
                 }
-            } else if (j == 1) {
+            } else if (j == 2) {
                 const clfStamp = data[i][j].replace(/\s.*$/, "");  // remove the timezone
                 const dateStamp = parseCLFDate(clfStamp);  // assume UTC
                 const timediff = timeDiff(dateStamp, new Date());
                 const jsonDate = dateStamp.toJSON();
                 row += '<td id=timestamp:' + jsonDate + '>';
                 row += timediff + "</td>";
-            } else if (j == 2) {
+            } else if (j == 3) {
                 // request
                 const rawRequest = data[i][j];
                 // truncate request to 32 characters
@@ -360,7 +354,7 @@ function updateTable(jsonData) {
                         ? rawRequest.substring(0, maxRequestLength) + "..."
                         : rawRequest;
                 row += '<td class="code hideable">' + truncRequest + "</td>";
-            } else if (j == 3) {
+            } else if (j == 4) {
                 // common status handling
                 const greenStatus = ["200", "304", "OK"];
                 const redStatus = ["308", "400", "401", "403", "404", "500", "FAIL"];
@@ -378,6 +372,14 @@ function updateTable(jsonData) {
             }
         }
         rowElement.innerHTML = row;
+    }
+
+    // update the page number
+    const pageSpan = document.getElementById("page");
+    if (page == 0) {
+        pageSpan.innerHTML = "Last page";
+    } else {
+        pageSpan.innerHTML = "Page " + page + " from end";
     }
 
     // Get the host names from the IP addresses

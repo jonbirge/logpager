@@ -37,7 +37,7 @@ function authHeatmap($searchDict)
     // Initialize an empty array to store the log summary data
     $logSummary = [];
 
-    // Add each failed login attempt to the log summary
+    // Add each login attempt to the log summary
     while (($line = fgets($fp)) !== false) {
         $status = getAuthLogStatus($line);
         $data = parseAuthLogLine($line);
