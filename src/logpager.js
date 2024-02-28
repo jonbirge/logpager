@@ -1,4 +1,5 @@
 // hard-wired settings
+const pageSize = 16; // number of log entries per page
 const geolocate = true; // pull IP geolocation from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
@@ -138,21 +139,12 @@ function pollLog() {
         page = 0; // reset page
     }
 
-    // reset the URL and search
-    const url = new URL(window.location.href);
-    url.searchParams.delete("search");
-    url.searchParams.delete("summary");
-    url.searchParams.set("type", logType);
-    url.searchParams.set("page", page);
-    window.history.replaceState({}, "", url);
-    search = null;
-
     // clear status divs
     const searchStatus = document.getElementById("status");
     searchStatus.innerHTML = "";
 
     // get the log from the server
-    fetch("logtail.php?type=" + logType + "&page=" + page)
+    fetch("logtail.php?type=" + logType + "&page=" + page + "&n=" + pageSize)
         .then((response) => response.text())
         .then((data) => {
             updateTable(data);
@@ -305,8 +297,14 @@ function updateTable(jsonData) {
     headrow.innerHTML = row;
 
     // write table rows from remaining rows
-    for (let i = 1; i < dataLength; i++) {
-        rowElement = document.getElementById("row-" + i);
+    let hitEnd = false;
+    for (var i = 1; i < dataLength; i++) {
+        // check to see if this is the "END" row
+        if (data[i][0] == "END") {
+            hitEnd = true;
+            tableLength = i;
+            break;
+        }
         row = "";
         for (let j = 0; j < data[i].length; j++) {
             if (j == 1) {
@@ -371,16 +369,40 @@ function updateTable(jsonData) {
                 row += "<td>" + data[i][j] + "</td>";
             }
         }
+        rowElement = document.getElementById("row-" + i);
         rowElement.innerHTML = row;
-    }
+    }  // build row
 
-    // update the page number
+    // update page numbers and handle log end
     const pageSpan = document.getElementById("page");
-    if (page == 0) {
-        pageSpan.innerHTML = "Last page";
+    if (hitEnd) {
+        // remove all the rows after the last row
+        for (let j = i; j < dataLength; j++) {
+            rowElement = document.getElementById("row-" + j);
+            rowElement.innerHTML = "";
+        }
+        // get line number of last row
+        const lastRow = data[i - 1][0];
+        pageSpan.innerHTML = "Beginning of log";
+        // compute the page of the last row
+        page = Math.floor(lastRow / 16);
+        console.log("updateTable: hit end of log, page: " + page);
     } else {
-        pageSpan.innerHTML = "Page " + page + " from end";
-    }
+        if (page == 0) {
+            pageSpan.innerHTML = "Latest page";
+        } else {
+            pageSpan.innerHTML = "Page " + page + " from end";
+        }
+    }   
+
+    // reset the URL and search
+    const url = new URL(window.location.href);
+    url.searchParams.delete("search");
+    url.searchParams.delete("summary");
+    url.searchParams.set("type", logType);
+    url.searchParams.set("page", page);
+    window.history.replaceState({}, "", url);
+    search = null;
 
     // Get the host names from the IP addresses
     const ipSet = [...new Set(ips)]; // Get unique IP addresses

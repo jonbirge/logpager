@@ -25,7 +25,7 @@ function authTail($page, $linesPerPage)
     // build UNIX command
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | nl | (echo 'BEGIN'; cat) | tail -n $lastLine | head -n $linesPerPage | tac";
+    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tac | nl | (echo 'BEGIN'; tac) | tail -n $lastLine | head -n $linesPerPage | tac";
 
     // read the lines from UNIX pipe
     $fp = popen($cmd, 'r');

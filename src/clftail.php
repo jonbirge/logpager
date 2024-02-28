@@ -9,7 +9,7 @@ function clfTail($page, $linesPerPage)
     // build UNIX command
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "nl $escFilePath | (echo 'BEGIN'; cat) | tail -n $lastLine | head -n $linesPerPage | tac";
+    $cmd = "tac $escFilePath | nl | (echo 'BEGIN'; tac) | tail -n $lastLine | head -n $linesPerPage | tac";
 
     // execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
