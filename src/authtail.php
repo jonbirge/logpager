@@ -5,8 +5,11 @@ include 'authparse.php';
 
 function authTail($page, $linesPerPage)
 {
-    // Path to the auth log file
+    // path to the auth log file
     $logFilePaths = getAuthLogFiles();
+
+    // create random temporary file path
+    $tmpFilePath = '/tmp/authlog-' . rand() . '.log';
 
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
@@ -22,10 +25,26 @@ function authTail($page, $linesPerPage)
     // generate cat command to concatenate all log files
     $catCmd = 'cat ' . implode(' ', $logFilePaths);
 
-    // build UNIX command
+    // build and execute UNIX command to generate filtered log
+    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd > $tmpFilePath";
+    exec($cmd);
+
+    // use UNIX wc command to count lines in temporary file
+    $cmd = "wc -l $tmpFilePath";
+    $fp = popen($cmd, 'r');
+    $lineCount = intval(fgets($fp));
+    pclose($fp);
+
+    // calculate number of pages
+    $pageCount = ceil($lineCount / $linesPerPage);
+
+    // calculate the page number we'll actually be returning
+    $page = min($page, $pageCount);
+
+    // build UNIX command to get the lines we want
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tail -n $lastLine | head -n $linesPerPage | tac";
+    $cmd = "tail -n $lastLine $tmpFilePath | head -n $linesPerPage | tac";
 
     // read the lines from UNIX pipe
     $fp = popen($cmd, 'r');
@@ -34,6 +53,9 @@ function authTail($page, $linesPerPage)
         $lines[] = $line;
     }
     pclose($fp);
+
+    // delete temp file
+    unlink($tmpFilePath);
 
     // Read in CLF header name array from clfhead.json
     $headers = json_decode(file_get_contents('loghead.json'));
@@ -45,6 +67,7 @@ function authTail($page, $linesPerPage)
     // Process each line and add to the array
     $lineCount = 0;
     foreach ($lines as $line) {
+        // parse log line
         $data = parseAuthLogLine($line);
 
         // determine status based on $data[2]
@@ -57,6 +80,11 @@ function authTail($page, $linesPerPage)
         }
     }
 
-    // Output the array as JSON
-    echo json_encode($logLines);
+    // Output $logLines, $page and $lineCount as a JSON dictionary
+    echo json_encode([
+        'page' => $page,
+        'pageCount' => $pageCount,
+        'lineCount' => $lineCount,
+        'logLines' => $logLines
+    ]);
 }

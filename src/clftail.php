@@ -6,6 +6,18 @@ function clfTail($page, $linesPerPage)
     $logFilePath = '/access.log';
     $escFilePath = escapeshellarg($logFilePath);
 
+    // use UNIX wc command to count lines in file
+    $cmd = "wc -l $escFilePath";
+    $fp = popen($cmd, 'r');
+    $lineCount = intval(fgets($fp));
+    pclose($fp);
+
+    // calculate number of pages
+    $pageCount = ceil($lineCount / $linesPerPage);
+
+    // calculate the page number we'll actually be returning
+    $page = min($page, $pageCount);
+
     // build UNIX command
     $firstLine = $page * $linesPerPage + 1;
     $lastLine = $firstLine + ($linesPerPage - 1);
@@ -35,6 +47,11 @@ function clfTail($page, $linesPerPage)
         $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));
     }
 
-    // Output the array as JSON
-    echo json_encode($logLines);
+    // Output $logLines, $page and $lineCount as a JSON dictionary
+    echo json_encode([
+        'page' => $page,
+        'pageCount' => $pageCount,
+        'lineCount' => $lineCount,
+        'logLines' => $logLines
+    ]);
 }

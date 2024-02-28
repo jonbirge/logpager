@@ -138,15 +138,6 @@ function pollLog() {
         page = 0; // reset page
     }
 
-    // reset the URL and search
-    const url = new URL(window.location.href);
-    url.searchParams.delete("search");
-    url.searchParams.delete("summary");
-    url.searchParams.set("type", logType);
-    url.searchParams.set("page", page);
-    window.history.replaceState({}, "", url);
-    search = null;
-
     // clear status divs
     const searchStatus = document.getElementById("status");
     searchStatus.innerHTML = "";
@@ -155,13 +146,7 @@ function pollLog() {
     fetch("logtail.php?type=" + logType + "&page=" + page)
         .then((response) => response.text())
         .then((data) => {
-            const pageSpan = document.getElementById("page");
             updateTable(data);
-            if (page == 0) {
-                pageSpan.innerHTML = "Last page";
-            } else {
-                pageSpan.innerHTML = "Page " + page + " from end";
-            }
         });
 }
 
@@ -271,20 +256,23 @@ function loadBlacklist() {
 // Take JSON array of commond log data and write HTML table
 function updateTable(jsonData) {
     const data = JSON.parse(jsonData);
+    const logdata = data.logLines;
+    page = parseInt(data.page, 10);
+    let pageCount = parseInt(data.pageCount, 10);
     const logDiv = document.getElementById("log");
     const signal = controller.signal;
     let ips = [];
     let row;
 
     // set dataLength to the minimum of data.length and maxLogLength
-    const dataLength = Math.min(data.length, maxLogLength);
+    const dataLength = Math.min(logdata.length, maxLogLength);
 
     // check to see if the table needs to be rebuilt
     if (dataLength != tableLength) {
         console.log("updateTable: rebuilding table");
-        tableLength = data.length;
+        tableLength = logdata.length;
         let table0 = '<table id="log-table" class="log">';
-        for (let i = 0; i < data.length; i++) {
+        for (let i = 0; i < logdata.length; i++) {
             table0 += '<tr id="row-' + i + '"></tr>';
         }
         table0 += "</table>";
@@ -294,18 +282,18 @@ function updateTable(jsonData) {
     // write table headers from first row
     let headrow = document.getElementById("row-0");
     row = "";
-    for (let i = 0; i < data[0].length; i++) {
+    for (let i = 0; i < logdata[0].length; i++) {
         if (i == 0) {
-            row += "<th>" + data[0][i] + "</th>";
+            row += "<th>" + logdata[0][i] + "</th>";
             if (geolocate) {
                 row += '<th class="hideable">Domain name</th>';
                 row += '<th class="hideable">Organization</th>';
                 row += '<th>Geolocation</th>';
             }
         } else if (i == 2) {  // details
-            row += '<th class="hideable">' + data[0][i] + '</th>';
+            row += '<th class="hideable">' + logdata[0][i] + '</th>';
         } else {
-            row += "<th>" + data[0][i] + "</th>";
+            row += "<th>" + logdata[0][i] + "</th>";
         }
     }
     headrow.innerHTML = row;
@@ -314,10 +302,10 @@ function updateTable(jsonData) {
     for (let i = 1; i < dataLength; i++) {
         rowElement = document.getElementById("row-" + i);
         row = "";
-        for (let j = 0; j < data[i].length; j++) {
+        for (let j = 0; j < logdata[i].length; j++) {
             if (j == 0) {
                 // ip address
-                const ip = data[i][j];
+                const ip = logdata[i][j];
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
                 const srchlink = "?type=" + logType + "&search=ip:" + ip;
@@ -345,7 +333,7 @@ function updateTable(jsonData) {
                     row += '<td id="' + geoid + '"></td>';
                 }
             } else if (j == 1) {
-                const clfStamp = data[i][j].replace(/\s.*$/, "");  // remove the timezone
+                const clfStamp = logdata[i][j].replace(/\s.*$/, "");  // remove the timezone
                 const dateStamp = parseCLFDate(clfStamp);  // assume UTC
                 const timediff = timeDiff(dateStamp, new Date());
                 const jsonDate = dateStamp.toJSON();
@@ -353,7 +341,7 @@ function updateTable(jsonData) {
                 row += timediff + "</td>";
             } else if (j == 2) {
                 // request
-                const rawRequest = data[i][j];
+                const rawRequest = logdata[i][j];
                 // truncate request to 32 characters
                 const truncRequest =
                     rawRequest.length > maxRequestLength
@@ -364,7 +352,7 @@ function updateTable(jsonData) {
                 // common status handling
                 const greenStatus = ["200", "304", "OK"];
                 const redStatus = ["308", "400", "401", "403", "404", "500", "FAIL"];
-                const status = data[i][j];
+                const status = logdata[i][j];
                 if (greenStatus.includes(status)) {
                     row += '<td class="green">' + status + "</td>";
                 } else if (redStatus.includes(status)) {
@@ -374,13 +362,44 @@ function updateTable(jsonData) {
                 }
             } else {
                 // anything else
-                row += "<td>" + data[i][j] + "</td>";
+                row += "<td>" + logdata[i][j] + "</td>";
             }
         }
         rowElement.innerHTML = row;
     }
 
-    // Get the host names from the IP addresses
+    // reset the URL and search
+    const url = new URL(window.location.href);
+    url.searchParams.delete("search");
+    url.searchParams.delete("summary");
+    url.searchParams.set("type", logType);
+    url.searchParams.set("page", page);
+    window.history.replaceState({}, "", url);
+    search = null;
+    
+    // handle case where we're at the last page
+    const nextButtons = document.querySelectorAll('[id^="next-"]');
+    if (page >= pageCount) {
+        nextButtons.forEach((button) => {
+            button.disabled = true;
+            button.classList.add("disabled");
+        });
+    } else {
+        nextButtons.forEach((button) => {
+            button.disabled = false;
+            button.classList.remove("disabled");
+        });
+    }
+    
+    // update the page number
+    const pageSpan = document.getElementById("page");
+    if (page == 0) {
+        pageSpan.innerHTML = "Latest page";
+    } else {
+        pageSpan.innerHTML = "Page " + page + " from end";
+    }
+
+    // asyncronously get the host locations from the IPs
     const ipSet = [...new Set(ips)]; // Get unique IP addresses
     if (geolocate) getGeoLocations(ipSet, signal);
 }
