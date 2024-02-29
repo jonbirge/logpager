@@ -138,6 +138,13 @@ function pollLog() {
         page = 0; // reset page
     }
 
+    // clear URL search and summary parameters
+    const url = new URL(window.location.href);
+    url.searchParams.delete("search");
+    url.searchParams.delete("summary");
+    url.searchParams.set("type", logType);
+    search = null;
+
     // clear status divs
     const searchStatus = document.getElementById("status");
     searchStatus.innerHTML = "";
@@ -356,15 +363,6 @@ function updateTable(jsonData) {
         }
         rowElement.innerHTML = row;
     }
-
-    // reset the URL and search
-    const url = new URL(window.location.href);
-    url.searchParams.delete("search");
-    url.searchParams.delete("summary");
-    url.searchParams.set("type", logType);
-    url.searchParams.set("page", page);
-    window.history.replaceState({}, "", url);
-    search = null;
     
     // handle case where we're at the last page
     const nextButtons = document.querySelectorAll('[id^="next-"]');
@@ -380,18 +378,22 @@ function updateTable(jsonData) {
         });
     }
     
-    // update the page number
+    // update the page number and URL
+    const url = new URL(window.location.href);
     const pageSpan = document.getElementById("page");
     if (page == 0) {
         if (pageCount == 0) {
             pageSpan.innerHTML = "All results";
         } else {
             pageSpan.innerHTML = "Latest of " + pageCount + " pages";
+            url.searchParams.set("page", 0);
         }
     } else {
         pageSpan.innerHTML = "Page " + page + " of " + pageCount;
+        url.searchParams.set("page", page);
     }
-
+    window.history.replaceState({}, "", url);
+    
     // asyncronously get the host locations from the IPs
     const ipSet = [...new Set(ips)]; // Get unique IP addresses
     if (geolocate) getGeoLocations(ipSet, signal);
