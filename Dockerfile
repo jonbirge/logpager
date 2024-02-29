@@ -37,7 +37,7 @@ RUN touch /blacklist && chmod a+w /blacklist
 COPY entry.sh /entry.sh
 
 # Copy the source files to the Nginx web root
-COPY src/* /var/www/
+COPY src/ /var/www/
 
 # Expose standard HTTP port 
 EXPOSE 80

@@ -318,8 +318,8 @@ function updateTable(jsonData) {
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 }
-                // Create link string that opens a new tab with intel.php?ip=ip
-                const traceLink = 'onclick="window.open(' + "'intel.php?ip=" + ip + "'" + '); return false"';
+                // Create link string that opens a new tab with /intel/?ip=ip
+                const traceLink = 'onclick="window.open(' + "'intel/?ip=" + ip + "'" + '); return false"';
                 row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
                 row += "</nobr></td>";
                 // Add new cell for Host name after the first cell
@@ -462,8 +462,8 @@ function updateSummaryTable(jsonData) {
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 }
-                // Create link string that opens a new tab with intel.php?ip=ip
-                const traceLink = 'onclick="window.open(' + "'intel.php?ip=" + ip + "'" + '); return false"';
+                // Create link string that opens a new tab with intel
+                const traceLink = 'onclick="window.open(' + "'intel/?ip=" + ip + "'" + '); return false"';
                 row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
                 row += "</nobr></td>";
                 // Add new cell for Host name after the first cell
