@@ -86,14 +86,18 @@ function clfSearch($searchDict, $doSummary = true)
     }
 
     // If $doSummary is true, summarize the log lines
-    if ($doSummary) {
+    if ($doSummary) { // return summary format
         $searchLines = searchStats($logLines);
         // take the first $maxItems items
         $searchLines = array_slice($searchLines, 0, $maxItems);
-    } else {
+        echo json_encode($searchLines);
+    } else { // return standard log format
         $searchLines = searchLines($logLines);
+        echo json_encode([
+            'page' => 0,
+            'pageCount' => 0,
+            'lineCount' => count($searchLines),
+            'logLines' => $searchLines
+        ]);
     }
-
-    // Output the log lines as JSON
-    echo json_encode($searchLines);
 }

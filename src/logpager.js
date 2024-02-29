@@ -150,7 +150,6 @@ function pollLog() {
         });
 }
 
-// TODO: come up with a better name for this that is complementary to searchHeatmap
 // search the log and return table of results
 function searchLog(searchTerm, doSummary) {
     console.log("searchLog: searching for " + searchTerm);
@@ -200,31 +199,21 @@ function searchLog(searchTerm, doSummary) {
         .then((response) => response.text())
         .then((data) => {
             // write the search results to the log div
-            const pageSpan = document.getElementById("page");
-            const dataLength = JSON.parse(data).length - 1;  // don't count header row
+            let dataLength;
             if (summary == null || summary === "true") {
+                dataLength = JSON.parse(data).length - 1;  // don't count header row
                 console.log("searchLog: summary table");
-                if (dataLength > maxSearchLength) {
-                    pageSpan.innerHTML = "first " + maxSearchLength + " summary results";
-                } else {
-                    pageSpan.innerHTML = "summary results";
-                }
                 updateSummaryTable(data);
             } else {
+                dataLength = JSON.parse(data).lineCount - 1;
                 console.log("searchLog: full table");
-                if (dataLength > maxLogLength) {
-                    pageSpan.innerHTML = "first " + maxLogLength + " search results";
-                } else {
-                    pageSpan.innerHTML = "search results";
-                }
                 updateTable(data);
             }
 
             // report the number of results
-            const count = JSON.parse(data).length - 1;  // don't count header row
-            console.log("search: " + count + " results");
+            console.log("search: " + dataLength + " results");
             const searchStatus = document.getElementById("status");
-            searchStatus.innerHTML = "<b>" + count + " items found</b>";
+            searchStatus.innerHTML = "<b>" + dataLength + " items found</b>";
         });
 }
 
@@ -394,7 +383,11 @@ function updateTable(jsonData) {
     // update the page number
     const pageSpan = document.getElementById("page");
     if (page == 0) {
-        pageSpan.innerHTML = "Latest page";
+        if (pageCount == 0) {
+            pageSpan.innerHTML = "All results";
+        } else {
+            pageSpan.innerHTML = "Latest page";
+        }
     } else {
         pageSpan.innerHTML = "Page " + page + " from end";
     }
@@ -490,6 +483,14 @@ function updateSummaryTable(jsonData) {
             }
         }
         rowElement.innerHTML = row;
+    }
+
+    // update the page number
+    const pageSpan = document.getElementById("page");
+    if (dataLength > maxSearchLength) {
+        pageSpan.innerHTML = "first " + maxSearchLength + " summary results";
+    } else {
+        pageSpan.innerHTML = "All summary results";
     }
 
     // Get the host names from the IP addresses
