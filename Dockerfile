@@ -1,5 +1,5 @@
 # Alpine Linux as the base image
-FROM alpine:latest
+FROM alpine:3.18
 
 # Labels
 LABEL org.opencontainers.image.source=https://github.com/jonbirge/logpager
@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.licenses=MIT
 
 # Install nginx, PHP and others
 RUN apk update && apk upgrade
-RUN apk add --no-cache nginx php83-fpm
+RUN apk add --no-cache nginx php82-fpm
 RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
 
 # setuid root
