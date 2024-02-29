@@ -386,10 +386,10 @@ function updateTable(jsonData) {
         if (pageCount == 0) {
             pageSpan.innerHTML = "All results";
         } else {
-            pageSpan.innerHTML = "Latest page";
+            pageSpan.innerHTML = "Latest of " + pageCount + " pages";
         }
     } else {
-        pageSpan.innerHTML = "Page " + page + " from end";
+        pageSpan.innerHTML = "Page " + page + " of " + pageCount;
     }
 
     // asyncronously get the host locations from the IPs
