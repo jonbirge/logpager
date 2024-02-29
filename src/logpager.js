@@ -7,7 +7,6 @@ const maxSearchLength = 128; // truncation length of summary search results
 const maxLogLength = 512; // truncation length of regular search results
 const maxGeoRequests = 128; // maximum number of IPs to geolocate at once
 
-// TODO: move these to a config file
 // global variables
 let pollInterval;
 let polling = false;
@@ -148,6 +147,10 @@ function pollLog() {
     // clear status divs
     const searchStatus = document.getElementById("status");
     searchStatus.innerHTML = "";
+
+    // update page to show loading...
+    const pageDiv = document.getElementById("page");
+    pageDiv.innerHTML = "Loading...";
 
     // get the log from the server
     fetch("logtail.php?type=" + logType + "&page=" + page)
