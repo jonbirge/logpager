@@ -9,7 +9,7 @@ function authTail($page, $linesPerPage)
     $logFilePaths = getAuthLogFiles();
 
     // create random temporary file path
-    $tmpFilePath = '/tmp/authlog-' . rand() . '.log';
+    $tmpFilePath = '/tmp/authlog-' . bin2hex(random_int(0, PHP_INT_MAX)) . '.log';
 
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
