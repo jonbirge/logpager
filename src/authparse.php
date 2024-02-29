@@ -109,9 +109,9 @@ function parseAuthLogLine($line)
         $ip = $matches[1];
     }
 
-    // Extract the message from the line
-    if (!preg_match('/\S+ \S+ \S+ \S+ (.+)/', $line, $matches)) {
-        $message = '';
+    // Extract the message from the line, excluding anything of the form xyz:
+    if (!preg_match('/(?<!\w): (.+)/', $line, $matches)) {
+        $message = '-';
     } else {
         $message = $matches[1];
     }
