@@ -2,6 +2,9 @@
 
 function clfHeatmap($searchDict)
 {
+    // Hardcoded maximum number of lines to read from the log file
+    $maxLines = 10000;
+
     // Log file to read
     $logFilePath = '/access.log';
 
@@ -11,18 +14,20 @@ function clfHeatmap($searchDict)
     $dateStr = $searchDict['date'];
     $stat = $searchDict['stat'];
 
-    // Open the log file for reading
-    $logFile = fopen($logFilePath, 'r');
-    if (!$logFile) {
-        echo "<p>Failed to open log file.</p>";
-        return;
-    }
-
     // Initialize an empty array to store the log summary data
     $logSummary = [];
 
-    // Read each line of the log file
-    while (($line = fgets($logFile)) !== false) {
+    // Scan backwards through the log file
+    $logFile = new SplFileObject($logFilePath, "r");
+    $logFile->seek(PHP_INT_MAX);
+    $last_line = $logFile->key();
+    $last_line--;
+    while ($last_line >= 0 | $maxLines-- > 0) {
+        $logFile->seek($last_line--);
+        $line = $logFile->current();
+
+        echo "<p>$last_line: $line</p>";
+
         // Extract the elements from the CLF log entry
         $logEntry = explode(' ', $line);
 
@@ -80,15 +85,16 @@ function clfHeatmap($searchDict)
         if (!isset($logSummary[$dayOfYear][$hStr])) {
             $logSummary[$dayOfYear][$hStr] = 0;
         }
+
         // Increment the count for the day of the year and hour of the day
         $logSummary[$dayOfYear][$hStr]++;
     }
 
-    // Close the log file
-    fclose($logFile);
-
     // Echo the log summary data as JSON
     echo json_encode($logSummary);
+
+    // Close the log file
+    fclose($logFile);
 }
 
 // Hour integer to string conversion function
