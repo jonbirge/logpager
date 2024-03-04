@@ -27,7 +27,7 @@ dev:
 	docker build -t $(IMAGE_NAME)_dev --build-arg TESTLOGS=true .
 
 # Run test image
-local: dev stop
+local: stop dev
 	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_dev
 
 # Stop test image

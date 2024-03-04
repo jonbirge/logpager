@@ -6,7 +6,7 @@ include 'searchparse.php';
 $type = $_GET['type'] ?? "clf";  // auth or clf
 $search = $_GET['search'] ?? null;  // search string
 $page = $_GET['page'] ?? 0;  // page size
-$linesPerPage = $_GET['n'] ?? 16;  // number of lines per page
+$linesPerPage = $_GET['n'] ?? 12;  // number of lines per page
 
 $searchDict = parseSearch($search);
 

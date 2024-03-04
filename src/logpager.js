@@ -2,6 +2,8 @@
 const geolocate = true; // pull IP geolocation from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
+
+// front-end data trucation settings
 const maxRequestLength = 48; // truncation length of log details
 const maxSearchLength = 128; // truncation length of summary search results
 const maxLogLength = 512; // truncation length of regular search results
