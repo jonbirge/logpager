@@ -816,6 +816,12 @@ function resetSearch() {
         button.classList.remove("disabled");
     });
 
+    // remove search term from URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete("search");
+    url.searchParams.delete("summary");
+    window.history.replaceState({}, "", url);
+
     // disable search button
     searchButton.disabled = true;
     searchButton.classList.add("disabled");
