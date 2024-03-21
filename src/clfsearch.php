@@ -29,7 +29,7 @@ function clfSearch($searchDict, $doSummary = true)
     if ($stat) {
         $grepSearch .= " -e $stat";
     }
-    $cmd = "grep $grepSearch $escFilePath";
+    $cmd = "grep $grepSearch $escFilePath | tac";
 
     // execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
