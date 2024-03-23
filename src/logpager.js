@@ -612,7 +612,6 @@ function jsonToHeatmap(jsonData) {
     const svg = d3
         .select("#heatmap")
         .append("svg")
-        .attr("font-size", "12px")
         .attr("width", "100%") // Set width to 100%
         .attr("viewBox",
             `${-margin.left} 0 ${width + margin.right + margin.left + 25}
@@ -678,7 +677,8 @@ function jsonToHeatmap(jsonData) {
     legend.append("text")
         .attr("x", 24)
         .attr("y", 12)
-        .text((d) => d);
+        .text((d) => d)
+        .style("font-size", "12px");
 
     // Add text labels to each tile
     if (tileLabels) {
@@ -710,20 +710,28 @@ function jsonToHeatmap(jsonData) {
         .call(
             d3.axisBottom(xScale).tickValues(
                 xScale.domain().filter(function (d, i) {
-                    return !(i % 5);
+                    return !(i % 14);
                 })
             )
-        ); // Adjust the tick interval as needed
+        )
+        .selectAll("text")
+        .style("font-size", "12px"); // Increase the font size
 
     // Add Y-axis
-    svg.append("g").call(d3.axisLeft(yScale));
+    svg.append("g")
+        .call(
+            d3.axisLeft(yScale)
+                .tickValues(yScale.domain().filter(function (d, i) { return !(i % 2); }))
+        )
+        .selectAll("text")
+        .style("font-size", "12px"); // Increase the font size
 
     // Add X-axis label
     svg.append("text")
         .attr("x", width / 2)
         .attr("y", height + 40)
         .attr("text-anchor", "middle")
-        .style("font-size", "14px")
+        .style("font-size", "16px")
         .text("Date");
 
     // Add Y-axis label
@@ -732,7 +740,7 @@ function jsonToHeatmap(jsonData) {
         .attr("y", -40)
         .attr("text-anchor", "middle")
         .attr("transform", "rotate(-90)")
-        .style("font-size", "14px")
+        .style("font-size", "16px")
         .text("Hour");
 
     // Add title by writing to the "heatmap-title" element
