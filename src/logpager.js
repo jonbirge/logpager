@@ -539,24 +539,33 @@ function jsonToHeatmap(jsonData) {
         svgElement.remove();
     }
 
-    // Process the data to work with D3 library
-    let processedData = [];
-    Object.keys(jsonData).forEach((date) => {
-        for (let hour = 0; hour < 24; hour++) {
-            const hourStr = hour.toString().padStart(2, "0");
-            processedData.push({
-                date: date,
-                hour: hourStr,
-                count:
-                    jsonData[date][hourStr] !== undefined
-                        ? jsonData[date][hourStr]
-                        : null,
-            });
-        }
+    // Iterate through every entry in jsonDate[date][hour] and create an array of Date objects
+    var dateObjs = [];
+    Object.entries(jsonData).forEach(([date, hours]) => {
+        Object.keys(hours).forEach((hour) => {
+            dateObjs.push(new Date(date + "T" + hour + ":00:00Z"));
+        });
     });
 
-    // Remove null values from the data
-    processedData = processedData.filter((d) => d.count !== null);
+    // Sort dateObjs from earliest to latest
+    dateObjs.sort((a, b) => a - b);
+
+    // Get the earliest and latest dates
+    const earliestDate = dateObjs[0];
+    const latestDate = dateObjs[dateObjs.length - 1];
+
+    // Create an array of Date objects for every hour between earliestDate and latestDate
+    var processedData = [];
+    for (let thedate = new Date(earliestDate); thedate <= latestDate; thedate.setHours(thedate.getHours() + 1)) {
+        const dayStr = thedate.toISOString().slice(0, 10);
+        const hourStr = thedate.toISOString().slice(11, 13);
+        const count = jsonData[dayStr] ? jsonData[dayStr][hourStr] : 0;
+        processedData.push({
+            date: dayStr,
+            hour: hourStr,
+            count: count,
+        });
+    }
 
     // Set dimensions for the heatmap
     const cellSize = 10; // size of each tile
@@ -699,7 +708,7 @@ function jsonToHeatmap(jsonData) {
         .attr("y", height + 40)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
-        .text("Day of the year");
+        .text("Date");
 
     // Add Y-axis label
     svg.append("text")
@@ -708,16 +717,16 @@ function jsonToHeatmap(jsonData) {
         .attr("text-anchor", "middle")
         .attr("transform", "rotate(-90)")
         .style("font-size", "14px")
-        .text("Hour of the day");
+        .text("Hour");
 
     // Add title by writing to the "heatmap-title" element
+    const titleHTMLElement = document.getElementById("heatmap-title");
     let titleText;
     if (search) {
         titleText = "Search results by time";
     } else {
         titleText = "Log entries by time";
     }
-    const titleHTMLElement = document.getElementById("heatmap-title");
     titleHTMLElement.innerHTML = titleText;
 
     // Center the chart in the div
