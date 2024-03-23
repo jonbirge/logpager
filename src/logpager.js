@@ -3,6 +3,7 @@ const geolocate = true; // pull IP geolocation from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
 const fillToNow = true; // fill heatmap to current time?
+const heatmapRatio = 0.5; // width to height ratio of heatmap
 
 // front-end data trucation settings
 const maxRequestLength = 48; // truncation length of log details
@@ -584,7 +585,7 @@ function jsonToHeatmap(jsonData) {
 
     // Set dimensions for the heatmap
     const cellSize = 10; // size of each tile
-    const ratio = 1.0; // width to height ratio
+    const ratio = heatmapRatio; // width to height ratio
     const margin = { top: 0, right: 50, bottom: 50, left: 50 };
     const width = ratio * allDates.length * cellSize;
     const height = 24 * cellSize;  // 24 hours
