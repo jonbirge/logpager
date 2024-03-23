@@ -229,21 +229,6 @@ function searchLog(searchTerm, doSummary) {
         });
 }
 
-// plot heatmap of log entries by hour and day, potentially including a search term
-function plotHeatmap(searchTerm) {
-    // Build data query URL
-    let heatmapURL = "heatmap.php?type=" + logType;
-    if (searchTerm) {
-        heatmapURL += "&search=" + searchTerm;
-    }
-
-    // get summary data from server
-    console.log("plotHeatmap: fetching " + heatmapURL);
-    fetch(heatmapURL)
-        .then((response) => response.json())
-        .then(jsonToHeatmap);
-}
-
 // update blacklist cache from server
 function loadBlacklist() {
     fetch("blacklist.php")
@@ -531,6 +516,21 @@ function blacklistAdd(ip) {
         });
 }
 
+// plot heatmap of log entries by hour and day, potentially including a search term
+function plotHeatmap(searchTerm) {
+    // Build data query URL
+    let heatmapURL = "heatmap.php?type=" + logType;
+    if (searchTerm) {
+        heatmapURL += "&search=" + searchTerm;
+    }
+
+    // get summary data from server
+    console.log("plotHeatmap: fetching " + heatmapURL);
+    fetch(heatmapURL)
+        .then((response) => response.json())
+        .then(jsonToHeatmap);
+}
+
 // Take JSON array of command log data and build SVG heatmap
 function jsonToHeatmap(jsonData) {
     // Check if SVG element already exists and remove if so
@@ -559,7 +559,7 @@ function jsonToHeatmap(jsonData) {
     processedData = processedData.filter((d) => d.count !== null);
 
     // Set dimensions for the heatmap
-    const cellSize = 11; // size of each tile
+    const cellSize = 10; // size of each tile
     const ratio = 1; // width to height ratio
     const margin = { top: 0, right: 50, bottom: 50, left: 50 };
     const width = ratio * Object.keys(jsonData).length * cellSize;
@@ -589,21 +589,21 @@ function jsonToHeatmap(jsonData) {
         .append("svg")
         .attr("font-size", "12px")
         .attr("width", "100%") // Set width to 100%
-        .style("height", height + "px") // Set height using CSS
-        .attr(
-            "viewBox",
-            `${-margin.left} 0 ${width + margin.right + margin.left + 25} ${height + margin.bottom + margin.top
-            }`
-        ) // Add viewBox
+        .attr("viewBox",
+            `${-margin.left} 0 ${width + margin.right + margin.left + 25}
+            ${height + margin.bottom + margin.top}`
+        ) // viewBox
+        .style("max-height", height + "px") // Set height using CSS
         .append("g")
         .attr("transform", `translate(0,${margin.top})`);
 
     // Create color scale
     const colorScale = d3
-        .scaleSqrt()
+        .scaleLog()
+        .base(2)
         .interpolate(() => d3.interpolatePlasma)
         .domain([1, d3.max(processedData, (d) => d.count)])
-        .range([0, 1]);
+        .range([0.1, 1]);
 
     // Create the tiles and make interactive
     svg.selectAll()
@@ -612,8 +612,8 @@ function jsonToHeatmap(jsonData) {
         .append("rect")
         .attr("x", (d) => xScale(d.date))
         .attr("y", (d) => yScale(d.hour))
-        .attr("width", xScale.bandwidth() - 1) // create a gap between tiles
-        .attr("height", yScale.bandwidth() - 1) // create a gap between tiles
+        .attr("width", xScale.bandwidth() + 1) // create a gap between tiles
+        .attr("height", yScale.bandwidth() + 1) // create a gap between tiles
         .style("fill", (d) => colorScale(d.count))
         .on("click", function (d) {
             // get the date and hour from the data

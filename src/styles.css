@@ -62,13 +62,13 @@ h1 {
 }
 
 h2 {
-    font-size: 20px;
-    margin-top: 18px;
+    font-size: 18px;
+    margin-top: 16px;
     margin-bottom: 6px;
     font-weight: 500;
 }
 
-/* Make links bold & black */
+/* Make links bold & black by default */
 a {
     color: black;
     font-weight: 600;
