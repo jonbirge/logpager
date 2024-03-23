@@ -2,6 +2,7 @@
 const geolocate = true; // pull IP geolocation from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
+const fillToNow = true; // fill heatmap to current time?
 
 // front-end data trucation settings
 const maxRequestLength = 48; // truncation length of log details
@@ -547,6 +548,11 @@ function jsonToHeatmap(jsonData) {
         });
     });
 
+    // Add current time to dateObjs if fillToNow is true
+    if (fillToNow) {
+        dateObjs.push(new Date());
+    }
+
     // Sort dateObjs from earliest to latest
     dateObjs.sort((a, b) => a - b);
 
@@ -556,28 +562,37 @@ function jsonToHeatmap(jsonData) {
 
     // Create an array of Date objects for every hour between earliestDate and latestDate
     var processedData = [];
-    for (let thedate = new Date(earliestDate); thedate <= latestDate; thedate.setHours(thedate.getHours() + 1)) {
+    for (let thedate = new Date(earliestDate); thedate < latestDate; thedate.setHours(thedate.getHours() + 1)) {
         const dayStr = thedate.toISOString().slice(0, 10);
         const hourStr = thedate.toISOString().slice(11, 13);
-        const count = jsonData[dayStr] ? jsonData[dayStr][hourStr] : 0;
+        let count;
+        if (jsonData[dayStr] && jsonData[dayStr][hourStr]) {
+            count = jsonData[dayStr][hourStr];
+        } else {
+            count = 0;
+        }
         processedData.push({
             date: dayStr,
             hour: hourStr,
             count: count,
         });
+        console.log("plotHeatmap: " + dayStr + " " + hourStr + " = " + count);
     }
+
+    // Get all unique dates from processedData
+    const allDates = [...new Set(processedData.map(d => d.date))];
 
     // Set dimensions for the heatmap
     const cellSize = 10; // size of each tile
-    const ratio = 1; // width to height ratio
+    const ratio = 1.0; // width to height ratio
     const margin = { top: 0, right: 50, bottom: 50, left: 50 };
-    const width = ratio * Object.keys(jsonData).length * cellSize;
+    const width = ratio * allDates.length * cellSize;
     const height = 24 * cellSize;  // 24 hours
 
     // Creating scales for date axes
     const xScale = d3
         .scaleBand()
-        .domain(Object.keys(jsonData))
+        .domain(allDates)
         .range([0, width]);
 
     // Create array of hour label strings with leading zeros
