@@ -2,6 +2,8 @@
 const geolocate = true; // pull IP geolocation from external service?
 const tileLabels = false; // show tile labels on heatmap?
 const apiWait = 200; // milliseconds to wait between external API calls
+const fillToNow = true; // fill heatmap to current time?
+const heatmapRatio = 0.5; // width to height ratio of heatmap
 
 // front-end data trucation settings
 const maxRequestLength = 48; // truncation length of log details
@@ -227,21 +229,6 @@ function searchLog(searchTerm, doSummary) {
             const searchStatus = document.getElementById("status");
             searchStatus.innerHTML = "<b>" + dataLength + " items found</b>";
         });
-}
-
-// plot heatmap of log entries by hour and day, potentially including a search term
-function plotHeatmap(searchTerm) {
-    // Build data query URL
-    let heatmapURL = "heatmap.php?type=" + logType;
-    if (searchTerm) {
-        heatmapURL += "&search=" + searchTerm;
-    }
-
-    // get summary data from server
-    console.log("plotHeatmap: fetching " + heatmapURL);
-    fetch(heatmapURL)
-        .then((response) => response.json())
-        .then(jsonToHeatmap);
 }
 
 // update blacklist cache from server
@@ -531,6 +518,21 @@ function blacklistAdd(ip) {
         });
 }
 
+// plot heatmap of log entries by hour and day, potentially including a search term
+function plotHeatmap(searchTerm) {
+    // Build data query URL
+    let heatmapURL = "heatmap.php?type=" + logType;
+    if (searchTerm) {
+        heatmapURL += "&search=" + searchTerm;
+    }
+
+    // get summary data from server
+    console.log("plotHeatmap: fetching " + heatmapURL);
+    fetch(heatmapURL)
+        .then((response) => response.json())
+        .then(jsonToHeatmap);
+}
+
 // Take JSON array of command log data and build SVG heatmap
 function jsonToHeatmap(jsonData) {
     // Check if SVG element already exists and remove if so
@@ -539,36 +541,59 @@ function jsonToHeatmap(jsonData) {
         svgElement.remove();
     }
 
-    // Process the data to work with D3 library
-    let processedData = [];
-    Object.keys(jsonData).forEach((date) => {
-        for (let hour = 0; hour < 24; hour++) {
-            const hourStr = hour.toString().padStart(2, "0");
-            processedData.push({
-                date: date,
-                hour: hourStr,
-                count:
-                    jsonData[date][hourStr] !== undefined
-                        ? jsonData[date][hourStr]
-                        : null,
-            });
-        }
+    // Iterate through every entry in jsonDate[date][hour] and create an array of Date objects
+    var dateObjs = [];
+    Object.entries(jsonData).forEach(([date, hours]) => {
+        Object.keys(hours).forEach((hour) => {
+            dateObjs.push(new Date(date + "T" + hour + ":00:00Z"));
+        });
     });
 
-    // Remove null values from the data
-    processedData = processedData.filter((d) => d.count !== null);
+    // Add current time to dateObjs if fillToNow is true
+    if (fillToNow) {
+        dateObjs.push(new Date());
+    }
+
+    // Sort dateObjs from earliest to latest
+    dateObjs.sort((a, b) => a - b);
+
+    // Get the earliest and latest dates
+    const earliestDate = dateObjs[0];
+    const latestDate = dateObjs[dateObjs.length - 1];
+
+    // Create an array of Date objects for every hour between earliestDate and latestDate
+    var processedData = [];
+    for (let thedate = new Date(earliestDate); thedate < latestDate; thedate.setHours(thedate.getHours() + 1)) {
+        const dayStr = thedate.toISOString().slice(0, 10);
+        const hourStr = thedate.toISOString().slice(11, 13);
+        let count;
+        if (jsonData[dayStr] && jsonData[dayStr][hourStr]) {
+            count = jsonData[dayStr][hourStr];
+        } else {
+            count = 0;
+        }
+        processedData.push({
+            date: dayStr,
+            hour: hourStr,
+            count: count,
+        });
+        console.log("plotHeatmap: " + dayStr + " " + hourStr + " = " + count);
+    }
+
+    // Get all unique dates from processedData
+    const allDates = [...new Set(processedData.map(d => d.date))];
 
     // Set dimensions for the heatmap
-    const cellSize = 11; // size of each tile
-    const ratio = 1; // width to height ratio
+    const cellSize = 10; // size of each tile
+    const ratio = heatmapRatio; // width to height ratio
     const margin = { top: 0, right: 50, bottom: 50, left: 50 };
-    const width = ratio * Object.keys(jsonData).length * cellSize;
+    const width = ratio * allDates.length * cellSize;
     const height = 24 * cellSize;  // 24 hours
 
     // Creating scales for date axes
     const xScale = d3
         .scaleBand()
-        .domain(Object.keys(jsonData))
+        .domain(allDates)
         .range([0, width]);
 
     // Create array of hour label strings with leading zeros
@@ -587,23 +612,22 @@ function jsonToHeatmap(jsonData) {
     const svg = d3
         .select("#heatmap")
         .append("svg")
-        .attr("font-size", "12px")
         .attr("width", "100%") // Set width to 100%
-        .style("height", height + "px") // Set height using CSS
-        .attr(
-            "viewBox",
-            `${-margin.left} 0 ${width + margin.right + margin.left + 25} ${height + margin.bottom + margin.top
-            }`
-        ) // Add viewBox
+        .attr("viewBox",
+            `${-margin.left} 0 ${width + margin.right + margin.left + 25}
+            ${height + margin.bottom + margin.top}`
+        ) // viewBox
+        .style("max-height", height + "px") // Set height using CSS
         .append("g")
         .attr("transform", `translate(0,${margin.top})`);
 
     // Create color scale
     const colorScale = d3
-        .scaleSqrt()
+        .scaleLog()
+        .base(2)
         .interpolate(() => d3.interpolatePlasma)
         .domain([1, d3.max(processedData, (d) => d.count)])
-        .range([0, 1]);
+        .range([0.1, 1]);
 
     // Create the tiles and make interactive
     svg.selectAll()
@@ -612,8 +636,8 @@ function jsonToHeatmap(jsonData) {
         .append("rect")
         .attr("x", (d) => xScale(d.date))
         .attr("y", (d) => yScale(d.hour))
-        .attr("width", xScale.bandwidth() - 1) // create a gap between tiles
-        .attr("height", yScale.bandwidth() - 1) // create a gap between tiles
+        .attr("width", xScale.bandwidth() + 1) // create a gap between tiles
+        .attr("height", yScale.bandwidth() + 1) // create a gap between tiles
         .style("fill", (d) => colorScale(d.count))
         .on("click", function (d) {
             // get the date and hour from the data
@@ -653,7 +677,8 @@ function jsonToHeatmap(jsonData) {
     legend.append("text")
         .attr("x", 24)
         .attr("y", 12)
-        .text((d) => d);
+        .text((d) => d)
+        .style("font-size", "12px");
 
     // Add text labels to each tile
     if (tileLabels) {
@@ -685,21 +710,29 @@ function jsonToHeatmap(jsonData) {
         .call(
             d3.axisBottom(xScale).tickValues(
                 xScale.domain().filter(function (d, i) {
-                    return !(i % 5);
+                    return !(i % 14);
                 })
             )
-        ); // Adjust the tick interval as needed
+        )
+        .selectAll("text")
+        .style("font-size", "12px"); // Increase the font size
 
     // Add Y-axis
-    svg.append("g").call(d3.axisLeft(yScale));
+    svg.append("g")
+        .call(
+            d3.axisLeft(yScale)
+                .tickValues(yScale.domain().filter(function (d, i) { return !(i % 2); }))
+        )
+        .selectAll("text")
+        .style("font-size", "12px"); // Increase the font size
 
     // Add X-axis label
     svg.append("text")
         .attr("x", width / 2)
         .attr("y", height + 40)
         .attr("text-anchor", "middle")
-        .style("font-size", "14px")
-        .text("Day of the year");
+        .style("font-size", "16px")
+        .text("Date");
 
     // Add Y-axis label
     svg.append("text")
@@ -707,17 +740,17 @@ function jsonToHeatmap(jsonData) {
         .attr("y", -40)
         .attr("text-anchor", "middle")
         .attr("transform", "rotate(-90)")
-        .style("font-size", "14px")
-        .text("Hour of the day");
+        .style("font-size", "16px")
+        .text("Hour");
 
     // Add title by writing to the "heatmap-title" element
+    const titleHTMLElement = document.getElementById("heatmap-title");
     let titleText;
     if (search) {
         titleText = "Search results by time";
     } else {
         titleText = "Log entries by time";
     }
-    const titleHTMLElement = document.getElementById("heatmap-title");
     titleHTMLElement.innerHTML = titleText;
 
     // Center the chart in the div
