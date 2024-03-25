@@ -11,6 +11,12 @@ RUN apk update && apk upgrade
 RUN apk add --no-cache nginx php82-fpm
 RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
 
+# Default environment variables for MySQL
+ENV SQL_PORT=3306
+ENV SQL_USER=root
+ENV SQL_PASS=root
+ENV SQL_DB=logpager
+
 # setuid root
 RUN chmod u+s /usr/bin/tcptraceroute
 RUN chmod u+s /usr/bin/nmap

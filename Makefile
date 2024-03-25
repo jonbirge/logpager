@@ -25,11 +25,11 @@ release: latest
 
 # Image with test files for development
 test:
-	docker build -f Dockerfile_test -t $(IMAGE_NAME)_dev .
+	docker build -f Dockerfile_test -t $(IMAGE_NAME)_test .
 
 # Run test image
 run: stop test
-	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_dev
+	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_test
 
 # Stop test image
 stop:
@@ -39,4 +39,4 @@ stop:
 # Convenience command to build
 all: build
 
-.PHONY: build clean dev release stop local all
+.PHONY: build clean test release stop run all

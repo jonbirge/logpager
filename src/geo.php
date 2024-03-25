@@ -17,6 +17,8 @@ $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
     echo "Connection failed: " . $conn->connect_error;
     die("Connection failed: " . $conn->connect_error);
+} else {
+    echo "<p>Connected to SQL server</p>";
 }
 
 // Prepare SQL query
@@ -25,6 +27,8 @@ $result = $conn->query($sql);
 if ($conn->error) {
     echo "SQL error: " . $conn->error;
     die("SQL error: " . $conn->error);
+} else {
+    echo "<p>SQL query executed</p>";
 }
 
 // If the IP address is not in the database

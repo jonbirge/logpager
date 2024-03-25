@@ -15,11 +15,11 @@ RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
 RUN apk add --no-cache mysql mysql-client
 
 # Setup environment variables for localhost MySQL
-ENV MYSQL_HOST=localhost
-ENV MYSQL_PORT=3306
-ENV MYSQL_USER=root
-ENV MYSQL_PASSWORD=root
-ENV MYSQL_DATABASE=logpager
+ENV SQL_HOST=localhost
+ENV SQL_PORT=3306
+ENV SQL_USER=root
+ENV SQL_PASS=root
+ENV SQL_DB=logpager
 
 # setuid root
 RUN chmod u+s /usr/bin/tcptraceroute
@@ -40,7 +40,8 @@ RUN cp /var/testlogs/* /
 # Default /blacklist file and make writable by php-fpm
 RUN touch /blacklist && chmod a+w /blacklist
 
-# Startup script
+# Startup scripts
+COPY db.sql /db.sql
 COPY entry.sh /entry.sh
 
 # Copy the source files to the Nginx web root
