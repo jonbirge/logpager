@@ -445,9 +445,11 @@ function updateSummaryTable(jsonData) {
                 const srchlink = "?type=" + logType + "&summary=false&search=ip:" + ip;
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
-                // Create link string that calls blacklistAdd(ip) function
+                // Create blacklist links
                 if (blacklist.includes(ip)) {
-                    row += '<button class="toggle-button tight disabled">block</button>';
+                    const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
+                    const blacklistid = 'id="block-' + ip + '"';
+                    row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
                 } else {
                     const blacklistCall = 'onclick="blacklistAdd(' + "'" + ip + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
