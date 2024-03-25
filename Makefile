@@ -15,10 +15,11 @@ build:
 clean:
 	docker build -t $(FULL_IMAGE_NAME) --no-cache .
 
+# Push into the latest tag
 latest: build
 	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
 
-# Push the Docker image to Docker Hub
+# Push into the latest tag and version tag
 release: latest
 	docker push $(FULL_IMAGE_NAME)
 
@@ -27,7 +28,7 @@ dev:
 	docker build -t $(IMAGE_NAME)_dev --build-arg TESTLOGS=true .
 
 # Run test image
-local: stop dev
+run: stop dev
 	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_dev
 
 # Stop test image
