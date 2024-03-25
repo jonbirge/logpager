@@ -906,7 +906,7 @@ function resetSearch() {
 function getGeoLocations(ips, signal) {
     // take only the first maxGeoRequests IP addresses
     ips = ips.slice(0, maxGeoRequests);
-    console.log("Getting geolocations for " + ips);
+    // console.log("Getting geolocations for " + ips);
     // Grab each ip address and send to ip-api.com
     let geoWaitTime = 0;
     ips.forEach((ip) => {
@@ -914,7 +914,7 @@ function getGeoLocations(ips, signal) {
         const ipindex = ips.indexOf(ip);
         // check cache first
         if (geoCache[ip]) {
-            console.log("cached geo: " + ip);
+            console.log("local geo cache hit: " + ip);
             updateGeoLocations(geoCache[ip], ip);
         } else {
             setTimeout(
@@ -982,10 +982,10 @@ function getGeoLocations(ips, signal) {
     }
 
     function fetchGeoLocation(ip) {
+        console.log("fetching geo: " + ip);
         fetch("geo.php?ip=" + ip, { signal })
             .then((response) => response.json())
             .then((data) => {
-                // console.log("geo rx: " + ip);
                 // cache the data
                 geoCache[ip] = data;
                 // update the table cells
