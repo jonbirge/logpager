@@ -213,7 +213,7 @@ tr:nth-child(even) {
 }
 
 .toggle-button.red {
-    background-color: red;
+    background-color: coral;
 }
 
 .toggle-button.red:hover {
