@@ -35,6 +35,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     // Send a confirmation message
     echo $ip . ' added to blacklist';
+} else if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    // Get the IP address from the URL
+    $ip = $_GET['ip'];
+
+    // Remove the IP address from the file if it exists
+    $contents = file_get_contents($file);
+    $contents = str_replace($ip . PHP_EOL, '', $contents);
+    file_put_contents($file, $contents);
+
+    // Send a confirmation message
+    echo $ip . ' removed from blacklist';
 } else {
     // Send a 405 Method Not Allowed response
     http_response_code(405);
