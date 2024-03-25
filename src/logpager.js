@@ -299,9 +299,11 @@ function updateTable(jsonData) {
                 const srchlink = "?type=" + logType + "&search=ip:" + ip;
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
-                // Create link string that calls blacklist(ip) function
+                // Create blacklist links
                 if (blacklist.includes(ip)) {
-                    row += '<button class="toggle-button tight disabled">block</button>';
+                    const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
+                    const blacklistid = 'id="block-' + ip + '"';
+                    row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
                 } else {
                     const blacklistCall = 'onclick="blacklistAdd(' + "'" + ip + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
@@ -509,11 +511,35 @@ function blacklistAdd(ip) {
             // update status div
             const status = document.getElementById("status");
             status.innerHTML = data;
-            // disable all block buttons with id of the form block-ipAddress
+            // update all block buttons
             const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
             blockButtons.forEach((button) => {
-                button.disabled = true;
-                button.classList.add("disabled");
+                button.innerHTML = "unblock";
+                button.setAttribute("onclick", 'blacklistRemove(' + "'" + ip + "'" + ');');
+                button.classList.add("red");
+            });
+        });
+}
+
+// Function to send DELETE request to blocklist.php?ip=IP_ADDRESS
+function blacklistRemove(ip) {
+    console.log("blacklist: remove " + ip);
+    // update blacklist cache manually
+    blacklist = blacklist.filter((item) => item !== ip);
+    fetch("blacklist.php?ip=" + ip, {
+        method: "DELETE",
+    })
+        .then((response) => response.text())
+        .then((data) => {
+            // update status div
+            const status = document.getElementById("status");
+            status.innerHTML = data;
+            // update all block buttons with id of the form block-ipAddress
+            const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
+            blockButtons.forEach((button) => {
+                button.innerHTML = "block";
+                button.setAttribute("onclick", 'blacklistAdd(' + "'" + ip + "'" + ');');
+                button.classList.remove("red");
             });
         });
 }
@@ -577,7 +603,6 @@ function jsonToHeatmap(jsonData) {
             hour: hourStr,
             count: count,
         });
-        console.log("plotHeatmap: " + dayStr + " " + hourStr + " = " + count);
     }
 
     // Get all unique dates from processedData
