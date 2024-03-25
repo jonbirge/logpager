@@ -498,7 +498,7 @@ function blacklistAdd(ip) {
     // update blacklist cache manually
     blacklist.push(ip);
     // send the IP address to the server
-    var formData = new FormData();
+    let formData = new FormData();
     formData.append('ip', ip);
     fetch("blacklist.php", {
         method: "POST",
@@ -542,7 +542,7 @@ function jsonToHeatmap(jsonData) {
     }
 
     // Iterate through every entry in jsonDate[date][hour] and create an array of Date objects
-    var dateObjs = [];
+    let dateObjs = [];
     Object.entries(jsonData).forEach(([date, hours]) => {
         Object.keys(hours).forEach((hour) => {
             dateObjs.push(new Date(date + "T" + hour + ":00:00Z"));
@@ -562,7 +562,7 @@ function jsonToHeatmap(jsonData) {
     const latestDate = dateObjs[dateObjs.length - 1];
 
     // Create an array of Date objects for every hour between earliestDate and latestDate
-    var processedData = [];
+    let processedData = [];
     for (let thedate = new Date(earliestDate); thedate < latestDate; thedate.setHours(thedate.getHours() + 1)) {
         const dayStr = thedate.toISOString().slice(0, 10);
         const hourStr = thedate.toISOString().slice(11, 13);
@@ -618,6 +618,7 @@ function jsonToHeatmap(jsonData) {
             ${height + margin.bottom + margin.top}`
         ) // viewBox
         .style("max-height", height + "px") // Set height using CSS
+        .style("font-family", "DM Sans, sans-serif")
         .append("g")
         .attr("transform", `translate(0,${margin.top})`);
 
@@ -715,7 +716,8 @@ function jsonToHeatmap(jsonData) {
             )
         )
         .selectAll("text")
-        .style("font-size", "12px"); // Increase the font size
+        .style("font-family", "DM Sans, sans-serif")
+        .style("font-size", "12px");
 
     // Add Y-axis
     svg.append("g")
@@ -724,7 +726,8 @@ function jsonToHeatmap(jsonData) {
                 .tickValues(yScale.domain().filter(function (d, i) { return !(i % 2); }))
         )
         .selectAll("text")
-        .style("font-size", "12px"); // Increase the font size
+        .style("font-family", "DM Sans, sans-serif")
+        .style("font-size", "12px");
 
     // Add X-axis label
     svg.append("text")
@@ -732,7 +735,8 @@ function jsonToHeatmap(jsonData) {
         .attr("y", height + 40)
         .attr("text-anchor", "middle")
         .style("font-size", "16px")
-        .text("Date");
+        .style("font-weight", 500)
+        .text("Day of year");
 
     // Add Y-axis label
     svg.append("text")
@@ -741,7 +745,8 @@ function jsonToHeatmap(jsonData) {
         .attr("text-anchor", "middle")
         .attr("transform", "rotate(-90)")
         .style("font-size", "16px")
-        .text("Hour");
+        .style("font-weight", 500)
+        .text("Hour of day");
 
     // Add title by writing to the "heatmap-title" element
     const titleHTMLElement = document.getElementById("heatmap-title");
