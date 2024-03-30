@@ -15,11 +15,11 @@ mysqld_safe &
 echo "Starting php-fpm..."
 php-fpm82
 
-# Start nginx in the foreground
-echo "Starting nginx..."
-nginx -g 'daemon off;'
-
 # Create SQL database and table if they don't exist
 sleep 5
 echo "Creating database and table if needed..."
-mysql -h $SQL_HOST -u $SQL_USER -p $SQL_PASS < /db.sql
+mysql < /db.sql
+
+# Start nginx in the foreground
+echo "Starting nginx..."
+nginx -g 'daemon off;'

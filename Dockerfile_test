@@ -12,13 +12,17 @@ RUN apk add --no-cache nginx php82-fpm
 RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
 
 # Install MySQL server
-RUN apk add --no-cache mysql mysql-client
+RUN apk add --no-cache mariadb mariadb-client
+RUN mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+
+# Volume configuration
+# VOLUME ["/var/lib/mysql"]
 
 # Setup environment variables for localhost MySQL
 ENV SQL_HOST=localhost
 ENV SQL_PORT=3306
 ENV SQL_USER=root
-ENV SQL_PASS=root
+ENV SQL_PASS=
 ENV SQL_DB=logpager
 
 # setuid root
@@ -42,7 +46,7 @@ RUN touch /blacklist && chmod a+w /blacklist
 
 # Startup scripts
 COPY db.sql /db.sql
-COPY entry.sh /entry.sh
+COPY entry_test.sh /entry.sh
 
 # Copy the source files to the Nginx web root
 COPY src/ /var/www/
@@ -50,5 +54,5 @@ COPY src/ /var/www/
 # Expose standard HTTP port 
 EXPOSE 80
 
-# Start nginx and PHP-FPM
+# Start everything
 CMD ["/entry.sh"]
