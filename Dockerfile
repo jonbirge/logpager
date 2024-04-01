@@ -18,8 +18,8 @@ RUN echo "variables_order = 'EGPCS'" > /etc/php82/conf.d/00_variables.ini
 COPY default.conf /etc/nginx/http.d/default.conf
 RUN rm -rf /var/www && mkdir -p /var/www && chown -R nginx:nginx /var/www
 
-# Persist MySQL server
-# VOLUME ["/var/lib/mysql"]
+# Use volume for MySQL server
+VOLUME ["/var/lib/mysql"]
 
 # Setup default environment variables for SQL
 ENV SQL_HOST=localhost

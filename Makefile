@@ -36,8 +36,6 @@ stop:
 	-docker stop $(IMAGE_NAME)_test
 	-docker rm $(IMAGE_NAME)_test
 
-# It?
-
 # Convenience command to build
 all: build
 
