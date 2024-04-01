@@ -945,32 +945,44 @@ function getGeoLocations(ips, signal) {
             '[id^="org-' + ip + '"]'
         );
         if (data !== null) {
-            // set each cell in geoCells to data
-            geoCells.forEach((cell) => {
-                cell.innerHTML =
-                    data.city + ", " +
-                    data.region + ", " +
-                    data.countryCode;
-            })
-            // get rDNS and set hostname
-            let hostname;
-            if (data.reverse == "") {
-                // no reverse DNS entry
-                hostname = "N/A";
+            if (data.status != "fail") {
+                // set each cell in geoCells to data
+                geoCells.forEach((cell) => {
+                    cell.innerHTML =
+                        data.city + ", " +
+                        data.region + ", " +
+                        data.countryCode;
+                })
+                // get rDNS and set hostname
+                let hostname;
+                if (data.reverse == "") {
+                    // no reverse DNS entry
+                    hostname = "N/A";
+                } else {
+                    // extract domain.tld from reverse DNS entry
+                    const parts = data.reverse.split(".");
+                    hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
+                }
+                // set each cell in hostnameCells to hostname
+                hostnameCells.forEach((cell) => {
+                    cell.innerHTML = hostname;
+                });
+                // set each cell in orgCells to org
+                const orgname = data.org !== null ? data.org : "N/A";
+                orgCells.forEach((cell) => {
+                    cell.innerHTML = orgname;
+                });
             } else {
-                // extract domain.tld from reverse DNS entry
-                const parts = data.reverse.split(".");
-                hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
+                geoCells.forEach((cell) => {
+                    cell.innerHTML = "local";
+                });
+                orgCells.forEach((cell) => {
+                    cell.innerHTML = "local";
+                });
+                hostnameCells.forEach((cell) => {
+                    cell.innerHTML = "local";
+                });
             }
-            // set each cell in hostnameCells to hostname
-            hostnameCells.forEach((cell) => {
-                cell.innerHTML = hostname;
-            });
-            // set each cell in orgCells to org
-            const orgname = data.org.length != 0 ? data.org : "N/A";
-            orgCells.forEach((cell) => {
-                cell.innerHTML = orgname;
-            });
         } else {
             geoCells.forEach((cell) => {
                 cell.innerHTML = "N/A";
