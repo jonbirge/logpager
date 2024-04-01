@@ -25,7 +25,7 @@ release: latest
 
 # Image with test files for development
 test:
-	docker build -f Dockerfile_test -t $(IMAGE_NAME)_test .
+	docker build -t $(IMAGE_NAME)_test .
 
 # Run test image
 run: stop test
