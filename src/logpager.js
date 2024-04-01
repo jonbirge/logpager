@@ -7,9 +7,10 @@ const heatmapRatio = 0.5; // width to height ratio of heatmap
 
 // front-end data trucation settings
 const maxRequestLength = 48; // truncation length of log details
-const maxSearchLength = 128; // truncation length of summary search results
-const maxLogLength = 512; // truncation length of regular search results
-const maxGeoRequests = 128; // maximum number of IPs to geolocate at once
+const maxSearchLength = 512; // truncation length of summary search results
+const maxLogLength = 1024; // truncation length of regular search results
+const fastGeoRequests = 16; // number of IPs to geolocate at once
+const maxGeoRequests = 1024; // maximum number of IPs to geolocate at once
 
 // global variables
 let pollInterval;
@@ -909,9 +910,9 @@ function getGeoLocations(ips, signal) {
     // console.log("Getting geolocations for " + ips);
     // Grab each ip address and send to ip-api.com
     let geoWaitTime = 0;
+    let geoCount = 0;
     ips.forEach((ip) => {
-        // is this the last IP address?
-        const ipindex = ips.indexOf(ip);
+        geoCount++;
         // check cache first
         if (geoCache[ip]) {
             console.log("local geo cache hit: " + ip);
@@ -925,7 +926,10 @@ function getGeoLocations(ips, signal) {
                 geoWaitTime,
                 { signal }
             );
-            geoWaitTime += apiWait;
+            if (geoCount > fastGeoRequests) {
+                geoWaitTime += apiWait;
+                console.log("throttling request for " + geoWaitTime);
+            }
         }
     });
 
@@ -962,7 +966,7 @@ function getGeoLocations(ips, signal) {
             hostnameCells.forEach((cell) => {
                 cell.innerHTML = hostname;
             });
-            // set each cell in orgCells to data
+            // set each cell in orgCells to org
             const orgname = data.org.length != 0 ? data.org : "N/A";
             orgCells.forEach((cell) => {
                 cell.innerHTML = orgname;
@@ -990,6 +994,11 @@ function getGeoLocations(ips, signal) {
                 geoCache[ip] = data;
                 // update the table cells
                 updateGeoLocations(data, ip);
+                // check if data was cached
+                if (data.cached) {
+                    geoCount--;
+                    console.log("geo data server cached for " + ip);
+                }
             })
             .catch((error) => {
                 if (error.name === "AbortError") {
