@@ -6,24 +6,26 @@ LABEL org.opencontainers.image.source=https://github.com/jonbirge/logpager-test
 LABEL org.opencontainers.image.description="Web-based log file forensics tool test container"
 LABEL org.opencontainers.image.licenses=MIT
 
-# Install nginx, PHP and others
+# Install & configure nginx/PHP-FPM/MySQL stack
 RUN apk update && apk upgrade
-RUN apk add --no-cache nginx php82-fpm
-RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
-
-# Install MySQL server
 RUN apk add --no-cache mariadb mariadb-client
 RUN mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+RUN apk add --no-cache nginx php82 php82-fpm
+RUN apk add --no-cache php82-mysqli
+RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
+RUN echo "variables_order = 'EGPCS'" > /etc/php82/conf.d/00_variables.ini
+COPY default.conf /etc/nginx/http.d/default.conf
+COPY www.conf /etc/php82/php-fpm.d/www.conf
+# COPY php.ini /etc/php82/php.ini
 
-# Volume configuration
+# Persist MySQL server
 # VOLUME ["/var/lib/mysql"]
 
-# Setup environment variables for localhost MySQL
+# Setup default environment variables for SQL
 ENV SQL_HOST=localhost
-ENV SQL_PORT=3306
 ENV SQL_USER=root
 ENV SQL_PASS=
-ENV SQL_DB=logpager
+ENV SQL_DB="logpager"
 
 # setuid root
 RUN chmod u+s /usr/bin/tcptraceroute
@@ -32,8 +34,6 @@ RUN chmod u+s /usr/bin/nmap
 # Setup Nginx web root
 RUN rm -rf /var/www && mkdir -p /var/www && chown -R nginx:nginx /var/www
 
-# Copy Nginx configuration file
-COPY default.conf /etc/nginx/http.d/default.conf
 
 # Copy test log files during testing
 RUN mkdir -p /var/testlogs

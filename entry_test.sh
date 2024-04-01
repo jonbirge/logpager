@@ -2,7 +2,6 @@
 
 # List all SQL environment variables
 echo "SQL_HOST: $SQL_HOST"
-echo "SQL_PORT: $SQL_PORT"
 echo "SQL_USER: $SQL_USER"
 echo "SQL_PASS: $SQL_PASS"
 echo "SQL_DB: $SQL_DB"
@@ -13,7 +12,7 @@ mysqld_safe &
 
 # Start PHP-FPM
 echo "Starting php-fpm..."
-php-fpm82
+php-fpm82 -R
 
 # Create SQL database and table if they don't exist
 sleep 5
