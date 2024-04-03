@@ -1,6 +1,6 @@
 # Define variables
 IMAGE_NAME=logpager
-VERSION=1.7
+VERSION=1.8-dev
 DOCKER_HUB_USER=jonbirge
 
 # Derived variables
@@ -24,12 +24,12 @@ release: latest
 	docker push $(FULL_IMAGE_NAME)
 
 # Image with test files for development
-dev:
-	docker build -t $(IMAGE_NAME)_dev --build-arg TESTLOGS=true .
+test:
+	docker build -t $(IMAGE_NAME)_test .
 
 # Run test image
-run: stop dev
-	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_dev
+run: stop test
+	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_test
 
 # Stop test image
 stop:
@@ -39,4 +39,4 @@ stop:
 # Convenience command to build
 all: build
 
-.PHONY: build clean dev release stop local all
+.PHONY: build clean test release stop run it all

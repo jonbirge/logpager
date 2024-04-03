@@ -1,15 +1,16 @@
 // hard-wired settings
 const geolocate = true; // pull IP geolocation from external service?
 const tileLabels = false; // show tile labels on heatmap?
-const apiWait = 200; // milliseconds to wait between external API calls
+const apiWait = 1200; // milliseconds to wait between external API calls
 const fillToNow = true; // fill heatmap to current time?
 const heatmapRatio = 0.5; // width to height ratio of heatmap
 
 // front-end data trucation settings
 const maxRequestLength = 48; // truncation length of log details
-const maxSearchLength = 128; // truncation length of summary search results
-const maxLogLength = 512; // truncation length of regular search results
-const maxGeoRequests = 128; // maximum number of IPs to geolocate at once
+const maxSearchLength = 512; // truncation length of summary search results
+const maxLogLength = 1024; // truncation length of regular search results
+const fastGeoRequests = 16; // number of IPs to geolocate at once
+const maxGeoRequests = 1024; // maximum number of IPs to geolocate at once
 
 // global variables
 let pollInterval;
@@ -906,15 +907,15 @@ function resetSearch() {
 function getGeoLocations(ips, signal) {
     // take only the first maxGeoRequests IP addresses
     ips = ips.slice(0, maxGeoRequests);
-    console.log("Getting geolocations for " + ips);
+    // console.log("Getting geolocations for " + ips);
     // Grab each ip address and send to ip-api.com
     let geoWaitTime = 0;
+    let geoCount = 0;
     ips.forEach((ip) => {
-        // is this the last IP address?
-        const ipindex = ips.indexOf(ip);
+        geoCount++;
         // check cache first
         if (geoCache[ip]) {
-            console.log("cached geo: " + ip);
+            console.log("local geo cache hit: " + ip);
             updateGeoLocations(geoCache[ip], ip);
         } else {
             setTimeout(
@@ -925,7 +926,10 @@ function getGeoLocations(ips, signal) {
                 geoWaitTime,
                 { signal }
             );
-            geoWaitTime += apiWait;
+            if (geoCount > fastGeoRequests) {
+                geoWaitTime += apiWait;
+                console.log("throttling request for " + geoWaitTime);
+            }
         }
     });
 
@@ -941,32 +945,44 @@ function getGeoLocations(ips, signal) {
             '[id^="org-' + ip + '"]'
         );
         if (data !== null) {
-            // set each cell in geoCells to data
-            geoCells.forEach((cell) => {
-                cell.innerHTML =
-                    data.city + ", " +
-                    data.region + ", " +
-                    data.countryCode;
-            })
-            // get rDNS and set hostname
-            let hostname;
-            if (data.reverse == "") {
-                // no reverse DNS entry
-                hostname = "N/A";
+            if (data.status != "fail") {
+                // set each cell in geoCells to data
+                geoCells.forEach((cell) => {
+                    cell.innerHTML =
+                        data.city + ", " +
+                        data.region + ", " +
+                        data.countryCode;
+                })
+                // get rDNS and set hostname
+                let hostname;
+                if (data.reverse === "" || data.reverse === null) {
+                    // no reverse DNS entry
+                    hostname = "-";
+                } else {
+                    // extract domain.tld from reverse DNS entry
+                    const parts = data.reverse.split(".");
+                    hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
+                }
+                // set each cell in hostnameCells to hostname
+                hostnameCells.forEach((cell) => {
+                    cell.innerHTML = hostname;
+                });
+                // set each cell in orgCells to org
+                const orgname = data.org !== null ? data.org : "N/A";
+                orgCells.forEach((cell) => {
+                    cell.innerHTML = orgname;
+                });
             } else {
-                // extract domain.tld from reverse DNS entry
-                const parts = data.reverse.split(".");
-                hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
+                geoCells.forEach((cell) => {
+                    cell.innerHTML = "local";
+                });
+                orgCells.forEach((cell) => {
+                    cell.innerHTML = "local";
+                });
+                hostnameCells.forEach((cell) => {
+                    cell.innerHTML = "local";
+                });
             }
-            // set each cell in hostnameCells to hostname
-            hostnameCells.forEach((cell) => {
-                cell.innerHTML = hostname;
-            });
-            // set each cell in orgCells to data
-            const orgname = data.org.length != 0 ? data.org : "N/A";
-            orgCells.forEach((cell) => {
-                cell.innerHTML = orgname;
-            });
         } else {
             geoCells.forEach((cell) => {
                 cell.innerHTML = "N/A";
@@ -975,21 +991,26 @@ function getGeoLocations(ips, signal) {
                 cell.innerHTML = "N/A";
             });
             hostnameCells.forEach((cell) => {
-                cell.innerHTML = "N/A";
+                cell.innerHTML = "-";
             });
         }
 
     }
 
     function fetchGeoLocation(ip) {
+        console.log("fetching geo: " + ip);
         fetch("geo.php?ip=" + ip, { signal })
             .then((response) => response.json())
             .then((data) => {
-                // console.log("geo rx: " + ip);
                 // cache the data
                 geoCache[ip] = data;
                 // update the table cells
                 updateGeoLocations(data, ip);
+                // check if data was cached
+                if (data.cached) {
+                    geoCount--;
+                    console.log("geo data server cached for " + ip);
+                }
             })
             .catch((error) => {
                 if (error.name === "AbortError") {
