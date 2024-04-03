@@ -1,28 +1,24 @@
 // hard-wired settings
 const geolocate = true; // pull IP geolocation from external service?
 const tileLabels = false; // show tile labels on heatmap?
-// const apiWait = 1200; // milliseconds to wait between external API calls
 const fillToNow = true; // fill heatmap to current time?
 const heatmapRatio = 0.5; // width to height ratio of heatmap
-
-// front-end data trucation settings
-const maxRequestLength = 48; // truncation length of log details
+const maxDetailLength = 48; // truncation length of log details
 const maxSearchLength = 256; // truncation length of summary search results
 const maxLogLength = 1024; // truncation length of regular search results
 const maxGeoRequests = 32; // maximum number of IPs to externally geolocate at once
 
 // global variables
-let pollInterval;
-let polling = false;
-let controller;
 let params = new URLSearchParams(window.location.search);
+let polling = false;
+let pollInterval;
+let controller;
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
 let summary = params.get("summary");  // applies to search
 let logType = params.get("type") !== null ? params.get("type") : "auth";  // "clf" or "auth"
 let tableLength = 0;  // used to decide when to reuse the table
 let geoCache = {};  // cache of geolocation data
-let hostnameCache = {};  // cache of hostnames
 let blacklist = {};  // cache of blacklisted IPs
 
 // start initial data fetches
@@ -334,8 +330,8 @@ function updateTable(jsonData) {
                 const rawRequest = logdata[i][j];
                 // truncate request to 32 characters
                 const truncRequest =
-                    rawRequest.length > maxRequestLength
-                        ? rawRequest.substring(0, maxRequestLength) + "..."
+                    rawRequest.length > maxDetailLength
+                        ? rawRequest.substring(0, maxDetailLength) + "..."
                         : rawRequest;
                 row += '<td class="code hideable">' + truncRequest + "</td>";
             } else if (j == 3) {
@@ -978,7 +974,7 @@ function getGeoLocations(ips, signal) {
         if (geoCache[ip]) {  // get from local cache
             console.log("geo local cache hit: " + ip);
             updateGeoLocations(geoCache[ip], ip);
-            if (ips.length > 0 && apiCount < maxGeoRequests) {
+            if (ips.length > 0) {
                 recurseFetchGeoLocations(ips, apiCount);
             }
         } else {  // pull from server
@@ -992,6 +988,9 @@ function getGeoLocations(ips, signal) {
                         console.log("geo server cache hit: " + ip);
                     } else {
                         apiCount++;
+                        if (apiCount >= maxGeoRequests) {
+                            console.log("geo api limit reached!");
+                        }
                     }
                     if (ips.length > 0 && apiCount < maxGeoRequests) {
                         recurseFetchGeoLocations(ips, apiCount);
