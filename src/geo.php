@@ -29,29 +29,43 @@ if ($conn->error) {
     die("SQL error: " . $conn->error);
 }
 
-// If the IP address is not in the database
+// Check if the IP address is in the database
+$isCached = false;
+$cacheError = "none";
+$cacheTime = "";
 if ($result->num_rows == 0) {
     // Send ip address to ip-api.com geolocation API
     $locJSON = file_get_contents("http://ip-api.com/json/$ipAddress?fields=17563647");
 
-    // Insert the IP address and the geolocation data into the database
-    $sql = "INSERT INTO geo (ip, data) VALUES ('$ipAddress', '$locJSON')";
-    $conn->query($sql);
+    // If the API returns an error, don't cache
+    if ($locJSON == false) {
+        die("Error: IP-API returned jack.");
+    }
 
-    // Add field to JSON to indicate that the data is NOT cached
-    $locJSON = json_decode($locJSON, true);
-    $locJSON['cached'] = false;
-    $locJSON = json_encode($locJSON);
+    // Insert the IP address and the geolocation data into the database
+    $sql = "INSERT INTO geo (ip, cache_time, json_data) VALUES ('$ipAddress', CURRENT_TIMESTAMP(), '$locJSON')";
+
+    // Execute the SQL query, catching any errors using try/catch block
+    try {
+        $conn->query($sql);
+    } catch (Exception $e) {
+        $cacheError = $e->getMessage();
+    }
 } else {
     // If the IP address is in the database, return the geolocation data
     $row = $result->fetch_assoc();
-    $locJSON = $row['data'];
+    $locJSON = $row['json_data'];
+    $cacheTime = $row['cache_time'];
 
-    // Add field to JSON to indicate that the data is cached
-    $locJSON = json_decode($locJSON, true);
-    $locJSON['cached'] = true;
-    $locJSON = json_encode($locJSON);
+    $isCached = true;
 }
+
+// Add the isCached and cacheError variables to the JSON response
+$locArray = json_decode($locJSON, true);
+$locArray['cached'] = $isCached;
+$locArray['cache_error'] = $cacheError;
+$locArray['cache_time'] = $cacheTime;
+$locJSON = json_encode($locArray);
 
 // Return answer
 echo $locJSON;

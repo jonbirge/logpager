@@ -1,7 +1,7 @@
 // hard-wired settings
 const geolocate = true; // pull IP geolocation from external service?
 const tileLabels = false; // show tile labels on heatmap?
-const apiWait = 200; // milliseconds to wait between external API calls
+const apiWait = 1200; // milliseconds to wait between external API calls
 const fillToNow = true; // fill heatmap to current time?
 const heatmapRatio = 0.5; // width to height ratio of heatmap
 
@@ -955,9 +955,9 @@ function getGeoLocations(ips, signal) {
                 })
                 // get rDNS and set hostname
                 let hostname;
-                if (data.reverse == "") {
+                if (data.reverse === "" || data.reverse === null) {
                     // no reverse DNS entry
-                    hostname = "N/A";
+                    hostname = "-";
                 } else {
                     // extract domain.tld from reverse DNS entry
                     const parts = data.reverse.split(".");
@@ -991,7 +991,7 @@ function getGeoLocations(ips, signal) {
                 cell.innerHTML = "N/A";
             });
             hostnameCells.forEach((cell) => {
-                cell.innerHTML = "N/A";
+                cell.innerHTML = "-";
             });
         }
 
