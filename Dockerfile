@@ -18,7 +18,7 @@ RUN echo "variables_order = 'EGPCS'" > /etc/php82/conf.d/00_variables.ini
 COPY default.conf /etc/nginx/http.d/default.conf
 RUN rm -rf /var/www && mkdir -p /var/www && chown -R nginx:nginx /var/www
 
-# Use volume for MySQL server
+# Use anonymous volume for MySQL server
 VOLUME ["/var/lib/mysql"]
 
 # Setup default environment variables for SQL
@@ -30,8 +30,6 @@ ENV SQL_DB="logpager"
 # setuid root
 RUN chmod u+s /usr/bin/tcptraceroute
 RUN chmod u+s /usr/bin/nmap
-
-# Setup Nginx web root
 
 # Copy test log files during testing
 RUN mkdir -p /var/testlogs
@@ -49,8 +47,8 @@ COPY entry.sh /entry.sh
 # Copy the source files to the Nginx web root
 COPY src/ /var/www/
 
-# Expose standard HTTP port 
+# Expose HTTP port 
 EXPOSE 80
 
-# Start everything
+# Start
 CMD ["/entry.sh"]

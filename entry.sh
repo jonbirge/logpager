@@ -16,7 +16,7 @@ php-fpm82 -R
 
 # Create SQL database and table if they don't exist
 sleep 5
-echo "Creating database and table if needed..."
+echo "Creating SQL database and tables as needed..."
 mysql < /db.sql
 
 # Start nginx in the foreground

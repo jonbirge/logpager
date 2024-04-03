@@ -3,5 +3,6 @@ USE logpager;
 
 CREATE TABLE IF NOT EXISTS geo (
     ip VARCHAR(255) PRIMARY KEY,
-    data TEXT
+    cache_time TIMESTAMP,
+    json_data TEXT
 );
