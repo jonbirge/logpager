@@ -6,14 +6,15 @@ $user = getenv('SQL_USER');
 $pass = getenv('SQL_PASS');
 $db = getenv('SQL_DB');
 
-// Allow very long caching
+// No caching allowed
 // header("Cache-Control: max-age=86400, must-revalidate");
+header("Cache-Control: no-cache, no-store, must-revalidate");
 
 // Get parameters from URL
 $ipAddress = $_GET['ip'];
 // If the IP address is not provided, use a dummy test address
 if ($ipAddress == "") {
-    $ipAddress = "173.48.140.140";
+    $ipAddress = "8.8.8.8";
 }
 
 // Open SQL connection
@@ -34,13 +35,15 @@ $isCached = false;
 $cacheError = "none";
 $cacheTime = "";
 if ($result->num_rows == 0) {
-    // Send ip address to ip-api.com geolocation API
-    $locJSON = file_get_contents("http://ip-api.com/json/$ipAddress?fields=17563647");
+    $locJSON = getGeoInfo($ipAddress);
 
-    // If the API returns an error, don't cache
-    if ($locJSON == false) {
-        die("Error: IP-API returned jack.");
+    // Check to see if $locJSON is valid JSON
+    if ($locJSON == "" || json_decode($locJSON) == null) {
+        die("Error: IP-API returned invalid JSON.");
     }
+
+    // Sanitize the JSON data for inclusion in the SQL query
+    $locJSON = $conn->real_escape_string($locJSON);
 
     // Insert the IP address and the geolocation data into the database
     $sql = "INSERT INTO geo (ip, cache_time, json_data) VALUES ('$ipAddress', CURRENT_TIMESTAMP(), '$locJSON')";
@@ -52,12 +55,20 @@ if ($result->num_rows == 0) {
         $cacheError = $e->getMessage();
     }
 } else {
-    // If the IP address is in the database, return the geolocation data
     $row = $result->fetch_assoc();
     $locJSON = $row['json_data'];
-    $cacheTime = $row['cache_time'];
 
-    $isCached = true;
+    // If cached data is bad, clear the cache and load from service
+    if ($locJSON == false || $locJSON == "" || json_decode($locJSON) == null) {
+        $sql = "DELETE FROM geo WHERE ip = '$ipAddress'";
+        $conn->query($sql);
+        $locJSON = getGeoInfo($ipAddress);
+        $isCached = false;
+    } else {
+        $cacheTime = $row['cache_time'];
+        $isCached = true;
+    }
+
 }
 
 // Add the isCached and cacheError variables to the JSON response
@@ -69,3 +80,17 @@ $locJSON = json_encode($locArray);
 
 // Return answer
 echo $locJSON;
+
+
+// Function to pull geo information from external web API
+function getGeoInfo($ipAddress) {
+    $geoURL = "http://ip-api.com/json/$ipAddress?fields=17563647";
+    $locJSON = file_get_contents($geoURL);
+    return $locJSON;
+}
+
+// Function to cache the geo information given a database connection
+function cacheGeoInfo($conn, $ipAddress, $locJSON) {
+    $sql = "INSERT INTO geo (ip, cache_time, json_data) VALUES ('$ipAddress', CURRENT_TIMESTAMP(), '$locJSON')";
+    $conn->query($sql);
+}

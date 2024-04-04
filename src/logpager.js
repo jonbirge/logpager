@@ -914,7 +914,7 @@ function getGeoLocations(ips, signal) {
         const orgCells = document.querySelectorAll(
             '[id^="org-' + ip + '"]'
         );
-        if (data !== null) {
+        if (data.status !== undefined) {
             if (data.status != "fail") {
                 // set each cell in geoCells to data
                 geoCells.forEach((cell) => {
@@ -925,8 +925,7 @@ function getGeoLocations(ips, signal) {
                 })
                 // get rDNS and set hostname
                 let hostname;
-                if (data.reverse === "" || data.reverse === null) {
-                    // no reverse DNS entry
+                if (data.reverse === "" || data.reverse === undefined) {
                     hostname = "-";
                 } else {
                     // extract domain.tld from reverse DNS entry
@@ -938,7 +937,8 @@ function getGeoLocations(ips, signal) {
                     cell.innerHTML = hostname;
                 });
                 // set each cell in orgCells to org
-                const orgname = data.org !== null ? data.org : "N/A";
+                // todo: check multiple fields...
+                const orgname = data.org !== undefined ? data.org : "N/A";
                 orgCells.forEach((cell) => {
                     cell.innerHTML = orgname;
                 });
@@ -953,7 +953,14 @@ function getGeoLocations(ips, signal) {
                     cell.innerHTML = "local";
                 });
             }
-        } else {
+        } else {  // we got bad JSON
+            console.log("* geo: bad data for " + ip + ":");
+            console.log(JSON.stringify(data));
+
+            // remove ip from local cache, if it's there
+            delete geoCache[ip];
+
+            // write N/A values everywhere
             geoCells.forEach((cell) => {
                 cell.innerHTML = "N/A";
             });

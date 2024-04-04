@@ -16,14 +16,16 @@
 </head>
 
 <body>
-    <div class="container">
+    <div id="logpager" class="container">
         <div class="tab-header">
             <a id="authtab" class="tab" href="./?type=auth&page=0">auth.log</a>
             <a id="clftab" class="tab" href="./?type=clf&page=0">access.log</a>
         </div>
 
-        <!-- summary chart(s) -->
-        <h2 id="heatmap-title" style="text-align: center;">Log entries by time</h2>
+        <!-- summary charts -->
+        <h2 id="heatmap-title" style="text-align: center;">
+            Log entries by time
+        </h2>
         <div id="heatmap"></div>
 
         <!-- search header -->
@@ -37,9 +39,8 @@
             </span>
         </div>
 
-        <!-- empty log file table -->
-        <div id="log">
-        </div>
+        <!-- log file table -->
+        <div id="log"></div>
 
         <!-- paging buttons -->
         <div class="button-set" id="buttons">
@@ -52,12 +53,12 @@
             <button class="toggle-button" id="watch-button" onclick="runWatch()">Live</button>
         </div>
 
-        <!-- version and copyright -->
-        <div>1.8-dev7</div>
+        <!-- version footer -->
+        <div>1.8-dev11</div>
 
     </div>
 
-    <script src="logpager.js?ver=1.8-dev7"></script>
+    <script src="logpager.js?ver=1.8-dev11"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 </body>
 
