@@ -33,7 +33,7 @@ RUN chmod u+s /usr/bin/nmap
 
 # Copy test log files during testing
 RUN mkdir -p /var/testlogs
-COPY testlogs/* /var/testlogs/
+COPY test/* /var/testlogs/
 RUN chown -R nginx:nginx /var/testlogs
 RUN cp /var/testlogs/* /
 
