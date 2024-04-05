@@ -38,8 +38,13 @@ if ($result->num_rows == 0) {
     // If the IP address is not in the database, get the geolocation data from the external service
     $locJSON = getGeoInfo($ipAddress);
 
-    // Cache the geolocation data
-    cacheGeoInfo($conn, $ipAddress, $locJSON);
+    // If the geolocation data is not valid JSON, return nothing
+    if (json_decode($locJSON) == null) {
+        $locJSON = "";
+    } else {
+        // Cache the geolocation data
+        cacheGeoInfo($conn, $ipAddress, $locJSON);
+    }
 } else {
     // If the IP address is in the database, get the geolocation data from the database
     $row = $result->fetch_assoc();
@@ -56,7 +61,6 @@ if ($result->num_rows == 0) {
         $cacheTime = $row['cache_time'];
         $isCached = true;
     }
-
 }
 
 // Add the isCached and cacheError variables to the JSON response

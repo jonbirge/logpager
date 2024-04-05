@@ -165,10 +165,10 @@ function searchLog(searchTerm, doSummary) {
     console.log("searchLog: searching for " + searchTerm);
 
     // abort any pending fetches
-    // if (controller) {
-    //     controller.abort();
-    // }
-    // controller = new AbortController();
+    if (controller) {
+        controller.abort();
+    }
+    controller = new AbortController();
 
     // reset page
     if (page < 0) {
@@ -937,12 +937,18 @@ function getGeoLocations(ips, signal) {
                     cell.innerHTML = hostname;
                 });
                 // set each cell in orgCells to org
-                // todo: check multiple fields...
-                const orgname = data.org !== undefined ? data.org : "N/A";
+                let orgname = "-";
+                if (data.org !== undefined && data.org !== "") {
+                    orgname = data.org;
+                } else if (data.isp !== undefined && data.isp !== "") {
+                    orgname = data.isp;
+                } else if (data.as !== undefined && data.as !== "") {
+                    orgname = data.as;
+                }
                 orgCells.forEach((cell) => {
                     cell.innerHTML = orgname;
                 });
-            } else {
+            } else { // we have a private address
                 geoCells.forEach((cell) => {
                     cell.innerHTML = "local";
                 });
