@@ -35,34 +35,22 @@ $isCached = false;
 $cacheError = "none";
 $cacheTime = "";
 if ($result->num_rows == 0) {
+    // If the IP address is not in the database, get the geolocation data from the external service
     $locJSON = getGeoInfo($ipAddress);
 
-    // Check to see if $locJSON is valid JSON
-    if ($locJSON == "" || json_decode($locJSON) == null) {
-        die("Error: IP-API returned invalid JSON.");
-    }
-
-    // Sanitize the JSON data for inclusion in the SQL query
-    $locJSON = $conn->real_escape_string($locJSON);
-
-    // Insert the IP address and the geolocation data into the database
-    $sql = "INSERT INTO geo (ip, cache_time, json_data) VALUES ('$ipAddress', CURRENT_TIMESTAMP(), '$locJSON')";
-
-    // Execute the SQL query, catching any errors using try/catch block
-    try {
-        $conn->query($sql);
-    } catch (Exception $e) {
-        $cacheError = $e->getMessage();
-    }
+    // Cache the geolocation data
+    cacheGeoInfo($conn, $ipAddress, $locJSON);
 } else {
+    // If the IP address is in the database, get the geolocation data from the database
     $row = $result->fetch_assoc();
     $locJSON = $row['json_data'];
 
-    // If cached data is bad, clear the cache and load from service
+    // If cached data is bad, clear the cache and load from service (again)
     if ($locJSON == false || $locJSON == "" || json_decode($locJSON) == null) {
         $sql = "DELETE FROM geo WHERE ip = '$ipAddress'";
         $conn->query($sql);
         $locJSON = getGeoInfo($ipAddress);
+        $locJSON = cacheGeoInfo($conn, $ipAddress, $locJSON);
         $isCached = false;
     } else {
         $cacheTime = $row['cache_time'];
@@ -86,11 +74,24 @@ echo $locJSON;
 function getGeoInfo($ipAddress) {
     $geoURL = "http://ip-api.com/json/$ipAddress?fields=17563647";
     $locJSON = file_get_contents($geoURL);
+    if ($locJSON == "" || json_decode($locJSON) == null) {
+        die("Error: IP-API returned invalid JSON.");
+        return false;
+    }
     return $locJSON;
 }
 
 // Function to cache the geo information given a database connection
 function cacheGeoInfo($conn, $ipAddress, $locJSON) {
+    // Sanitize the JSON data for inclusion in the SQL query
+    $locJSON = $conn->real_escape_string($locJSON);
+
+    // Insert the IP address and the geolocation data into the database
     $sql = "INSERT INTO geo (ip, cache_time, json_data) VALUES ('$ipAddress', CURRENT_TIMESTAMP(), '$locJSON')";
-    $conn->query($sql);
+
+    try {
+        $conn->query($sql);
+    } catch (Exception $e) {
+        $cacheError = $e->getMessage();
+    }
 }
