@@ -8,8 +8,7 @@ LABEL org.opencontainers.image.licenses=MIT
 
 # Install & configure nginx/PHP-FPM/MySQL stack
 RUN apk update && apk upgrade
-RUN apk add --no-cache mariadb mariadb-client mariadb-connector-c-dev
-RUN mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
 RUN apk add --no-cache nginx php82-fpm php82-mysqli
 RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
 COPY www.conf /etc/php82/php-fpm.d/www.conf
@@ -17,13 +16,10 @@ COPY default.conf /etc/nginx/http.d/default.conf
 RUN echo "variables_order = 'EGPCS'" > /etc/php82/conf.d/00_variables.ini
 RUN rm -rf /var/www && mkdir -p /var/www && chown -R nginx:nginx /var/www
 
-# Use anonymous volume for MySQL server
-VOLUME ["/var/lib/mysql"]
-
-# Setup default environment variables for SQL
+# Setup default environment variables for local SQL
 ENV SQL_HOST=localhost
 ENV SQL_USER=root
-ENV SQL_PASS=
+ENV SQL_PASS=""
 ENV SQL_DB=logpager
 
 # setuid root

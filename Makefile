@@ -25,12 +25,12 @@ push: latest
 release: latest
 	docker push $(FULL_IMAGE_NAME)
 
-# Image with test files for development
+# Test image for development
 test:
 	docker build -t $(IMAGE_NAME)_test .
 
 # Bring up/down the test stack
-up: down build
+up: down test
 	cd ./test/stack && ./up.sh
 
 down:

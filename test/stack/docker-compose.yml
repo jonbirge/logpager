@@ -10,7 +10,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "28080:8080"  # traefik admin
+      - "8080:8080"  # traefik admin
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./certs:/letsencrypt
@@ -29,7 +29,7 @@ services:
       MYSQL_ROOT_PASSWORD: testpass
 
   logpager:
-    image: jonbirge/logpager
+    image: logpager_test
     restart: always
     environment:
       SQL_HOST: db
@@ -41,7 +41,8 @@ services:
       - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
-      - /var/log/auth.log:/auth.log:ro  # NOTE: need to make sure this is readable by the container
+      # - ../../src:/var/www/:ro  # NOTE: only for development
+      # - /var/log/auth.log:/auth.log:ro  # NOTE: confirm this is safe to expose
       - ./logs/access.log:/access.log:ro
       - ./logs/blacklist.txt:/blacklist:rw
     depends_on:
