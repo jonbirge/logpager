@@ -19,6 +19,8 @@ clean:
 latest: build
 	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
 
+push: latest
+
 # Push into the latest tag and version tag
 release: latest
 	docker push $(FULL_IMAGE_NAME)
@@ -27,14 +29,20 @@ release: latest
 test:
 	docker build -t $(IMAGE_NAME)_test .
 
-# Run test image
+# Bring up/down the test stack
+up: down build
+	cd ./test/stack && ./up.sh
+
+down:
+	- cd ./test/stack && ./down.sh
+
+# Run/stop test image
 run: stop test
 	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_test
 
-# Stop test image
 stop:
-	-docker stop $(IMAGE_NAME)_test
-	-docker rm $(IMAGE_NAME)_test
+	- docker stop $(IMAGE_NAME)_test
+	- docker rm $(IMAGE_NAME)_test
 
 # Convenience command to build
 all: build

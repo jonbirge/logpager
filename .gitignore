@@ -1,0 +1,4 @@
+.env
+test/stack/db
+test/stack/certs
+test/stack/logs

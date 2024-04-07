@@ -1,0 +1,32 @@
+# Traefik Static Configuration
+
+accesslog:
+  filePath: "/logs/access.log"
+
+providers:
+  docker:
+    exposedByDefault: true
+
+api:
+  insecure: true
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  stackresolver:
+    acme:
+      storage: "/letsencrypt/acme.json"
+      tlsChallenge: true
+      httpChallenge:
+        entryPoint: websecure
+
