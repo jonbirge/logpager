@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.licenses=MIT
 
 # Install & configure nginx/PHP-FPM/MySQL stack
 RUN apk update && apk upgrade
-RUN apk add --no-cache mysql mysql-client
+RUN apk add --no-cache mariadb mariadb-client mariadb-connector-c-dev
 RUN mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 RUN apk add --no-cache nginx php82-fpm php82-mysqli
 RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
@@ -40,7 +40,6 @@ RUN touch /blacklist && chmod a+w /blacklist
 
 # Startup scripts
 COPY db.sql /db.sql
-COPY initdb.sh /initdb.sh
 COPY entry.sh /entry.sh
 
 # Copy the source files to the Nginx web root
