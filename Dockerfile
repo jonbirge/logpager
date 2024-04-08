@@ -3,7 +3,7 @@ FROM alpine:3.18
 
 # Labels
 LABEL org.opencontainers.image.source=https://github.com/jonbirge/logpager
-LABEL org.opencontainers.image.description="Web-based log file forensics tool test container"
+LABEL org.opencontainers.image.description="Web-based log file forensics tool container"
 LABEL org.opencontainers.image.licenses=MIT
 
 # Install & configure nginx/PHP-FPM/MySQL stack
@@ -24,9 +24,8 @@ ENV SQL_DB=logpager
 
 # setuid root
 RUN chmod u+s /usr/bin/tcptraceroute /usr/bin/nmap
-# RUN chmod u+s /usr/bin/nmap
 
-# Copy test log files during testing
+# Copy test log files
 RUN mkdir -p /var/testlogs
 COPY test/*.log /var/testlogs/
 RUN chown -R nginx:nginx /var/testlogs && cp /var/testlogs/* /
