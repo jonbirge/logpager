@@ -47,4 +47,4 @@ stop:
 # Convenience command to build
 all: build
 
-.PHONY: build clean test release stop run it all
+.PHONY: build clean test release stop run it all up down
