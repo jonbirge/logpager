@@ -1,15 +1,11 @@
-version: "3"
-
 services:
   traefik:
     image: traefik
     restart: always
     command:
-      - "--certificatesresolvers.stackresolver.acme.email=$EMAIL"
       - "--configFile=/etc/traefik.yml"
     ports:
       - "80:80"
-      - "443:443"
       - "8080:8080"  # traefik admin
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -36,15 +32,14 @@ services:
       SQL_PASS: testpass
       SQL_USER: root
     labels:
-      - "traefik.http.routers.logpagerdev.rule=Host(`$HOSTNAME`) && PathPrefix(`/logs`)"
-      - "traefik.http.routers.logpagerdev.tls.certresolver=stackresolver"
+      - "traefik.http.routers.logpagerdev.rule=PathPrefix(`/logs`)"
       - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
-      # - ../../src:/var/www/:ro  # NOTE: only for development
-      # - /var/log/auth.log:/auth.log:ro  # NOTE: confirm this is safe to expose
       - ./logs/access.log:/access.log:ro
       - ./logs/blacklist.txt:/blacklist:rw
+      - ../../src:/var/www:ro  # NOTE: only for development
+      # - /var/log/auth.log:/auth.log:ro  # NOTE: confirm this is safe to expose
     depends_on:
       - db
 
@@ -52,8 +47,18 @@ services:
     image: nginx
     restart: always
     labels:
-      - "traefik.http.routers.www.rule=Host(`$HOSTNAME`) && PathPrefix(`/`)"
-      - "traefik.http.routers.www.tls.certresolver=stackresolver"
+      - "traefik.http.routers.www.rule=PathPrefix(`/`)"
     volumes:
       - ./www:/usr/share/nginx/html:rw
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      ADMINER_DESIGN: nette
+    labels:
+      - "traefik.http.routers.adminer.rule=PathPrefix(`/adminer`)"
+      - "traefik.port=8080"
+    depends_on:
+      - db

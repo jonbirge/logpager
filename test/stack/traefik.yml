@@ -13,20 +13,19 @@ api:
 entryPoints:
   web:
     address: ":80"
-    http:
-      redirections:
-        entryPoint:
-          to: websecure
-          scheme: https
-          permanent: true
-  websecure:
-    address: ":443"
+  #   http:
+  #     redirections:
+  #       entryPoint:
+  #         to: websecure
+  #         scheme: https
+  #         permanent: true
+  # websecure:
+  #   address: ":443"
 
-certificatesResolvers:
-  stackresolver:
-    acme:
-      storage: "/letsencrypt/acme.json"
-      tlsChallenge: true
-      httpChallenge:
-        entryPoint: websecure
-
+# certificatesResolvers:
+#   stackresolver:
+#     acme:
+#       storage: "/letsencrypt/acme.json"
+#       tlsChallenge: true
+#       httpChallenge:
+#         entryPoint: websecure
