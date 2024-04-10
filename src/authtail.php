@@ -65,7 +65,7 @@ function authTail($page, $linesPerPage)
     $logLines[] = $headers;
 
     // Process each line and add to the array
-    $lineCount = 0;
+    $pageLineCount = 0;
     foreach ($lines as $line) {
         // parse log line
         $data = parseAuthLogLine($line);
@@ -74,8 +74,8 @@ function authTail($page, $linesPerPage)
         $status = getAuthLogStatus($data[2]);
 
         $logLines[] = [$data[0], $data[1], $data[2], $status];
-        $lineCount++;
-        if ($lineCount >= $linesPerPage) {
+        $pageLineCount++;
+        if ($pageLineCount >= $linesPerPage) {
             break;
         }
     }

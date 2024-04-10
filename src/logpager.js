@@ -144,10 +144,6 @@ function pollLog() {
     url.searchParams.set("type", logType);
     search = null;
 
-    // clear status divs
-    const searchStatus = document.getElementById("status");
-    searchStatus.innerHTML = "";
-
     // update page to show loading...
     const pageDiv = document.getElementById("page");
     pageDiv.innerHTML = "Loading...";
@@ -169,11 +165,6 @@ function searchLog(searchTerm, doSummary) {
         controller.abort();
     }
     controller = new AbortController();
-
-    // reset page
-    if (page < 0) {
-        page = 0;
-    }
 
     // disable all other buttons and...
     const buttonDiv = document.getElementById("buttons");
@@ -204,8 +195,8 @@ function searchLog(searchTerm, doSummary) {
     }
 
     // run the search on the server
-    let summaryStr = doSummary ? "true" : "false";
-    fetch("logsearch.php?type=" + logType + "&search=" + searchTerm + "&summary=" + summaryStr)
+    let summaryKey = doSummary ? "true" : "false";
+    fetch("logsearch.php?type=" + logType + "&search=" + searchTerm + "&summary=" + summaryKey)
         .then((response) => response.text())
         .then((data) => {
             // write the search results to the log div
@@ -215,25 +206,11 @@ function searchLog(searchTerm, doSummary) {
                 console.log("searchLog: summary table");
                 updateSummaryTable(data);
             } else {
-                dataLength = JSON.parse(data).lineCount - 1;
+                dataLength = JSON.parse(data).lineCount;
                 console.log("searchLog: full table");
                 updateTable(data);
             }
-
-            // report the number of results
             console.log("search: " + dataLength + " results");
-            const searchStatus = document.getElementById("status");
-            searchStatus.innerHTML = "<b>" + dataLength + " items found</b>";
-        });
-}
-
-// update blacklist cache from server
-function loadBlacklist() {
-    fetch("blacklist.php")
-        .then((response) => response.json())
-        .then((data) => {
-            blacklist = data;
-            // console.log("loadBlacklist: " + JSON.stringify(blacklist));
         });
 }
 
@@ -241,15 +218,22 @@ function loadBlacklist() {
 function updateTable(jsonData) {
     const data = JSON.parse(jsonData);
     const logdata = data.logLines;
-    page = parseInt(data.page, 10);
-    let pageCount = parseInt(data.pageCount, 10);
+    const pageCount = parseInt(data.pageCount, 10);
+    const lineCount = parseInt(data.lineCount, 10);
     const logDiv = document.getElementById("log");
     const signal = controller.signal;
-    let ips = [];
-    let row;
-
+    page = parseInt(data.page, 10);
+    
     // set dataLength to the minimum of data.length and maxLogLength
     const dataLength = Math.min(logdata.length, maxLogLength);
+
+    // report the number of results in the status div
+    const searchStatus = document.getElementById("status");
+    if (data.search !== undefined) {
+        searchStatus.innerHTML = "<b>Found " + lineCount + " matching log entries</b>";
+    } else {
+        searchStatus.innerHTML = "<b>Paging " + lineCount + " log entries</b>";
+    }
 
     // check to see if the table needs to be rebuilt
     if (dataLength != tableLength) {
@@ -265,7 +249,7 @@ function updateTable(jsonData) {
 
     // write table headers from first row
     let headrow = document.getElementById("row-0");
-    row = "";
+    let row = "";
     for (let i = 0; i < logdata[0].length; i++) {
         if (i == 0) {
             row += "<th>" + logdata[0][i] + "</th>";
@@ -283,6 +267,7 @@ function updateTable(jsonData) {
     headrow.innerHTML = row;
 
     // write table rows from remaining rows
+    let ips = [];
     for (let i = 1; i < dataLength; i++) {
         rowElement = document.getElementById("row-" + i);
         row = "";
@@ -400,6 +385,17 @@ function updateSummaryTable(jsonData) {
     // set dataLength to the minimum of data.length and maxSearchLength
     const dataLength = Math.min(data.length, maxSearchLength);
 
+    // go through the data and add up all the counts
+    let total = 0;
+    for (let i = 1; i < data.length; i++) {
+        total += parseInt(data[i][0]);
+    }
+
+    // report the number of results in the status div
+    const searchStatus = document.getElementById("status");
+    searchStatus.innerHTML = "<b>Found " + (dataLength - 1) + " IP addresses from " +
+        total + " matching log entries</b>";
+
     // initialize the table
     tableLength = 0;  // reset table length
     let table0 = '<table id="log-table" class="log">';
@@ -492,6 +488,16 @@ function updateSummaryTable(jsonData) {
     if (geolocate) getGeoLocations(ipSet, signal);
 }
 
+// update blacklist cache from server
+function loadBlacklist() {
+    fetch("blacklist.php")
+        .then((response) => response.json())
+        .then((data) => {
+            blacklist = data;
+            // console.log("loadBlacklist: " + JSON.stringify(blacklist));
+        });
+}
+
 // Function to send POST request to blacklist.php with a given IP address in the body of the POST
 function blacklistAdd(ip) {
     console.log("blacklist: add " + ip);
@@ -507,8 +513,8 @@ function blacklistAdd(ip) {
         .then((response) => response.text())
         .then((data) => {
             // update status div
-            const status = document.getElementById("status");
-            status.innerHTML = data;
+            // const status = document.getElementById("status");
+            // status.innerHTML = data;
             // update all block buttons
             const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
             blockButtons.forEach((button) => {
@@ -530,8 +536,8 @@ function blacklistRemove(ip) {
         .then((response) => response.text())
         .then((data) => {
             // update status div
-            const status = document.getElementById("status");
-            status.innerHTML = data;
+            // const status = document.getElementById("status");
+            // status.innerHTML = data;
             // update all block buttons with id of the form block-ipAddress
             const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
             blockButtons.forEach((button) => {

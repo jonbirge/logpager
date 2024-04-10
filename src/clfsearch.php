@@ -96,8 +96,9 @@ function clfSearch($searchDict, $doSummary = true)
         echo json_encode([
             'page' => 0,
             'pageCount' => 0,
-            'lineCount' => count($searchLines),
-            'logLines' => $searchLines
+            'lineCount' => count($searchLines) - 1,
+            'logLines' => $searchLines,
+            'search' => $searchDict
         ]);
     }
 }

@@ -3,6 +3,11 @@
 // Specify the file path
 $file = '/blacklist';
 
+// Check to see if the file exists, and create it if it doesn't
+if (!file_exists($file)) {
+    touch($file);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // read file contents into an array
     $blacklist = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -17,11 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (empty($ip)) {
         echo 'no IP address provided!';
         exit();
-    }
-
-    // Check to see if the file exists, and create it if it doesn't
-    if (!file_exists($file)) {
-        touch($file);
     }
 
     // Check if the IP address is already in the file
