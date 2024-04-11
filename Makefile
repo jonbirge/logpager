@@ -31,7 +31,7 @@ up: down test
 	cd ./test/stack && ./up.sh
 
 down:
-	- cd ./test/stack && ./down.sh && sudo rm -rf db
+	- cd ./test/stack && ./down.sh
 
 # Run/stop test image
 run: stop test
