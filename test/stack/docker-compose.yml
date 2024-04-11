@@ -1,4 +1,5 @@
 services:
+
   traefik:
     image: traefik
     restart: always
@@ -9,20 +10,11 @@ services:
       - "8080:8080"  # traefik admin
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./certs:/letsencrypt
       - ./traefik.yml:/etc/traefik.yml:ro
       - ./logs/:/logs/:rw
     depends_on:
       - logpager
       - www
-
-  db:
-    image: mysql
-    restart: always
-    volumes:
-      - ./db:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: testpass
 
   logpager:
     image: logpager_test
@@ -37,11 +29,18 @@ services:
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
       - ./logs/access.log:/access.log:ro
-      - ./logs/blacklist.txt:/blacklist:rw
-      - ../../src:/var/www:ro  # NOTE: for development
+      - ../../src:/var/www:ro  # for development only
       # - /var/log/auth.log:/auth.log:ro  # NOTE: confirm this is safe to expose
     depends_on:
       - db
+
+  db:
+      image: mysql
+      restart: always
+      volumes:
+        - dbdata:/var/lib/mysql
+      environment:
+        MYSQL_ROOT_PASSWORD: testpass
 
   www:
     image: nginx
@@ -62,3 +61,6 @@ services:
       - "traefik.port=8080"
     depends_on:
       - db
+
+volumes:
+  dbdata:
