@@ -9,6 +9,7 @@ FULL_IMAGE_NAME=$(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
 # Build the Docker image
 build:
 	docker build -t $(FULL_IMAGE_NAME) .
+	docker tag $(FULL_IMAGE_NAME) $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
 
 # No cache build (a clear abuse of 'make clean')
 clean:
