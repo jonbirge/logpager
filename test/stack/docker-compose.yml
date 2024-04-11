@@ -35,12 +35,12 @@ services:
       - db
 
   db:
-      image: mysql
-      restart: always
-      volumes:
-        - dbdata:/var/lib/mysql
-      environment:
-        MYSQL_ROOT_PASSWORD: testpass
+    image: mysql
+    restart: always
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: testpass
 
   www:
     image: nginx

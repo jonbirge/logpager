@@ -505,12 +505,13 @@ function loadBlacklist() {
 
 // Function to send POST request to blacklist.php with a given IP address in the body of the POST
 function blacklistAdd(ip, log = null) {
-    console.log("blacklist: add " + ip);
+    console.log("blacklist: add " + ip + " as " + logType);
     // update blacklist cache manually
     blacklist.push(ip);
     // send the IP address to the server
     const formData = new FormData();
     formData.append('ip', ip);
+    formData.append('log_type', logType);
     if (log) formData.append('log', log);
     fetch("blacklist.php", {
         method: "POST",

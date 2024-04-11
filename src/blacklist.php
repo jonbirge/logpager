@@ -24,10 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         die("SQL error: " . $conn->error);
     }
 
-    // Create an empty array to store the blacklist
-    $blacklist = [];
-
     // Loop through each row in the 'blacklist' table and add the 'cidr' column to the array
+    $blacklist = [];
     while ($row = $result->fetch_assoc()) {
         $blacklist[] = $row['cidr'];
     }
@@ -39,7 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Get the IP address from the POST request body
     $ip = $_POST['ip'];
 
-    // Get the log line from the POST request body if it exists
+    // Get the optional data from the POST request body
+    $log_type = $_POST['log_type'];
     $log = $_POST['log'];
 
     // Check to see if IP address is empty
@@ -49,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     // Insert $ip and $log (if exists) into the 'blacklist' table
-    $sql = "INSERT INTO $table (cidr, log_line) VALUES ('$ip', '$log')";
+    $sql = "INSERT INTO $table (cidr, log_type, log_line) VALUES ('$ip', '$log_type', '$log')";
     $conn->query($sql);
     if ($conn->error) {
         die("SQL error: " . $conn->error);

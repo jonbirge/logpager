@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS geo_cache (
 CREATE TABLE IF NOT EXISTS ip_blacklist (
     cidr VARCHAR(64) PRIMARY KEY,
     add_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    log_type VARCHAR(32),
     log_line TEXT
 );
