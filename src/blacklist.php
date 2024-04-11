@@ -5,6 +5,7 @@ $host = getenv('SQL_HOST');
 $user = getenv('SQL_USER');
 $pass = getenv('SQL_PASS');
 $db = getenv('SQL_DB');
+$table = 'ip_blacklist';
 
 // No caching allowed
 header("Cache-Control: no-cache, no-store, must-revalidate");
@@ -17,7 +18,7 @@ if ($conn->connect_error) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Get all rows from the 'blacklist' table
-    $sql = "SELECT * FROM ip_blacklist";
+    $sql = "SELECT * FROM $table";
     $result = $conn->query($sql);
     if ($conn->error) {
         die("SQL error: " . $conn->error);
@@ -48,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     // Insert $ip and $log (if exists) into the 'blacklist' table
-    $sql = "INSERT INTO ip_blacklist (cidr, log_line) VALUES ('$ip', '$log')";
+    $sql = "INSERT INTO $table (cidr, log_line) VALUES ('$ip', '$log')";
     $conn->query($sql);
     if ($conn->error) {
         die("SQL error: " . $conn->error);
@@ -62,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $ip = $_GET['ip'];
 
     // Delete $ip from the 'blacklist' table
-    $sql = "DELETE FROM ip_blacklist WHERE cidr = '$ip'";
+    $sql = "DELETE FROM $table WHERE cidr = '$ip'";
     $conn->query($sql);
     if ($conn->error) {
         die("SQL error: " . $conn->error);
@@ -70,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     // Send a confirmation message
     echo $ip . ' removed from blacklist';
-    
+
 } else {
     // Send a 405 Method Not Allowed response
     http_response_code(405);
