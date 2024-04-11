@@ -24,7 +24,7 @@ if ($conn->connect_error) {
 }
 
 // Prepare SQL query
-$sql = "SELECT * FROM geo WHERE ip = '$ipAddress'";
+$sql = "SELECT * FROM geo_cache WHERE ip = '$ipAddress'";
 $result = $conn->query($sql);
 if ($conn->error) {
     die("SQL error: " . $conn->error);
@@ -91,7 +91,7 @@ function cacheGeoInfo($conn, $ipAddress, $locJSON) {
     $locJSON = $conn->real_escape_string($locJSON);
 
     // Insert the IP address and the geolocation data into the database
-    $sql = "INSERT INTO geo (ip, cache_time, json_data) VALUES ('$ipAddress', CURRENT_TIMESTAMP(), '$locJSON')";
+    $sql = "INSERT INTO geo_cache (ip, cache_time, json_data) VALUES ('$ipAddress', CURRENT_TIMESTAMP(), '$locJSON')";
 
     try {
         $conn->query($sql);

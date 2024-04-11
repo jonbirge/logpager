@@ -38,7 +38,7 @@ services:
     volumes:
       - ./logs/access.log:/access.log:ro
       - ./logs/blacklist.txt:/blacklist:rw
-      - ../../src:/var/www:ro  # NOTE: only for development
+      - ../../src:/var/www:ro  # NOTE: for development
       # - /var/log/auth.log:/auth.log:ro  # NOTE: confirm this is safe to expose
     depends_on:
       - db
