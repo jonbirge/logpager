@@ -7,6 +7,7 @@ const maxDetailLength = 48; // truncation length of log details
 const maxSearchLength = 256; // truncation length of summary search results
 const maxLogLength = 1024; // truncation length of regular search results
 const maxGeoRequests = 32; // maximum number of IPs to externally geolocate at once
+const pollWait = 240; // seconds
 
 // global variables
 let params = new URLSearchParams(window.location.search);
@@ -145,8 +146,8 @@ function pollLog() {
     search = null;
 
     // update page to show loading...
-    const pageDiv = document.getElementById("page");
-    pageDiv.innerHTML = "Loading...";
+    const statusDiv = document.getElementById("status");
+    statusDiv.innerHTML = "<b>Loading...</b>";
 
     // get the log from the server
     fetch("logtail.php?type=" + logType + "&page=" + page)
@@ -1049,7 +1050,7 @@ function runWatch() {
     } else {
         pollLog();
         polling = true;
-        pollInterval = setInterval(pollLog, 10000);
+        pollInterval = setInterval(pollLog, 1000*pollWait);
         // disable all other ui elements
         uielements.forEach((uielement) => {
             uielement.disabled = true;
