@@ -287,7 +287,10 @@ function updateTable(jsonData) {
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
                 } else {
-                    const blacklistCall = 'onclick="blacklistAdd(' + "'" + ip + "'" + ');"';
+                    const logText = logdata[i][2];
+                    const blacklistCall =
+                        'onclick="blacklistAdd(' + "'" + ip + "'" + 
+                        ",'" + logText + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 }
@@ -444,7 +447,8 @@ function updateSummaryTable(jsonData) {
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
                 } else {
-                    const blacklistCall = 'onclick="blacklistAdd(' + "'" + ip + "'" + ');"';
+                    const blacklistCall =
+                        'onclick="blacklistAdd(' + "'" + ip + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
                 }
@@ -500,23 +504,20 @@ function loadBlacklist() {
 }
 
 // Function to send POST request to blacklist.php with a given IP address in the body of the POST
-function blacklistAdd(ip) {
+function blacklistAdd(ip, log = null) {
     console.log("blacklist: add " + ip);
     // update blacklist cache manually
     blacklist.push(ip);
     // send the IP address to the server
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append('ip', ip);
+    if (log) formData.append('log', log);
     fetch("blacklist.php", {
         method: "POST",
         body: formData,
     })
         .then((response) => response.text())
         .then((data) => {
-            // update status div
-            // const status = document.getElementById("status");
-            // status.innerHTML = data;
-            // update all block buttons
             const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
             blockButtons.forEach((button) => {
                 button.innerHTML = "unblock";
@@ -536,10 +537,6 @@ function blacklistRemove(ip) {
     })
         .then((response) => response.text())
         .then((data) => {
-            // update status div
-            // const status = document.getElementById("status");
-            // status.innerHTML = data;
-            // update all block buttons with id of the form block-ipAddress
             const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
             blockButtons.forEach((button) => {
                 button.innerHTML = "block";
