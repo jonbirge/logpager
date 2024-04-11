@@ -7,12 +7,14 @@ const maxDetailLength = 48; // truncation length of log details
 const maxSearchLength = 256; // truncation length of summary search results
 const maxLogLength = 1024; // truncation length of regular search results
 const maxGeoRequests = 32; // maximum number of IPs to externally geolocate at once
-const pollWait = 240; // seconds
+const pollWait = 60; // seconds to wait between polling the server
+const mapWait = 5;  // minutes to wait between updating the heatmap
 
 // global variables
 let params = new URLSearchParams(window.location.search);
 let polling = false;
 let pollInterval;
+let heatmapInterval;
 let controller;
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
@@ -553,9 +555,14 @@ function blacklistRemove(ip) {
 }
 
 // plot heatmap of log entries by hour and day, potentially including a search term
-function plotHeatmap(searchTerm) {
+function plotHeatmap(searchTerm, plotLogType = null) {
+    // set plotLogType to logType if not provided
+    if (plotLogType === null) {
+        plotLogType = logType;
+    }
+
     // Build data query URL
-    let heatmapURL = "heatmap.php?type=" + logType;
+    let heatmapURL = "heatmap.php?type=" + plotLogType;
     if (searchTerm) {
         heatmapURL += "&search=" + searchTerm;
     }
@@ -565,6 +572,12 @@ function plotHeatmap(searchTerm) {
     fetch(heatmapURL)
         .then((response) => response.json())
         .then(jsonToHeatmap);
+
+    // set interval to update the heatmap every mapWait minutes
+    clearInterval(heatmapInterval);
+    heatmapInterval = setInterval(
+        () => {plotHeatmap(searchTerm, plotLogType)},
+        mapWait * 60 * 1000);
 }
 
 // Take JSON array of command log data and build SVG heatmap
@@ -1031,12 +1044,12 @@ function getGeoLocations(ips, signal) {
     }
 }
 
-// function to setup polling
+// function to start and stop log table polling
 function runWatch() {
     const uielements = [...document.querySelectorAll("button")];
     const textedit = document.getElementById("search-input");
-    uielements.push(textedit);
     const watchButton = document.getElementById("watch-button");
+    uielements.push(textedit);
     page = 0; // reset page
     if (polling) {
         // stop polling
