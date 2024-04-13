@@ -7,8 +7,8 @@ const maxDetailLength = 48; // truncation length of log details
 const maxSearchLength = 256; // truncation length of summary search results
 const maxLogLength = 1024; // truncation length of regular search results
 const maxGeoRequests = 32; // maximum number of IPs to externally geolocate at once
-const pollWait = 60; // seconds to wait between polling the server
-const mapWait = 5;  // minutes to wait between updating the heatmap
+const pollWait = 30; // seconds to wait between polling the server
+const mapWait = 5;  // minutes to wait between updating the heatmap (always)
 
 // global variables
 let params = new URLSearchParams(window.location.search);
@@ -556,7 +556,7 @@ function blacklistRemove(ip) {
 
 // plot heatmap of log entries by hour and day, potentially including a search term
 function plotHeatmap(searchTerm, plotLogType = null) {
-    // set plotLogType to logType if not provided
+    // set plotLogType to global logType if not provided
     if (plotLogType === null) {
         plotLogType = logType;
     }
@@ -574,8 +574,8 @@ function plotHeatmap(searchTerm, plotLogType = null) {
         .then(jsonToHeatmap);
 
     // set interval to update the heatmap every mapWait minutes
-    clearInterval(heatmapInterval);
-    heatmapInterval = setInterval(
+    console.log("plotHeatmap: refresh time " + mapWait + " minutes");
+    setTimeout(
         () => {plotHeatmap(searchTerm, plotLogType)},
         mapWait * 60 * 1000);
 }
