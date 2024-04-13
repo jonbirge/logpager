@@ -272,7 +272,9 @@ function updateTable(jsonData) {
     for (let i = 1; i < dataLength; i++) {
         rowElement = document.getElementById("row-" + i);
         row = "";
-        for (let j = 0; j < logdata[i].length; j++) {
+        for (let j = 0; j < logdata[i].length; j++) {  // FIX: this is idiotic!
+            const clfStamp = logdata[i][1].replace(/\s.*$/, "");  // remove the timezone (assume UTC)
+            const dateStamp = parseCLFDate(clfStamp);  // assume UTC
             if (j == 0) {
                 // ip address
                 const ip = logdata[i][j];
@@ -290,6 +292,7 @@ function updateTable(jsonData) {
                     const logText = logdata[i][2];
                     const blacklistCall =
                         'onclick="blacklistAdd(' + "'" + ip + "'" + 
+                        ",'" + clfStamp + "'" + 
                         ",'" + logText + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
@@ -308,8 +311,6 @@ function updateTable(jsonData) {
                     row += '<td id="' + geoid + '"></td>';
                 }
             } else if (j == 1) {
-                const clfStamp = logdata[i][j].replace(/\s.*$/, "");  // remove the timezone
-                const dateStamp = parseCLFDate(clfStamp);  // assume UTC
                 const timediff = timeDiff(dateStamp, new Date());
                 const jsonDate = dateStamp.toJSON();
                 row += '<td id=timestamp:' + jsonDate + '>';
@@ -504,13 +505,17 @@ function loadBlacklist() {
 }
 
 // Function to send POST request to blacklist.php with a given IP address in the body of the POST
-function blacklistAdd(ip, log = null) {
-    console.log("blacklist: add " + ip + " as " + logType);
+function blacklistAdd(ip, lastTime, log = null) {
+    // convert lastTime (a CLF timestamp string) to Date object and then to SQL timestamp
+    const lastTimeDate = parseCLFDate(lastTime);
+    const lastTimeConv = lastTimeDate.toISOString().slice(0, 19).replace("T", " ");
+    console.log("blacklist: add " + ip + " as " + logType + " at " + lastTimeConv);
     // update blacklist cache manually
     blacklist.push(ip);
     // send the IP address to the server
     const formData = new FormData();
     formData.append('ip', ip);
+    formData.append('last_seen', lastTimeConv);
     formData.append('log_type', logType);
     if (log) formData.append('log', log);
     fetch("blacklist.php", {

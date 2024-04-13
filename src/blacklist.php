@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Get the optional data from the POST request body
     $log_type = $_POST['log_type'];
     $log = $_POST['log'];
+    $timestamp = $_POST['last_seen'];
 
     // Check to see if IP address is empty
     if (empty($ip)) {
@@ -48,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     // Insert $ip and $log (if exists) into the 'blacklist' table
-    $sql = "INSERT INTO $table (cidr, log_type, log_line) VALUES ('$ip', '$log_type', '$log')";
+    $sql = "INSERT INTO $table (cidr, last_seen, log_type, log_line) VALUES ('$ip', '$timestamp', '$log_type', '$log')";
     $conn->query($sql);
     if ($conn->error) {
         die("SQL error: " . $conn->error);
