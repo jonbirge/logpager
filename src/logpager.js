@@ -297,7 +297,8 @@ function updateTable(jsonData) {
                         ",'" + clfStamp + "'" + 
                         ",'" + logText + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
-                    row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
+                    row += '<button ' + blacklistid + 'class="toggle-button tight" '
+                        + blacklistCall + ">block</button>";
                 }
                 // Create link string that opens a new tab with /intel/?ip=ip
                 const traceLink = 'onclick="window.open(' + "'intel/?ip=" + ip + "'" + '); return false"';
@@ -383,19 +384,17 @@ function updateTable(jsonData) {
 
 // Take JSON array of commond log data and write HTML table
 function updateSummaryTable(jsonData) {
-    const data = JSON.parse(jsonData);
+    const logdata = JSON.parse(jsonData);
     const logDiv = document.getElementById("log");
     const signal = controller.signal;
-    let ips = [];
-    let row;
 
     // set dataLength to the minimum of data.length and maxSearchLength
-    const dataLength = Math.min(data.length, maxSearchLength);
+    const dataLength = Math.min(logdata.length, maxSearchLength);
 
     // go through the data and add up all the counts
     let total = 0;
-    for (let i = 1; i < data.length; i++) {
-        total += parseInt(data[i][0]);
+    for (let i = 1; i < logdata.length; i++) {
+        total += parseInt(logdata[i][0]);
     }
 
     // report the number of results in the status div
@@ -414,31 +413,34 @@ function updateSummaryTable(jsonData) {
 
     // write table headers from first row
     let headrow = document.getElementById("row-0");
-    row = "";
-    for (let i = 0; i < data[0].length; i++) {
+    let row = "";
+    for (let i = 0; i < logdata[0].length; i++) {
         if (i == 1) {
-            row += "<th>" + data[0][i] + "</th>";
+            row += "<th>" + logdata[0][i] + "</th>";
             if (geolocate) {
                 row += '<th class="hideable">Domain name</th>';
                 row += '<th class="hideable">Organization</th>';
                 row += '<th>Geolocation</th>';
             }
         } else {
-            row += "<th>" + data[0][i] + "</th>";
+            row += "<th>" + logdata[0][i] + "</th>";
         }
     }
     headrow.innerHTML = row;
 
     // write table rows from remaining rows
+    let ips = [];
     for (let i = 1; i < dataLength; i++) {
         rowElement = document.getElementById("row-" + i);
         row = "";
-        for (let j = 0; j < data[i].length; j++) {
+        for (let j = 0; j < logdata[i].length; j++) {
             if (j == 0) {
-                row += "<td><b>" + data[i][j] + "</b></td>";
+                row += "<td><b>" + logdata[i][j] + "</b></td>";
             } else if (j == 1) {
+                const clfStamp = logdata[i][2].replace(/\s.*$/, "");  // remove the timezone (assume UTC)
+                const dateStamp = parseCLFDate(clfStamp);  // assume UTC
                 // ip address
-                const ip = data[i][j];
+                const ip = logdata[i][j];
                 ips.push(ip);
                 // Add cell for IP address with link to search for ip address
                 const srchlink = "?type=" + logType + "&summary=false&search=ip:" + ip;
@@ -450,10 +452,14 @@ function updateSummaryTable(jsonData) {
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
                 } else {
+                    const logText = logdata[i][2];
                     const blacklistCall =
-                        'onclick="blacklistAdd(' + "'" + ip + "'" + ');"';
+                        'onclick="blacklistAdd(' + "'" + ip + "'" + 
+                        ",'" + clfStamp + "'" + 
+                        ",'" + logText + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
-                    row += '<button ' + blacklistid + 'class="toggle-button tight" ' + blacklistCall + ">block</button>";
+                    row += '<button ' + blacklistid + 'class="toggle-button tight" '
+                        + blacklistCall + ">block</button>";
                 }
                 // Create link string that opens a new tab with intel
                 const traceLink = 'onclick="window.open(' + "'intel/?ip=" + ip + "'" + '); return false"';
@@ -469,7 +475,7 @@ function updateSummaryTable(jsonData) {
                     row += '<td id="' + geoid + '">-</td>';
                 }
             } else if (j == 2) {  // last date
-                const clfStamp = data[i][j].replace(/\s.*$/, "");  // remove the timezone
+                const clfStamp = logdata[i][j].replace(/\s.*$/, "");  // remove the timezone
                 const dateStamp = parseCLFDate(clfStamp);  // assume UTC
                 const timediff = timeDiff(dateStamp, new Date());
                 const jsonDate = dateStamp.toJSON();
@@ -477,7 +483,7 @@ function updateSummaryTable(jsonData) {
                 row += timediff + "</td>";
             } else {
                 // anything else
-                row += "<td>" + data[i][j] + "</td>";
+                row += "<td>" + logdata[i][j] + "</td>";
             }
         }
         rowElement.innerHTML = row;
