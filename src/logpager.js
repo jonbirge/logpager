@@ -14,7 +14,7 @@ const mapWait = 5;  // minutes to wait between updating the heatmap (always)
 let params = new URLSearchParams(window.location.search);
 let polling = false;
 let pollInterval;
-let heatmapInterval;
+let heatmapTimeout;
 let controller;
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
@@ -562,6 +562,11 @@ function blacklistRemove(ip) {
 
 // plot heatmap of log entries by hour and day, potentially including a search term
 function plotHeatmap(searchTerm, plotLogType = null) {
+    // cancel existing heatmap timeout
+    if (heatmapTimeout) {
+        clearTimeout(heatmapTimeout);
+    }
+
     // set plotLogType to global logType if not provided
     if (plotLogType === null) {
         plotLogType = logType;
@@ -581,7 +586,7 @@ function plotHeatmap(searchTerm, plotLogType = null) {
 
     // set interval to update the heatmap every mapWait minutes
     console.log("plotHeatmap: refresh time " + mapWait + " minutes");
-    setTimeout(
+    heatmapTimeout = setTimeout(
         () => {plotHeatmap(searchTerm, plotLogType)},
         mapWait * 60 * 1000);
 }
