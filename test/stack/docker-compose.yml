@@ -29,7 +29,6 @@ services:
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
       - ./logs/access.log:/access.log:ro
-      - ../../src:/var/www:ro  # for development only
       # - /var/log/auth.log:/auth.log:ro  # NOTE: confirm this is safe to expose
     depends_on:
       - db
