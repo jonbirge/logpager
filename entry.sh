@@ -36,8 +36,9 @@ echo "SQL is ready. Continuing..."
 
 # Start PHP-FPM
 echo "Starting php-fpm..."
-php-fpm82 -R
+php-fpm83 -R
 
 # Start nginx in the foreground
 echo "Starting nginx..."
 nginx -g 'daemon off;'
+

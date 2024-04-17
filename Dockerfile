@@ -1,5 +1,5 @@
 # Alpine Linux as the base image
-FROM alpine:3.18
+FROM alpine:3.19
 
 # Labels
 LABEL org.opencontainers.image.source=https://github.com/jonbirge/logpager
@@ -7,13 +7,13 @@ LABEL org.opencontainers.image.description="Web-based log file forensics tool co
 LABEL org.opencontainers.image.licenses=MIT
 
 # Install & configure nginx/PHP-FPM/MySQL stack
-RUN apk update && apk upgrade
+RUN apk --no-cache update && apk --no-cache upgrade
 RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
-RUN apk add --no-cache nginx php82-fpm php82-mysqli
+RUN apk add --no-cache nginx php83-fpm php83-mysqli
 RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
-COPY www.conf /etc/php82/php-fpm.d/www.conf
+COPY www.conf /etc/php83/php-fpm.d/www.conf
 COPY default.conf /etc/nginx/http.d/default.conf
-RUN echo "variables_order = 'EGPCS'" > /etc/php82/conf.d/00_variables.ini
+RUN echo "variables_order = 'EGPCS'" > /etc/php83/conf.d/00_variables.ini
 RUN rm -rf /var/www && mkdir -p /var/www && chown -R nginx:nginx /var/www
 
 # Setup default environment variables for local SQL
