@@ -3,7 +3,7 @@
 // Include the authparse.php file
 include 'authparse.php';
 
-function authTail($page, $linesPerPage)
+function tail($page, $linesPerPage)
 {
     // path to the auth log file
     $logFilePaths = getAuthLogFiles();

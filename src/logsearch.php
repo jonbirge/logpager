@@ -7,19 +7,18 @@ include 'searchparse.php';
 $type = $_GET['type'] ?? "auth";  // auth or clf
 $search = $_GET['search'] ?? "publickey";  // search string
 $summary = $_GET['summary'] ?? "true";  // true or false
-
 $doSummary = $summary === "true";
 $searchDict = parseSearch($search);
 
-switch ($type) {
-    case 'clf':
-        include 'clfsearch.php';
-        clfSearch($searchDict, $doSummary);
-        break;
-    case 'auth':
-        include 'authsearch.php';
-        authSearch($searchDict, $doSummary);
-        break;
-    default:
-        echo "<p>Invalid log type: $type</p>";
+// Include the appropriate heatmap function based on the log type
+$searchInc = $type . '/search.php';
+
+// Check to see if the file exists
+if (!file_exists($searchInc)) {
+    echo "<p>Invalid log type specified.</p>";
+    return;
 }
+
+// Execute the appropriate heatmap function
+include $searchInc;
+search($searchDict, $doSummary);

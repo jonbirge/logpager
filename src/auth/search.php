@@ -3,7 +3,7 @@
 // Include the authparse.php file
 include 'authparse.php';
 
-function authSearch($searchDict, $doSummary = true)
+function search($searchDict, $doSummary = true)
 {
     // Parameters
     $maxItems = 1024;  // Maximum number of items to return

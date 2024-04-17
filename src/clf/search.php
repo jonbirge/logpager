@@ -1,6 +1,6 @@
 <?php
 
-function clfSearch($searchDict, $doSummary = true)
+function search($searchDict, $doSummary = true)
 {
     // Maximum number of items to return
     $maxItems = 1024;

@@ -1,9 +1,12 @@
 <?php
 
-function clfHeatmap($searchDict)
+// Include the authparse.php file
+include 'authparse.php';
+
+function heatmap($searchDict)
 {
-    // Log file to read
-    $logFilePath = '/access.log';
+    // Log files to read
+    $logFilePaths = getAuthLogFiles();
 
     // Get search parameters
     $search = $searchDict['search'];
@@ -11,48 +14,57 @@ function clfHeatmap($searchDict)
     $dateStr = $searchDict['date'];
     $stat = $searchDict['stat'];
 
-    // Open the log file for reading
-    $logFile = fopen($logFilePath, 'r');
-    if (!$logFile) {
-        echo "<p>Failed to open log file.</p>";
-        return;
+    // generate UNIX grep command line argument to only include lines containing IP addresses
+    $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
+
+    // generate UNIX grep command line arguments to include services we care about
+    $services = ['sshd', 'sudo'];
+    $grepArgs = '';
+    foreach ($services as $service) {
+        $grepArgs .= " -e $service";
     }
+    $grepSrvCmd = "grep $grepArgs";
+
+    // generate cat command to concatenate all log files
+    $catCmd = 'cat ' . implode(' ', $logFilePaths);
+
+    // build UNIX command to get lines
+    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd";
+
+    // execute the UNIX command
+    $fp = popen($cmd, 'r');
 
     // Initialize an empty array to store the log summary data
     $logSummary = [];
 
-    // Read each line of the log file
-    while (($line = fgets($logFile)) !== false) {
-        // Extract the elements from the CLF log entry
-        $logEntry = explode(' ', $line);
+    // Add each failed login attempt to the log summary
+    while (($line = fgets($fp)) !== false) {
+        $status = getAuthLogStatus($line);
+        $data = parseAuthLogLine($line);
 
-        // Extract the IP address from the CLF log entry
-        $ipAddress = $logEntry[0];
-
-        // Extract the timestamp from the CLF log entry
-        $timeStamp = $logEntry[3];
+        // Extract the timestamp from the auth log entry
+        $timeStamp = $data[1];
 
         // Convert the timestamp to a DateTime object
-        $date = DateTime::createFromFormat('[d/M/Y:H:i:s', $timeStamp);
-
-        // If $ip is set, check if $ipAddress contains $ip
-        if ($ip) {
-            if (strpos($ipAddress, $ip) === false) {
-                continue;
-            }
-        }
-
-        // If $dateStr is set, check if $date contains $dateStr
-        if ($dateStr) {
-            if (strpos($timeStamp, $dateStr) === false) {
-                continue;
-            }
-        }
+        $date = DateTime::createFromFormat('d/M/Y:H:i:s', $timeStamp);
 
         // If $stat is set, check if $status matches $stat
         if ($stat) {
-            $status = $logEntry[8];
             if ($status !== $stat) {
+                continue;
+            }
+        }
+
+        // If $ip is set, check if $data[0] contains $ip
+        if ($ip) {
+            if (strpos($data[0], $ip) === false) {
+                continue;
+            }
+        }
+
+        // If $date is set, check if $data[1] contains $date
+        if ($date) {
+            if (strpos($data[1], $dateStr) === false) {
                 continue;
             }
         }
@@ -84,8 +96,7 @@ function clfHeatmap($searchDict)
         $logSummary[$dayOfYear][$hStr]++;
     }
 
-    // Close the log file
-    fclose($logFile);
+    pclose($fp);
 
     // Echo the log summary data as JSON
     echo json_encode($logSummary);
