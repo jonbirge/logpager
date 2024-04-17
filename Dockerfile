@@ -11,8 +11,7 @@ RUN apk --no-cache update && apk --no-cache upgrade
 RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
 RUN apk add --no-cache nginx php83-fpm php83-mysqli
 RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
-COPY www.conf /etc/php83/php-fpm.d/www.conf
-COPY default.conf /etc/nginx/http.d/default.conf
+
 RUN echo "variables_order = 'EGPCS'" > /etc/php83/conf.d/00_variables.ini
 RUN rm -rf /var/www && mkdir -p /var/www && chown -R nginx:nginx /var/www
 
@@ -30,11 +29,15 @@ RUN mkdir -p /var/testlogs
 COPY ./test/logs/*.log /var/testlogs/
 RUN chown -R nginx:nginx /var/testlogs && cp /var/testlogs/* /
 
-# Startup scripts
-COPY db.sql /db.sql
+# Copy the configuration files
+COPY conf/www.conf /etc/php83/php-fpm.d/www.conf
+COPY conf/default.conf /etc/nginx/http.d/default.conf
+COPY conf/db.sql /db.sql
+
+# Startup script
 COPY entry.sh /entry.sh
 
-# Copy the source files to the Nginx web root
+# Copy the source files to the web root
 COPY src/ /var/www/
 
 # Expose HTTP port 
@@ -42,4 +45,3 @@ EXPOSE 80
 
 # Start
 CMD ["/entry.sh"]
-

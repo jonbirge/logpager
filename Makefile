@@ -28,7 +28,7 @@ test:
 	docker build -t $(IMAGE_NAME)_test .
 
 # Bring up/down the test stack
-up: down test
+up: test
 	cd ./test/stack && ./up.sh
 
 down:
