@@ -30,9 +30,6 @@ RUN mkdir -p /var/testlogs
 COPY ./test/logs/*.log /var/testlogs/
 RUN chown -R nginx:nginx /var/testlogs && cp /var/testlogs/* /
 
-# Create default blacklist file and make writable by php-fpm
-RUN touch /blacklist && chmod a+w /blacklist
-
 # Startup scripts
 COPY db.sql /db.sql
 COPY entry.sh /entry.sh
