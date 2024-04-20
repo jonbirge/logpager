@@ -935,14 +935,18 @@ function resetSearch() {
 // get geolocations and update table cells
 function getGeoLocations(ips, signal) {
     // take care of everything locally cached
+    localHits = 0;
     ips.forEach((ip) => {
         if (geoCache[ip]) {
-            console.log("geo local cache hit: " + ip);
+            localHits += 1;
             updateGeoLocation(geoCache[ip], ip);
             // remove ip from ips
             ips = ips.filter((value) => value !== ip);
         }
     });
+    if (localHits > 0) {
+        console.log("got " + localHits + " hit(s) from local cache");
+    }
 
     // send remaining ips to remote sql cache, and of those that aren't satisfied, send to external web service
     if (ips.length > 0) {
@@ -958,7 +962,7 @@ function getGeoLocations(ips, signal) {
                     console.log("geo: bad data from server");
                 } else {
                     cachedips = Object.keys(geodata);
-                    console.log("got " + cachedips.length + " ips from server cache")
+                    console.log("got " + cachedips.length + " hit(s) from server cache")
                     for (let ip of cachedips) {
                         updateGeoLocation(geodata[ip], ip);
                         ips = ips.filter((value) => value !== ip);
