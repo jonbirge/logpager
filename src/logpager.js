@@ -958,10 +958,11 @@ function getGeoLocations(ips, signal) {
                     console.log("geo: bad data from server");
                 } else {
                     cachedips = Object.keys(geodata);
-                    console.log("geo: got " + cachedips.length + " ips from server cache")
+                    console.log("got " + cachedips.length + " ips from server cache")
                     for (let ip of cachedips) {
                         updateGeoLocation(geodata[ip], ip);
                         ips = ips.filter((value) => value !== ip);
+                        geoCache[ip] = geodata[ip];
                     }
                 }
                 // asyncronously recurse queries to external web service for remaining ips
@@ -1059,10 +1060,10 @@ function getGeoLocations(ips, signal) {
         console.log("fetching geo from web service: " + ip);
         fetch("geo.php?ip=" + ip, { signal })
             .then((response) => response.json())
-            .then((data) => {
+            .then((geodata) => {
                 // cache the data
-                geoCache[ip] = data;
-                updateGeoLocation(data, ip);
+                geoCache[ip] = geodata;
+                updateGeoLocation(geodata, ip);
                 apiCount++;
                 if (apiCount >= maxGeoRequests) {
                     console.log("geo api limit reached!");

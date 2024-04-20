@@ -20,8 +20,9 @@ if ($conn->connect_error) {
 }
 
 // Use case to handle GET versus POST requests
+$locJSON = "";
 switch ($method) {
-    case 'GET':
+    case 'GET':  // get get data by hook or crook
         // Get parameters from URL
         $ipAddress = $_GET['ip'];
         if ($ipAddress == "") {
@@ -29,25 +30,19 @@ switch ($method) {
         }
         $locArray = getGeoInfo($conn, $ipAddress);
         $locJSON = json_encode($locArray);
-        echo $locJSON;
 
         break;
 
-    case 'POST':
-        // Get JSON-encoded list of IPs from POST body
+    case 'POST':  // only check the cache, with no fail-over to external service
         $data = json_decode(file_get_contents('php://input'), true);
         $locArray = array();
         foreach ($data as $ipAddress) {
-            $locArray[$ipAddress] = getGeoInfo($conn, $ipAddress);
+            $geoResponse = getGeoInfo($conn, $ipAddress, false);
+            if ($geoResponse != false) {
+                $locArray[$ipAddress] = $geoResponse;
+            }
         }
         $locJSON = json_encode($locArray);
-        
-        // Make sure JSON is valid
-        if (json_decode($locJSON) == null) {
-            die("Invalid JSON data.");
-        }
-
-        echo $locJSON;
         
         break;
     
@@ -55,11 +50,18 @@ switch ($method) {
         echo "Unsupported HTTP method.";
 }
 
+// Make sure JSON is valid
+if (json_decode($locJSON) == null) {
+    echo "Invalid JSON data returned.";
+} else {
+    echo $locJSON;
+}
+
 // Close SQL connection
 $conn->close();
 
 
-function getGeoInfo($conn, $ipAddress)
+function getGeoInfo($conn, $ipAddress, $failOver = true)
 {
     // Prepare SQL query
     $sql = "SELECT * FROM geo_cache WHERE ip = '$ipAddress'";
@@ -73,6 +75,10 @@ function getGeoInfo($conn, $ipAddress)
     $cacheError = "none";
     $cacheTime = "";
     if ($result->num_rows == 0) {
+        if ($failOver == false) {
+            return false;  // FIX: this is pretty awful...
+        }
+
         // If the IP address is not in the database, get the geolocation data from the external service
         $locJSON = extGeoInfo($ipAddress);
 
