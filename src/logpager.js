@@ -932,12 +932,25 @@ function resetSearch() {
     plotHeatmap();
 }
 
-// get geolocations and orgs from IP addresses using ip-api.com
+// get geolocations and update table cells
 function getGeoLocations(ips, signal) {
-    // asyncronously run recurseFetchGeoLocations(ips)
-    setTimeout(() => recurseFetchGeoLocations(ips), 0);
+    // take care of everything locally cached
+    ips.forEach((ip) => {
+        if (geoCache[ip]) {
+            console.log("geo local cache hit: " + ip);
+            updateGeoLocation(geoCache[ip], ip);
+            // remove ip from ips
+            ips = ips.filter((value) => value !== ip);
+        }
+    });
+
+    // asyncronously recurse queries to external server for remaining ips
+    if (ips.length > 0) {
+        setTimeout(() => recurseFetchGeoLocations(ips), 0);
+    }
     
-    function updateGeoLocations(data, ip) {
+    // function to update geo location for given ip in all matching cells
+    function updateGeoLocation(data, ip) {
         // Get all cells with id of the form geo-ipAddress
         const geoCells = document.querySelectorAll(
             '[id^="geo-' + ip + '"]'
@@ -1017,41 +1030,33 @@ function getGeoLocations(ips, signal) {
     function recurseFetchGeoLocations(ips, apiCount = 0) {
         // pop the first ip off of ips
         const ip = ips.shift();
-        console.log("fetching geo: " + ip);
-        if (geoCache[ip]) {  // get from local cache
-            console.log("geo local cache hit: " + ip);
-            updateGeoLocations(geoCache[ip], ip);
-            if (ips.length > 0) {
-                recurseFetchGeoLocations(ips, apiCount);
-            }
-        } else {  // pull from server
-            fetch("geo.php?ip=" + ip, { signal })
-                .then((response) => response.json())
-                .then((data) => {
-                    // cache the data
-                    geoCache[ip] = data;
-                    updateGeoLocations(data, ip);
-                    if (data.cached) {
-                        console.log("geo server cache hit: " + ip);
-                    } else {
-                        apiCount++;
-                        if (apiCount >= maxGeoRequests) {
-                            console.log("geo api limit reached!");
-                        }
+        console.log("fetching geo from server: " + ip);
+        fetch("geo.php?ip=" + ip, { signal })
+            .then((response) => response.json())
+            .then((data) => {
+                // cache the data
+                geoCache[ip] = data;
+                updateGeoLocation(data, ip);
+                if (data.cached) {
+                    console.log("geo server cache hit: " + ip);
+                } else {
+                    apiCount++;
+                    if (apiCount >= maxGeoRequests) {
+                        console.log("geo api limit reached!");
                     }
-                    if (ips.length > 0 && apiCount < maxGeoRequests) {
-                        recurseFetchGeoLocations(ips, apiCount);
-                    }
-                })
-                .catch((error) => {
-                    if (error.name === "AbortError") {
-                        console.log("geo fetch aborted for " + ip);
-                    } else {
-                        console.log("fetch error:", ip, error);
-                        updateGeoLocations(null, ip);
-                    }
-                });
-        }
+                }
+                if (ips.length > 0 && apiCount < maxGeoRequests) {
+                    recurseFetchGeoLocations(ips, apiCount);
+                }
+            })
+            .catch((error) => {
+                if (error.name === "AbortError") {
+                    console.log("geo fetch aborted for " + ip);
+                } else {
+                    console.log("fetch error:", ip, error);
+                    updateGeoLocation(null, ip);
+                }
+            });
     }
 }
 

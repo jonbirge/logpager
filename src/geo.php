@@ -24,13 +24,9 @@ switch ($method) {
     case 'GET':
         // Get parameters from URL
         $ipAddress = $_GET['ip'];
-        
-        // If the IP address is not provided, use a dummy test address
         if ($ipAddress == "") {
             $ipAddress = "8.8.8.8";
         }
-
-        // Pull data from cache or external service
         $locArray = getGeoInfo($conn, $ipAddress);
         $locJSON = json_encode($locArray);
         echo $locJSON;
@@ -38,7 +34,14 @@ switch ($method) {
         break;
 
     case 'POST':
-        echo "POST not yet implemented.";
+        // Get JSON-encoded list of IPs from POST body
+        $data = json_decode(file_get_contents('php://input'), true);
+        $locArray = array();
+        foreach ($data as $ipAddress) {
+            $locArray[$ipAddress] = getGeoInfo($conn, $ipAddress);
+        }
+        $locJSON = json_encode($locArray);
+        echo $locJSON;
         
         break;
     
