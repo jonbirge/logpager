@@ -944,9 +944,35 @@ function getGeoLocations(ips, signal) {
         }
     });
 
-    // asyncronously recurse queries to external server for remaining ips
+    // send remaining ips to remote sql cache, and of those that aren't satisfied, send to external web service
     if (ips.length > 0) {
-        setTimeout(() => recurseFetchGeoLocations(ips), 0);
+        ipsJSON = JSON.stringify(ips);
+        fetch("geo.php", {
+            method: "POST",
+            body: ipsJSON,
+            signal,
+        })
+            .then((response) => response.json())
+            .then((geodata) => {
+                if (geodata === null) {
+                    console.log("geo: bad data from server");
+                } else {
+                    cachedips = Object.keys(geodata);
+                    console.log("geo: got " + cachedips.length + " ips from server cache")
+                    for (let ip of cachedips) {
+                        updateGeoLocation(geodata[ip], ip);
+                        ips = ips.filter((value) => value !== ip);
+                    }
+                }
+                // asyncronously recurse queries to external web service for remaining ips
+                if (ips.length > 0) {
+                    setTimeout(() => recurseFetchGeoLocations(ips), 0);
+                }
+            })
+            .catch((error) => {
+                console.log("geo fetch error:", error);
+            }
+        );
     }
     
     // function to update geo location for given ip in all matching cells
@@ -1030,20 +1056,16 @@ function getGeoLocations(ips, signal) {
     function recurseFetchGeoLocations(ips, apiCount = 0) {
         // pop the first ip off of ips
         const ip = ips.shift();
-        console.log("fetching geo from server: " + ip);
+        console.log("fetching geo from web service: " + ip);
         fetch("geo.php?ip=" + ip, { signal })
             .then((response) => response.json())
             .then((data) => {
                 // cache the data
                 geoCache[ip] = data;
                 updateGeoLocation(data, ip);
-                if (data.cached) {
-                    console.log("geo server cache hit: " + ip);
-                } else {
-                    apiCount++;
-                    if (apiCount >= maxGeoRequests) {
-                        console.log("geo api limit reached!");
-                    }
+                apiCount++;
+                if (apiCount >= maxGeoRequests) {
+                    console.log("geo api limit reached!");
                 }
                 if (ips.length > 0 && apiCount < maxGeoRequests) {
                     recurseFetchGeoLocations(ips, apiCount);

@@ -41,6 +41,12 @@ switch ($method) {
             $locArray[$ipAddress] = getGeoInfo($conn, $ipAddress);
         }
         $locJSON = json_encode($locArray);
+        
+        // Make sure JSON is valid
+        if (json_decode($locJSON) == null) {
+            die("Invalid JSON data.");
+        }
+
         echo $locJSON;
         
         break;
@@ -48,6 +54,10 @@ switch ($method) {
     default:
         echo "Unsupported HTTP method.";
 }
+
+// Close SQL connection
+$conn->close();
+
 
 function getGeoInfo($conn, $ipAddress)
 {
