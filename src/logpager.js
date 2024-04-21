@@ -4,11 +4,11 @@ const tileLabels = false; // show tile labels on heatmap?
 const fillToNow = true; // fill heatmap to current time?
 const heatmapRatio = 0.5; // width to height ratio of heatmap
 const maxDetailLength = 48; // truncation length of log details
-const maxSearchLength = 256; // truncation length of summary search results
-const maxLogLength = 1024; // truncation length of regular search results
-const maxGeoRequests = 32; // maximum number of IPs to externally geolocate at once
+const maxSearchLength = 300; // truncation length of summary search results
+const maxLogLength = 1000; // truncation length of regular search results
+const maxGeoRequests = 30; // maximum number of IPs to externally geolocate at once
 const pollWait = 30; // seconds to wait between polling the server
-const mapWait = 5;  // minutes to wait between updating the heatmap (always)
+const mapWait = 15;  // minutes to wait between updating the heatmap (always)
 
 // global variables
 let params = new URLSearchParams(window.location.search);
@@ -389,7 +389,7 @@ function updateSummaryTable(jsonData) {
     const signal = controller.signal;
 
     // set dataLength to the minimum of data.length and maxSearchLength
-    const dataLength = Math.min(logdata.length, maxSearchLength);
+    const dataLength = Math.min(logdata.length, maxSearchLength + 1);  // include header row
 
     // go through the data and add up all the counts
     let total = 0;

@@ -50,15 +50,11 @@ switch ($method) {
         echo "Unsupported HTTP method.";
 }
 
-// Make sure JSON is valid
-if (json_decode($locJSON) == null) {
-    echo "Invalid JSON data returned.";
-} else {
-    echo $locJSON;
-}
-
 // Close SQL connection
 $conn->close();
+
+// Output
+echo $locJSON;
 
 
 function getGeoInfo($conn, $ipAddress, $failOver = true)
