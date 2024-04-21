@@ -4,8 +4,8 @@ const tileLabels = false; // show tile labels on heatmap?
 const fillToNow = true; // fill heatmap to current time?
 const heatmapRatio = 0.5; // width to height ratio of heatmap
 const maxDetailLength = 48; // truncation length of log details
-const maxSearchLength = 300; // truncation length of summary search results
-const maxLogLength = 1000; // truncation length of regular search results
+const maxSearchLength = 512; // truncation length of summary search results
+const maxLogLength = 1024; // truncation length of regular search results
 const maxGeoRequests = 30; // maximum number of IPs to externally geolocate at once
 const pollWait = 30; // seconds to wait between polling the server
 const mapWait = 15;  // minutes to wait between updating the heatmap (always)
@@ -22,7 +22,7 @@ let summary = params.get("summary");  // applies to search
 let logType = params.get("type") !== null ? params.get("type") : "auth";  // "clf" or "auth"
 let tableLength = 0;  // used to decide when to reuse the table
 let geoCache = {};  // cache of geolocation data
-let blacklist = {};  // cache of blacklisted IPs
+let blackList = {};  // cache of blacklisted IPs
 
 // start initial data fetches
 loadManifest();
@@ -286,7 +286,7 @@ function updateTable(jsonData) {
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
                 // Create blacklist links
-                if (blacklist.includes(ip)) {
+                if (blackList.includes(ip)) {
                     const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
@@ -447,7 +447,7 @@ function updateSummaryTable(jsonData) {
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
                 // Create blacklist links
-                if (blacklist.includes(ip)) {
+                if (blackList.includes(ip)) {
                     const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
@@ -507,7 +507,7 @@ function loadBlacklist() {
     fetch("blacklist.php")
         .then((response) => response.json())
         .then((data) => {
-            blacklist = data;
+            blackList = data;
             // console.log("loadBlacklist: " + JSON.stringify(blacklist));
         });
 }
@@ -519,7 +519,7 @@ function blacklistAdd(ip, lastTime, log = null) {
     const lastTimeConv = lastTimeDate.toISOString().slice(0, 19).replace("T", " ");
     console.log("blacklist: add " + ip + " as " + logType + " at " + lastTimeConv);
     // update blacklist cache manually
-    blacklist.push(ip);
+    blackList.push(ip);
     // send the IP address to the server
     const formData = new FormData();
     formData.append('ip', ip);
@@ -545,7 +545,7 @@ function blacklistAdd(ip, lastTime, log = null) {
 function blacklistRemove(ip) {
     console.log("blacklist: remove " + ip);
     // update blacklist cache manually
-    blacklist = blacklist.filter((item) => item !== ip);
+    blackList = blackList.filter((item) => item !== ip);
     fetch("blacklist.php?ip=" + ip, {
         method: "DELETE",
     })
