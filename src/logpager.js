@@ -582,7 +582,7 @@ function plotHeatmap(searchTerm, plotLogType = null) {
     console.log("plotHeatmap: fetching " + heatmapURL);
     fetch(heatmapURL)
         .then((response) => response.json())
-        .then(jsonToHeatmap);
+        .then(buildHeatmap);
 
     // set interval to update the heatmap every mapWait minutes
     console.log("plotHeatmap: refresh time " + mapWait + " minutes");
@@ -592,7 +592,7 @@ function plotHeatmap(searchTerm, plotLogType = null) {
 }
 
 // Take JSON array of command log data and build SVG heatmap
-function jsonToHeatmap(jsonData) {
+function buildHeatmap(jsonData) {
     // Check if SVG element already exists and remove if so
     const svgElement = document.querySelector("svg");
     if (svgElement) {
@@ -688,7 +688,7 @@ function jsonToHeatmap(jsonData) {
         .range([0.1, 1]);
 
     // Create the tiles and make interactive
-    svg.selectAll()
+    let tiles = svg.selectAll()
         .data(processedData)
         .enter()
         .append("rect")
@@ -696,8 +696,10 @@ function jsonToHeatmap(jsonData) {
         .attr("y", (d) => yScale(d.hour))
         .attr("width", xScale.bandwidth() + 1) // create a gap between tiles
         .attr("height", yScale.bandwidth() + 1) // create a gap between tiles
-        .style("fill", (d) => colorScale(d.count))
-        .on("click", function (d) {
+        .style("fill", (d) => colorScale(d.count));
+
+    // Interactivity    
+    tiles.on("click", function (d) {
             // get the date and hour from the data
             const date = d.date;
             const hour = d.hour;
