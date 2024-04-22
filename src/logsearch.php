@@ -1,6 +1,6 @@
 <?php
 
-// Include the searchparse.php file, needed by this and all ___search.php files
+// Include the searchparse.php file, needed by this and all search.php files
 include 'searchparse.php';
 
 // Get parameters from URL

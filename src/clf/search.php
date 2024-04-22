@@ -3,7 +3,8 @@
 function search($searchDict, $doSummary = true)
 {
     // Maximum number of items to return
-    $maxItems = 1024;
+    $maxItems = 512;  // summary items
+    $maxSearchLines = 32000;  // matching lines
 
     // Path to the CLF log file
     $logFilePath = '/access.log';
@@ -29,7 +30,7 @@ function search($searchDict, $doSummary = true)
     if ($stat) {
         $grepSearch .= " -e $stat";
     }
-    $cmd = "grep $grepSearch $escFilePath | tac";
+    $cmd = "grep -m $maxSearchLines $grepSearch $escFilePath | tac";
 
     // execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
@@ -69,6 +70,7 @@ function search($searchDict, $doSummary = true)
         }
 
         $lineCount++;
+
         if ($doSummary) {
             // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object,  ignoring the timezone part
             $theDate = $data[2];

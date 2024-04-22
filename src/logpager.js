@@ -4,11 +4,11 @@ const tileLabels = false; // show tile labels on heatmap?
 const fillToNow = true; // fill heatmap to current time?
 const heatmapRatio = 0.5; // width to height ratio of heatmap
 const maxDetailLength = 48; // truncation length of log details
-const maxSearchLength = 256; // truncation length of summary search results
+const maxSearchLength = 512; // truncation length of summary search results
 const maxLogLength = 1024; // truncation length of regular search results
-const maxGeoRequests = 32; // maximum number of IPs to externally geolocate at once
+const maxGeoRequests = 30; // maximum number of IPs to externally geolocate at once
 const pollWait = 30; // seconds to wait between polling the server
-const mapWait = 5;  // minutes to wait between updating the heatmap (always)
+const mapWait = 15;  // minutes to wait between updating the heatmap (always)
 
 // global variables
 let params = new URLSearchParams(window.location.search);
@@ -22,7 +22,7 @@ let summary = params.get("summary");  // applies to search
 let logType = params.get("type") !== null ? params.get("type") : "auth";  // "clf" or "auth"
 let tableLength = 0;  // used to decide when to reuse the table
 let geoCache = {};  // cache of geolocation data
-let blacklist = {};  // cache of blacklisted IPs
+let blackList = {};  // cache of blacklisted IPs
 
 // start initial data fetches
 loadManifest();
@@ -286,7 +286,7 @@ function updateTable(jsonData) {
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
                 // Create blacklist links
-                if (blacklist.includes(ip)) {
+                if (blackList.includes(ip)) {
                     const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
@@ -389,7 +389,7 @@ function updateSummaryTable(jsonData) {
     const signal = controller.signal;
 
     // set dataLength to the minimum of data.length and maxSearchLength
-    const dataLength = Math.min(logdata.length, maxSearchLength);
+    const dataLength = Math.min(logdata.length, maxSearchLength + 1);  // include header row
 
     // go through the data and add up all the counts
     let total = 0;
@@ -447,7 +447,7 @@ function updateSummaryTable(jsonData) {
                 row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                 row += '<nobr>';
                 // Create blacklist links
-                if (blacklist.includes(ip)) {
+                if (blackList.includes(ip)) {
                     const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
                     const blacklistid = 'id="block-' + ip + '"';
                     row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
@@ -507,7 +507,7 @@ function loadBlacklist() {
     fetch("blacklist.php")
         .then((response) => response.json())
         .then((data) => {
-            blacklist = data;
+            blackList = data;
             // console.log("loadBlacklist: " + JSON.stringify(blacklist));
         });
 }
@@ -519,7 +519,7 @@ function blacklistAdd(ip, lastTime, log = null) {
     const lastTimeConv = lastTimeDate.toISOString().slice(0, 19).replace("T", " ");
     console.log("blacklist: add " + ip + " as " + logType + " at " + lastTimeConv);
     // update blacklist cache manually
-    blacklist.push(ip);
+    blackList.push(ip);
     // send the IP address to the server
     const formData = new FormData();
     formData.append('ip', ip);
@@ -545,7 +545,7 @@ function blacklistAdd(ip, lastTime, log = null) {
 function blacklistRemove(ip) {
     console.log("blacklist: remove " + ip);
     // update blacklist cache manually
-    blacklist = blacklist.filter((item) => item !== ip);
+    blackList = blackList.filter((item) => item !== ip);
     fetch("blacklist.php?ip=" + ip, {
         method: "DELETE",
     })
@@ -932,12 +932,56 @@ function resetSearch() {
     plotHeatmap();
 }
 
-// get geolocations and orgs from IP addresses using ip-api.com
+// get geolocations and update table cells
 function getGeoLocations(ips, signal) {
-    // asyncronously run recurseFetchGeoLocations(ips)
-    setTimeout(() => recurseFetchGeoLocations(ips), 0);
+    // take care of everything locally cached
+    localHits = 0;
+    ips.forEach((ip) => {
+        if (geoCache[ip]) {
+            localHits += 1;
+            updateGeoLocation(geoCache[ip], ip);
+            // remove ip from ips
+            ips = ips.filter((value) => value !== ip);
+        }
+    });
+    if (localHits > 0) {
+        console.log("got " + localHits + " hit(s) from local cache");
+    }
+
+    // send remaining ips to remote sql cache, and of those that aren't satisfied, send to external web service
+    if (ips.length > 0) {
+        ipsJSON = JSON.stringify(ips);
+        fetch("geo.php", {
+            method: "POST",
+            body: ipsJSON,
+            signal,
+        })
+            .then((response) => response.json())
+            .then((geodata) => {
+                if (geodata === null) {
+                    console.log("geo: bad data from server");
+                } else {
+                    cachedips = Object.keys(geodata);
+                    console.log("got " + cachedips.length + " hit(s) from server cache")
+                    for (let ip of cachedips) {
+                        updateGeoLocation(geodata[ip], ip);
+                        ips = ips.filter((value) => value !== ip);
+                        geoCache[ip] = geodata[ip];
+                    }
+                }
+                // asyncronously recurse queries to external web service for remaining ips
+                if (ips.length > 0) {
+                    setTimeout(() => recurseFetchGeoLocations(ips), 0);
+                }
+            })
+            .catch((error) => {
+                console.log("geo fetch error:", error);
+            }
+        );
+    }
     
-    function updateGeoLocations(data, ip) {
+    // function to update geo location for given ip in all matching cells
+    function updateGeoLocation(data, ip) {
         // Get all cells with id of the form geo-ipAddress
         const geoCells = document.querySelectorAll(
             '[id^="geo-' + ip + '"]'
@@ -1017,41 +1061,29 @@ function getGeoLocations(ips, signal) {
     function recurseFetchGeoLocations(ips, apiCount = 0) {
         // pop the first ip off of ips
         const ip = ips.shift();
-        console.log("fetching geo: " + ip);
-        if (geoCache[ip]) {  // get from local cache
-            console.log("geo local cache hit: " + ip);
-            updateGeoLocations(geoCache[ip], ip);
-            if (ips.length > 0) {
-                recurseFetchGeoLocations(ips, apiCount);
-            }
-        } else {  // pull from server
-            fetch("geo.php?ip=" + ip, { signal })
-                .then((response) => response.json())
-                .then((data) => {
-                    // cache the data
-                    geoCache[ip] = data;
-                    updateGeoLocations(data, ip);
-                    if (data.cached) {
-                        console.log("geo server cache hit: " + ip);
-                    } else {
-                        apiCount++;
-                        if (apiCount >= maxGeoRequests) {
-                            console.log("geo api limit reached!");
-                        }
-                    }
-                    if (ips.length > 0 && apiCount < maxGeoRequests) {
-                        recurseFetchGeoLocations(ips, apiCount);
-                    }
-                })
-                .catch((error) => {
-                    if (error.name === "AbortError") {
-                        console.log("geo fetch aborted for " + ip);
-                    } else {
-                        console.log("fetch error:", ip, error);
-                        updateGeoLocations(null, ip);
-                    }
-                });
-        }
+        console.log("fetching geo from web service: " + ip);
+        fetch("geo.php?ip=" + ip, { signal })
+            .then((response) => response.json())
+            .then((geodata) => {
+                // cache the data
+                geoCache[ip] = geodata;
+                updateGeoLocation(geodata, ip);
+                apiCount++;
+                if (apiCount >= maxGeoRequests) {
+                    console.log("geo api limit reached!");
+                }
+                if (ips.length > 0 && apiCount < maxGeoRequests) {
+                    recurseFetchGeoLocations(ips, apiCount);
+                }
+            })
+            .catch((error) => {
+                if (error.name === "AbortError") {
+                    console.log("geo fetch aborted for " + ip);
+                } else {
+                    console.log("fetch error:", ip, error);
+                    updateGeoLocation(null, ip);
+                }
+            });
     }
 }
 
