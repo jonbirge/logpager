@@ -4,8 +4,7 @@ function search($searchDict, $doSummary = true)
 {
     // Maximum number of items to return
     $maxItems = 512;  // summary items
-    $maxSearchLines = 24000;  // matching lines
-    $maxCatLines = 64000;  // log lines to search
+    $maxSearchLines = 32000;  // matching lines
 
     // Path to the CLF log file
     $logFilePath = '/access.log';
@@ -31,7 +30,7 @@ function search($searchDict, $doSummary = true)
     if ($stat) {
         $grepSearch .= " -e $stat";
     }
-    $cmd = "tac $escFilePath | head -n $maxCatLines | grep -m $maxSearchLines $grepSearch";
+    $cmd = "grep -m $maxSearchLines $grepSearch $escFilePath | tac";
 
     // execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
