@@ -333,15 +333,15 @@ function refreshTable() {
 
 // Take JSON array of common log data and write HTML table
 function updateTable(jsonData) {
-    const data = JSON.parse(jsonData);
-    const pageCount = parseInt(data.pageCount, 10);
-    const lineCount = parseInt(data.lineCount, 10);
-    const page = parseInt(data.page, 10);
-    logLines = data.logLines;
+    const logdata = JSON.parse(jsonData);
+    const pageCount = parseInt(logdata.pageCount, 10);
+    const lineCount = parseInt(logdata.lineCount, 10);
+    const page = parseInt(logdata.page, 10);
+    logLines = logdata.logLines;
 
     // report the number of results in the status div
     const searchStatus = document.getElementById("status");
-    if (data.search !== undefined) {
+    if (logdata.search !== undefined) {
         searchStatus.innerHTML = "<b>Found " + lineCount + " matching log entries</b>";
     } else {
         searchStatus.innerHTML = "<b>Paging " + lineCount + " log entries</b>";
@@ -383,18 +383,17 @@ function updateTable(jsonData) {
 }
 
 // Take JSON array of search log data and write HTML table
+// Note: This function is similar to updateTable, but with different data
 function updateSummaryTable(jsonData) {
-    const logdata = JSON.parse(jsonData);
-    const logDiv = document.getElementById("log");
-    const signal = controller.signal;
-
-    // set dataLength to the minimum of data.length and maxSearchLength
-    const dataLength = Math.min(logdata.length, maxSearchLength + 1);  // include header row
+    logLines = JSON.parse(jsonData);
+    
+    // set dataLength to the minimum of data.length and maxLogLength
+    const dataLength = Math.min(logLines.length, maxLogLength);
 
     // go through the data and add up all the counts
     let total = 0;
-    for (let i = 1; i < logdata.length; i++) {
-        total += parseInt(logdata[i][0]);
+    for (let i = 1; i < logLines.length; i++) {
+        total += parseInt(logLines[i][0]);
     }
 
     // report the number of results in the status div
@@ -402,92 +401,8 @@ function updateSummaryTable(jsonData) {
     searchStatus.innerHTML = "<b>Found " + (dataLength - 1) + " IP addresses from " +
         total + " matching log entries</b>";
 
-    // initialize the table
-    tableLength = 0;  // reset table length
-    let table0 = '<table id="log-table" class="log">';
-    for (let i = 0; i < dataLength; i++) {
-        table0 += '<tr id="row-' + i + '"></tr>';
-    }
-    table0 += "</table>";
-    logDiv.innerHTML = table0;
-
-    // write table headers from first row
-    let headrow = document.getElementById("row-0");
-    let row = "";
-    for (let i = 0; i < logdata[0].length; i++) {
-        if (i == 1) {
-            row += "<th>" + logdata[0][i] + "</th>";
-            if (geolocate) {
-                row += '<th class="hideable">Domain name</th>';
-                row += '<th class="hideable">Organization</th>';
-                row += '<th>Geolocation</th>';
-            }
-        } else {
-            row += "<th>" + logdata[0][i] + "</th>";
-        }
-    }
-    headrow.innerHTML = row;
-
-    // write table rows from remaining rows
-    let ips = [];
-    for (let i = 1; i < dataLength; i++) {
-        rowElement = document.getElementById("row-" + i);
-        row = "";
-        for (let j = 0; j < logdata[i].length; j++) {
-            if (j == 0) {
-                row += "<td><b>" + logdata[i][j] + "</b></td>";
-            } else if (j == 1) {
-                const clfStamp = logdata[i][2].replace(/\s.*$/, "");  // remove the timezone (assume UTC)
-                const dateStamp = parseCLFDate(clfStamp);  // assume UTC
-                // ip address
-                const ip = logdata[i][j];
-                ips.push(ip);
-                // Add cell for IP address with link to search for ip address
-                const srchlink = "?type=" + logType + "&summary=false&search=ip:" + ip;
-                row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
-                row += '<nobr>';
-                // Create blacklist links
-                if (blackList.includes(ip)) {
-                    const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
-                    const blacklistid = 'id="block-' + ip + '"';
-                    row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
-                } else {
-                    const logText = logdata[i][2];
-                    const blacklistCall =
-                        'onclick="blacklistAdd(' + "'" + ip + "'" + 
-                        ",'" + clfStamp + "'" + 
-                        ",'" + logText + "'" + ');"';
-                    const blacklistid = 'id="block-' + ip + '"';
-                    row += '<button ' + blacklistid + 'class="toggle-button tight" '
-                        + blacklistCall + ">block</button>";
-                }
-                // Create link string that opens a new tab with intel
-                const traceLink = 'onclick="window.open(' + "'intel/?ip=" + ip + "'" + '); return false"';
-                row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
-                row += "</nobr></td>";
-                // Add new cell for Host name after the first cell
-                if (geolocate) {
-                    const hostnameid = "hostname-" + ip;
-                    row += '<td class="hideable" id="' + hostnameid + '">-</td>';
-                    const orgid = "org-" + ip;
-                    row += '<td class="hideable" id="' + orgid + '">-</td>';
-                    const geoid = "geo-" + ip;
-                    row += '<td id="' + geoid + '">-</td>';
-                }
-            } else if (j == 2) {  // last date
-                const clfStamp = logdata[i][j].replace(/\s.*$/, "");  // remove the timezone
-                const dateStamp = parseCLFDate(clfStamp);  // assume UTC
-                const timediff = timeDiff(dateStamp, new Date());
-                const jsonDate = dateStamp.toJSON();
-                row += '<td id=timestamp:' + jsonDate + '>';
-                row += timediff + "</td>";
-            } else {
-                // anything else
-                row += "<td>" + logdata[i][j] + "</td>";
-            }
-        }
-        rowElement.innerHTML = row;
-    }
+    // write HTML from data...
+    refreshTable();
 
     // update the page number
     const pageSpan = document.getElementById("page");
@@ -496,10 +411,6 @@ function updateSummaryTable(jsonData) {
     } else {
         pageSpan.innerHTML = "All summary results";
     }
-
-    // Get the host names from the IP addresses
-    const ipSet = [...new Set(ips)]; // Get unique IP addresses
-    if (geolocate) getGeoLocations(ipSet, signal);
 }
 
 // plot heatmap of log entries by hour and day, potentially including a search term
