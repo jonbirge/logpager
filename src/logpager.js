@@ -383,7 +383,6 @@ function updateTable(jsonData) {
 }
 
 // Take JSON array of search log data and write HTML table
-// Note: This function is similar to updateTable, but with different data
 function updateSummaryTable(jsonData) {
     logLines = JSON.parse(jsonData);
     
@@ -675,35 +674,6 @@ function buildHeatmap(jsonData) {
         .style("display", "flex")
         .style("justify-content", "center")
         .style("align-items", "center");
-}
-
-// take date of the form YYYY-MM-DD as one parameter, and the hour of the day as another parameter,
-// and return a search string for the beginning of the corresponding common timestamp.
-// example: buildSearch('2020-01-01', '12') would return '01/Jan/2020:12:'
-function buildTimestampSearch(date, hour) {
-    const monthnum = date.substring(5, 7);
-    // convert month number to month name
-    const monthnames = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-    ];
-    const month = monthnames[monthnum - 1];
-    const day = date.substring(8, 10);
-    const year = date.substring(0, 4);
-    // add leading zero to hour if necessary
-    const hourPad = hour.toString().padStart(2, "0");
-    const timestamp = day + "/" + month + "/" + year + ":" + hourPad + ":";
-    return timestamp;
 }
 
 // uiSearch is called when the search button is clicked by user
