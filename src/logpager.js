@@ -21,7 +21,7 @@ let search = params.get("search");
 let summary = params.get("summary");  // applies to search
 let logType = params.get("type") !== null ? params.get("type") : "auth";  // "clf" or "auth"
 let tableLength = 0;  // used to decide when to reuse the table
-let logTable = [];  // cache of current displayed table data
+let logLines = [];  // cache of current displayed table data
 let geoCache = {};  // cache of geolocation data
 let blackList = [];  // cache of blacklisted IPs
 
@@ -195,26 +195,13 @@ function searchLog(searchTerm, doSummary) {
         });
 }
 
-// Take JSON array of commond log data and write HTML table
-function updateTable(jsonData) {
-    const data = JSON.parse(jsonData);
-    const pageCount = parseInt(data.pageCount, 10);
-    const lineCount = parseInt(data.lineCount, 10);
-    const page = parseInt(data.page, 10);
-    const logLines = data.logLines;
+// Update table HTML from log array
+function refreshTable() {
     const logDiv = document.getElementById("log");
     const signal = controller.signal;
-    
+
     // set dataLength to the minimum of data.length and maxLogLength
     const dataLength = Math.min(logLines.length, maxLogLength);
-
-    // report the number of results in the status div
-    const searchStatus = document.getElementById("status");
-    if (data.search !== undefined) {
-        searchStatus.innerHTML = "<b>Found " + lineCount + " matching log entries</b>";
-    } else {
-        searchStatus.innerHTML = "<b>Paging " + lineCount + " log entries</b>";
-    }
 
     // check to see if the table needs to be rebuilt
     if (dataLength != tableLength) {
@@ -249,9 +236,8 @@ function updateTable(jsonData) {
                 break;
             case "Age":
                 ageIndex = j;
-                break;
             default:
-                row += "<th>" + headers[j] + "</th>";
+                row += "<th>" + headerName + "</th>";
         }
     }
     headrow.innerHTML = row;
@@ -260,10 +246,10 @@ function updateTable(jsonData) {
     let ips = [];
     for (let i = 1; i < dataLength; i++) {
         const rowElement = document.getElementById("row-" + i);
-        row = "";
         const rawTimestamp = logLines[i][ageIndex];
         const clfStamp = dropTimezone(rawTimestamp);  // remove the timezone (assume UTC)
         const dateStamp = parseCLFDate(rawTimestamp);  // assume UTC
+        row = "";
         for (let j = 0; j < logLines[i].length; j++) {  // build row
             const headerName = headers[j];
             switch (headerName) {
@@ -339,11 +325,31 @@ function updateTable(jsonData) {
         }
         rowElement.innerHTML = row;
     }
-    
+
     // asyncronously get the host locations from the IPs
     const ipSet = [...new Set(ips)]; // Get unique IP addresses
     if (geolocate) getGeoLocations(ipSet, signal);
-    
+}
+
+// Take JSON array of common log data and write HTML table
+function updateTable(jsonData) {
+    const data = JSON.parse(jsonData);
+    const pageCount = parseInt(data.pageCount, 10);
+    const lineCount = parseInt(data.lineCount, 10);
+    const page = parseInt(data.page, 10);
+    logLines = data.logLines;
+
+    // report the number of results in the status div
+    const searchStatus = document.getElementById("status");
+    if (data.search !== undefined) {
+        searchStatus.innerHTML = "<b>Found " + lineCount + " matching log entries</b>";
+    } else {
+        searchStatus.innerHTML = "<b>Paging " + lineCount + " log entries</b>";
+    }
+
+    // write HTML from data...
+    refreshTable();
+
     // handle case where we're at the last page
     // TODO: or first page...
     const nextButtons = document.querySelectorAll('[id^="next-"]');
@@ -374,10 +380,9 @@ function updateTable(jsonData) {
         url.searchParams.set("page", page);
     }
     window.history.replaceState({}, "", url);
-    
 }
 
-// Take JSON array of commond log data and write HTML table
+// Take JSON array of search log data and write HTML table
 function updateSummaryTable(jsonData) {
     const logdata = JSON.parse(jsonData);
     const logDiv = document.getElementById("log");
