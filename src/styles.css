@@ -110,17 +110,12 @@ a.header {
 
 /* Style tables to have a smaller font size */
 table, th, td {
-    border: 1px solid black;
+    border: 3px solid white;
     margin-bottom: 9px;
     padding-left: 7px;
     padding-right: 7px;
     padding-top: 3px;
     padding-bottom: 3px;
-}
-
-/* General table style */
-table {
-    text-wrap: pretty;
     word-wrap: break-word;
     border-collapse: collapse;
 }
@@ -136,39 +131,39 @@ table.log {
 th {
     background-color: #777777;
     color: white;
-    font-weight: 700;
+    font-weight: 1000;
 }
 
 /* Hidable columns */
-th.hideable, td.hideable {
+th.hideable, td.hijhgjhghtyuytfdeable {
     display: table-cell;
 }
 
 /* Style alternating rows */
 tr:nth-child(even) {
-    background-color: #f0f0f0;
+    background-color: #eff6fe;
 }
 
 /* Status colors */
 .green {
     font-weight: 600;
     color: black;
-    background-color: rgb(128, 204, 128);
+    background-color: rgb(176 230 176);
 }
 .red {
-    font-weight: 600;
+    font-weight: 700;
     color: black;
-    background-color: rgb(252, 199, 199);
+    background-color: rgb(252 216 216);
 }
 .gray {
     font-weight: 500;
     color: black;
-    background-color: lightgray;
+    background-color: #eeeeee;
 }
 
 /* Monospace font for request column */
 .code {
-    font-family: 'Roboto Mono', monospace;
+    font-family: 'Roboto Mono';
     text-align: left;
     padding-left: 7pt;
 }
