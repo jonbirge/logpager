@@ -21,12 +21,15 @@ let search = params.get("search");
 let summary = params.get("summary");  // applies to search
 let logType = params.get("type") !== null ? params.get("type") : "auth";  // "clf" or "auth"
 let tableLength = 0;  // used to decide when to reuse the table
+let logLines = [];  // cache of current displayed table data
 let geoCache = {};  // cache of geolocation data
-let blackList = {};  // cache of blacklisted IPs
+let blackList = [];  // cache of blacklisted IPs
 
 // start initial data fetches
+loadBlacklist(blackList);
 loadManifest();
-loadBlacklist();
+
+// create update interval
 updateClock();
 setInterval(updateClock, 1000);
 
@@ -86,6 +89,8 @@ function loadManifest() {
         });
 }
 
+// ***** function definitions *****
+
 // update time sensitive elements every second
 function updateClock() {
     // find all elements with id of the form timestamp:*
@@ -98,33 +103,6 @@ function updateClock() {
         const timediff = timeDiff(dateObj, new Date());
         element.innerHTML = timediff;
     });
-}
-
-// create a Date object from a log timestamp of the form DD/Mon/YYYY:HH:MM:SS, assuming UTC timezone
-function parseCLFDate(clfstamp) {
-    const parts = clfstamp.split(/[:/]/); // split on : and /
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const monthIndex = months.indexOf(parts[1]);
-    const dateObj = new Date(Date.UTC(parts[2], monthIndex, parts[0], parts[3], parts[4], parts[5]));
-    return dateObj;
-}
-
-// take two Date objects and return the difference in time in simple human-readable terms, such as "3 days" or "5 seconds"
-function timeDiff(date1, date2) {
-    const diff = date2 - date1;
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-    if (days > 2) {
-        return days + " days";
-    } else if (hours > 2) {
-        return hours + " hrs";
-    } else if (minutes > 5) {
-        return minutes + " min";
-    } else {
-        return seconds + "<br>sec";
-    }
 }
 
 // pull the relevent log data from the server
@@ -217,54 +195,96 @@ function searchLog(searchTerm, doSummary) {
         });
 }
 
-// Take JSON array of commond log data and write HTML table
-function updateTable(jsonData) {
-    const data = JSON.parse(jsonData);
-    const logdata = data.logLines;
-    const pageCount = parseInt(data.pageCount, 10);
-    const lineCount = parseInt(data.lineCount, 10);
+// sort table data in logLines by column
+function sortTable(column, isDate = false) {
+    // extract the given column from logLines, minus the header element
+    const columnData = logLines.slice(1).map((row) => row[column]);
+
+    // sort the column data, returning the indices of the sorted data
+    const indices = columnData.map((_, i) => i);
+    if (isDate) {
+        indices.sort((a, b) => {
+            if (parseCLFDate(columnData[a]) < parseCLFDate(columnData[b])) {
+                return 1;
+            } else if (parseCLFDate(columnData[a]) > parseCLFDate(columnData[b])) {
+                return -1;
+            }
+            return 0;
+        });
+    } else {
+        indices.sort((a, b) => {
+            if (columnData[a] < columnData[b]) {
+                return 1;
+            } else if (columnData[a] > columnData[b]) {
+                return -1;
+            }
+            return 0;
+        }
+        );
+    }
+
+    // apply the sorted indices to logLines
+    const sortedLogLines = [logLines[0]];
+    indices.forEach((i) => {
+        sortedLogLines.push(logLines[i + 1]);
+    });
+
+    // write the sorted data to the log div
+    logLines = sortedLogLines;
+    refreshTable();
+}
+
+// update table HTML from log array
+function refreshTable() {
     const logDiv = document.getElementById("log");
     const signal = controller.signal;
-    page = parseInt(data.page, 10);
-    
-    // set dataLength to the minimum of data.length and maxLogLength
-    const dataLength = Math.min(logdata.length, maxLogLength);
 
-    // report the number of results in the status div
-    const searchStatus = document.getElementById("status");
-    if (data.search !== undefined) {
-        searchStatus.innerHTML = "<b>Found " + lineCount + " matching log entries</b>";
-    } else {
-        searchStatus.innerHTML = "<b>Paging " + lineCount + " log entries</b>";
-    }
+    // set dataLength to the minimum of data.length and maxLogLength
+    const dataLength = Math.min(logLines.length, maxLogLength);
 
     // check to see if the table needs to be rebuilt
     if (dataLength != tableLength) {
         console.log("updateTable: rebuilding table");
-        tableLength = logdata.length;
+        tableLength = logLines.length;
         let table0 = '<table id="log-table" class="log">';
-        for (let i = 0; i < logdata.length; i++) {
+        for (let i = 0; i < logLines.length; i++) {
             table0 += '<tr id="row-' + i + '"></tr>';
         }
         table0 += "</table>";
         logDiv.innerHTML = table0;
     }
 
+    // utility function to create HTML link for sorting
+    function addSortLink(idx, name, isDate = false) {
+        return '<a class="header" href="#" onclick="sortTable(' +
+            idx + ', ' + isDate + '); return false;">' + name + "</a>";
+    }
+
     // write table headers from first row
-    let headrow = document.getElementById("row-0");
+    const headers = logLines[0];
+    const headrow = document.getElementById("row-0");
+    let ageIndex = null;
     let row = "";
-    for (let i = 0; i < logdata[0].length; i++) {
-        if (i == 0) {
-            row += "<th>" + logdata[0][i] + "</th>";
-            if (geolocate) {
-                row += '<th class="hideable">Domain name</th>';
-                row += '<th class="hideable">Organization</th>';
-                row += '<th>Geolocation</th>';
-            }
-        } else if (i == 2) {  // details
-            row += '<th class="hideable">' + logdata[0][i] + '</th>';
-        } else {
-            row += "<th>" + logdata[0][i] + "</th>";
+    for (let j = 0; j < headers.length; j++) {
+        const headerName = headers[j];
+        switch (headerName) {
+            case "IP":
+                row += "<th>" + addSortLink(j, headerName) + "</th>";
+                if (geolocate) {
+                    row += '<th class="hideable">Domain</th>';
+                    row += '<th class="hideable">Organization</th>';
+                    row += '<th>Geolocation</th>';
+                }
+                break;
+            case "Details":
+                row += '<th class="hideable">' + headerName + '</th>';
+                break;
+            case "Age":
+                ageIndex = j;
+                row += "<th>" + addSortLink(j, headerName, true) + "</th>";
+                break;
+            default:
+                row += "<th>" + addSortLink(j, headerName) + "</th>";
         }
     }
     headrow.innerHTML = row;
@@ -272,82 +292,113 @@ function updateTable(jsonData) {
     // write table rows from remaining rows
     let ips = [];
     for (let i = 1; i < dataLength; i++) {
-        rowElement = document.getElementById("row-" + i);
+        const rowElement = document.getElementById("row-" + i);
+        const rawTimestamp = logLines[i][ageIndex];
+        const clfStamp = dropTimezone(rawTimestamp);  // remove the timezone (assume UTC)
+        const dateStamp = parseCLFDate(rawTimestamp);  // assume UTC
         row = "";
-        for (let j = 0; j < logdata[i].length; j++) {  // FIX: this is idiotic!
-            const clfStamp = logdata[i][1].replace(/\s.*$/, "");  // remove the timezone (assume UTC)
-            const dateStamp = parseCLFDate(clfStamp);  // assume UTC
-            if (j == 0) {
-                // ip address
-                const ip = logdata[i][j];
-                ips.push(ip);
-                // Add cell for IP address with link to search for ip address
-                const srchlink = "?type=" + logType + "&search=ip:" + ip;
-                row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
-                row += '<nobr>';
-                // Create blacklist links
-                if (blackList.includes(ip)) {
-                    const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
-                    const blacklistid = 'id="block-' + ip + '"';
-                    row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
-                } else {
-                    const logText = logdata[i][2];
-                    const blacklistCall =
-                        'onclick="blacklistAdd(' + "'" + ip + "'" + 
-                        ",'" + clfStamp + "'" + 
-                        ",'" + logText + "'" + ');"';
-                    const blacklistid = 'id="block-' + ip + '"';
-                    row += '<button ' + blacklistid + 'class="toggle-button tight" '
-                        + blacklistCall + ">block</button>";
-                }
-                // Create link string that opens a new tab with /intel/?ip=ip
-                const traceLink = 'onclick="window.open(' + "'intel/?ip=" + ip + "'" + '); return false"';
-                row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
-                row += "</nobr></td>";
-                // Add new cell for Host name after the first cell
-                if (geolocate) {
-                    const hostnameid = "hostname-" + ip;
-                    row += '<td class="hideable" id="' + hostnameid + '"></td>';
-                    const orgid = "org-" + ip;
-                    row += '<td class="hideable" id="' + orgid + '"></td>';
-                    const geoid = "geo-" + ip;
-                    row += '<td id="' + geoid + '"></td>';
-                }
-            } else if (j == 1) {
-                const timediff = timeDiff(dateStamp, new Date());
-                const jsonDate = dateStamp.toJSON();
-                row += '<td id=timestamp:' + jsonDate + '>';
-                row += timediff + "</td>";
-            } else if (j == 2) {
-                // request
-                const rawRequest = logdata[i][j];
-                // truncate request to 32 characters
-                const truncRequest =
-                    rawRequest.length > maxDetailLength
-                        ? rawRequest.substring(0, maxDetailLength) + "..."
-                        : rawRequest;
-                row += '<td class="code hideable">' + truncRequest + "</td>";
-            } else if (j == 3) {
-                // common status handling
-                const greenStatus = ["200", "304", "OK"];
-                const redStatus = ["308", "400", "401", "403", "404", "500", "FAIL"];
-                const status = logdata[i][j];
-                if (greenStatus.includes(status)) {
-                    row += '<td class="green">' + status + "</td>";
-                } else if (redStatus.includes(status)) {
-                    row += '<td class="red">' + status + "</td>";
-                } else {
-                    row += '<td class="gray">' + status + "</td>";
-                }
-            } else {
-                // anything else
-                row += "<td>" + logdata[i][j] + "</td>";
+        for (let j = 0; j < logLines[i].length; j++) {  // build row
+            const headerName = headers[j];
+            switch (headerName) {
+                case "IP":
+                    const ip = logLines[i][j];
+                    ips.push(ip);
+                    // Add cell for IP address with link to search for ip address
+                    const srchlink = "?type=" + logType + "&search=ip:" + ip;
+                    row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
+                    row += '<nobr>';
+                    // Create blacklist links
+                    if (blackList.includes(ip)) {
+                        const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
+                        const blacklistid = 'id="block-' + ip + '"';
+                        row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
+                    } else {
+                        const logText = logLines[i][2];
+                        const blacklistCall =
+                            'onclick="blacklistAdd(' + "'" + ip + "'" +
+                            ",'" + clfStamp + "'" +
+                            ",'" + logText + "'" + ');"';
+                        const blacklistid = 'id="block-' + ip + '"';
+                        row += '<button ' + blacklistid + 'class="toggle-button tight" '
+                            + blacklistCall + ">block</button>";
+                    }
+                    // Create link string that opens a new tab with /intel/?ip=ip
+                    const traceLink = 'onclick="window.open(' + "'intel/?ip=" + ip + "'" + '); return false"';
+                    row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
+                    row += "</nobr></td>";
+                    // Add new cell for Host name after the first cell
+                    if (geolocate) {
+                        const hostnameid = "hostname-" + ip;
+                        row += '<td class="hideable" id="' + hostnameid + '"></td>';
+                        const orgid = "org-" + ip;
+                        row += '<td class="hideable" id="' + orgid + '"></td>';
+                        const geoid = "geo-" + ip;
+                        row += '<td id="' + geoid + '"></td>';
+                    }
+                    break;
+                case "Age":
+                    const timediff = timeDiff(dateStamp, new Date());
+                    const jsonDate = dateStamp.toJSON();
+                    row += '<td id=timestamp:' + jsonDate + '>';
+                    row += timediff + "</td>";
+                    break;
+                case "Details":
+                    // request
+                    const rawRequest = logLines[i][j];
+                    // truncate request to 32 characters
+                    const truncRequest =
+                        rawRequest.length > maxDetailLength
+                            ? rawRequest.substring(0, maxDetailLength) + "..."
+                            : rawRequest;
+                    row += '<td class="code hideable">' + truncRequest + "</td>";
+                    break;
+                case "Status":
+                    // common status handling
+                    const greenStatus = ["200", "304", "OK"];
+                    const redStatus = ["308", "400", "401", "403", "404", "500", "FAIL"];
+                    const status = logLines[i][j];
+                    if (greenStatus.includes(status)) {
+                        row += '<td class="green">' + status + "</td>";
+                    } else if (redStatus.includes(status)) {
+                        row += '<td class="red">' + status + "</td>";
+                    } else {
+                        row += '<td class="gray">' + status + "</td>";
+                    }
+                    break;
+                default:
+                    // anything else
+                    row += "<td>" + logLines[i][j] + "</td>";
             }
         }
         rowElement.innerHTML = row;
     }
-    
+
+    // asyncronously get the host locations from the IPs
+    const ipSet = [...new Set(ips)]; // Get unique IP addresses
+    if (geolocate) getGeoLocations(ipSet, signal);
+}
+
+// Take JSON array of common log data and write HTML table
+function updateTable(jsonData) {
+    const logdata = JSON.parse(jsonData);
+    const pageCount = parseInt(logdata.pageCount, 10);
+    const lineCount = parseInt(logdata.lineCount, 10);
+    const page = parseInt(logdata.page, 10);
+    logLines = logdata.logLines;
+
+    // report the number of results in the status div
+    const searchStatus = document.getElementById("status");
+    if (logdata.search !== undefined) {
+        searchStatus.innerHTML = "<b>Found " + lineCount + " matching log entries</b>";
+    } else {
+        searchStatus.innerHTML = "<b>Paging " + lineCount + " log entries</b>";
+    }
+
+    // write HTML from data...
+    refreshTable();
+
     // handle case where we're at the last page
+    // TODO: or first page...
     const nextButtons = document.querySelectorAll('[id^="next-"]');
     if (page >= pageCount) {
         nextButtons.forEach((button) => {
@@ -376,25 +427,19 @@ function updateTable(jsonData) {
         url.searchParams.set("page", page);
     }
     window.history.replaceState({}, "", url);
-    
-    // asyncronously get the host locations from the IPs
-    const ipSet = [...new Set(ips)]; // Get unique IP addresses
-    if (geolocate) getGeoLocations(ipSet, signal);
 }
 
-// Take JSON array of commond log data and write HTML table
+// Take JSON array of search log data and write HTML table
 function updateSummaryTable(jsonData) {
-    const logdata = JSON.parse(jsonData);
-    const logDiv = document.getElementById("log");
-    const signal = controller.signal;
-
-    // set dataLength to the minimum of data.length and maxSearchLength
-    const dataLength = Math.min(logdata.length, maxSearchLength + 1);  // include header row
+    logLines = JSON.parse(jsonData);
+    
+    // set dataLength to the minimum of data.length and maxLogLength
+    const dataLength = Math.min(logLines.length, maxLogLength);
 
     // go through the data and add up all the counts
     let total = 0;
-    for (let i = 1; i < logdata.length; i++) {
-        total += parseInt(logdata[i][0]);
+    for (let i = 1; i < logLines.length; i++) {
+        total += parseInt(logLines[i][0]);
     }
 
     // report the number of results in the status div
@@ -402,92 +447,8 @@ function updateSummaryTable(jsonData) {
     searchStatus.innerHTML = "<b>Found " + (dataLength - 1) + " IP addresses from " +
         total + " matching log entries</b>";
 
-    // initialize the table
-    tableLength = 0;  // reset table length
-    let table0 = '<table id="log-table" class="log">';
-    for (let i = 0; i < dataLength; i++) {
-        table0 += '<tr id="row-' + i + '"></tr>';
-    }
-    table0 += "</table>";
-    logDiv.innerHTML = table0;
-
-    // write table headers from first row
-    let headrow = document.getElementById("row-0");
-    let row = "";
-    for (let i = 0; i < logdata[0].length; i++) {
-        if (i == 1) {
-            row += "<th>" + logdata[0][i] + "</th>";
-            if (geolocate) {
-                row += '<th class="hideable">Domain name</th>';
-                row += '<th class="hideable">Organization</th>';
-                row += '<th>Geolocation</th>';
-            }
-        } else {
-            row += "<th>" + logdata[0][i] + "</th>";
-        }
-    }
-    headrow.innerHTML = row;
-
-    // write table rows from remaining rows
-    let ips = [];
-    for (let i = 1; i < dataLength; i++) {
-        rowElement = document.getElementById("row-" + i);
-        row = "";
-        for (let j = 0; j < logdata[i].length; j++) {
-            if (j == 0) {
-                row += "<td><b>" + logdata[i][j] + "</b></td>";
-            } else if (j == 1) {
-                const clfStamp = logdata[i][2].replace(/\s.*$/, "");  // remove the timezone (assume UTC)
-                const dateStamp = parseCLFDate(clfStamp);  // assume UTC
-                // ip address
-                const ip = logdata[i][j];
-                ips.push(ip);
-                // Add cell for IP address with link to search for ip address
-                const srchlink = "?type=" + logType + "&summary=false&search=ip:" + ip;
-                row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
-                row += '<nobr>';
-                // Create blacklist links
-                if (blackList.includes(ip)) {
-                    const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
-                    const blacklistid = 'id="block-' + ip + '"';
-                    row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
-                } else {
-                    const logText = logdata[i][2];
-                    const blacklistCall =
-                        'onclick="blacklistAdd(' + "'" + ip + "'" + 
-                        ",'" + clfStamp + "'" + 
-                        ",'" + logText + "'" + ');"';
-                    const blacklistid = 'id="block-' + ip + '"';
-                    row += '<button ' + blacklistid + 'class="toggle-button tight" '
-                        + blacklistCall + ">block</button>";
-                }
-                // Create link string that opens a new tab with intel
-                const traceLink = 'onclick="window.open(' + "'intel/?ip=" + ip + "'" + '); return false"';
-                row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
-                row += "</nobr></td>";
-                // Add new cell for Host name after the first cell
-                if (geolocate) {
-                    const hostnameid = "hostname-" + ip;
-                    row += '<td class="hideable" id="' + hostnameid + '">-</td>';
-                    const orgid = "org-" + ip;
-                    row += '<td class="hideable" id="' + orgid + '">-</td>';
-                    const geoid = "geo-" + ip;
-                    row += '<td id="' + geoid + '">-</td>';
-                }
-            } else if (j == 2) {  // last date
-                const clfStamp = logdata[i][j].replace(/\s.*$/, "");  // remove the timezone
-                const dateStamp = parseCLFDate(clfStamp);  // assume UTC
-                const timediff = timeDiff(dateStamp, new Date());
-                const jsonDate = dateStamp.toJSON();
-                row += '<td id=timestamp:' + jsonDate + '>';
-                row += timediff + "</td>";
-            } else {
-                // anything else
-                row += "<td>" + logdata[i][j] + "</td>";
-            }
-        }
-        rowElement.innerHTML = row;
-    }
+    // write HTML from data...
+    refreshTable();
 
     // update the page number
     const pageSpan = document.getElementById("page");
@@ -496,68 +457,6 @@ function updateSummaryTable(jsonData) {
     } else {
         pageSpan.innerHTML = "All summary results";
     }
-
-    // Get the host names from the IP addresses
-    const ipSet = [...new Set(ips)]; // Get unique IP addresses
-    if (geolocate) getGeoLocations(ipSet, signal);
-}
-
-// update blacklist cache from server
-function loadBlacklist() {
-    fetch("blacklist.php")
-        .then((response) => response.json())
-        .then((data) => {
-            blackList = data;
-            // console.log("loadBlacklist: " + JSON.stringify(blacklist));
-        });
-}
-
-// Function to send POST request to blacklist.php with a given IP address in the body of the POST
-function blacklistAdd(ip, lastTime, log = null) {
-    // convert lastTime (a CLF timestamp string) to Date object and then to SQL timestamp
-    const lastTimeDate = parseCLFDate(lastTime);
-    const lastTimeConv = lastTimeDate.toISOString().slice(0, 19).replace("T", " ");
-    console.log("blacklist: add " + ip + " as " + logType + " at " + lastTimeConv);
-    // update blacklist cache manually
-    blackList.push(ip);
-    // send the IP address to the server
-    const formData = new FormData();
-    formData.append('ip', ip);
-    formData.append('last_seen', lastTimeConv);
-    formData.append('log_type', logType);
-    if (log) formData.append('log', log);
-    fetch("blacklist.php", {
-        method: "POST",
-        body: formData,
-    })
-        .then((response) => response.text())
-        .then((data) => {
-            const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
-            blockButtons.forEach((button) => {
-                button.innerHTML = "unblock";
-                button.setAttribute("onclick", 'blacklistRemove(' + "'" + ip + "'" + ');');
-                button.classList.add("red");
-            });
-        });
-}
-
-// Function to send DELETE request to blocklist.php?ip=IP_ADDRESS
-function blacklistRemove(ip) {
-    console.log("blacklist: remove " + ip);
-    // update blacklist cache manually
-    blackList = blackList.filter((item) => item !== ip);
-    fetch("blacklist.php?ip=" + ip, {
-        method: "DELETE",
-    })
-        .then((response) => response.text())
-        .then((data) => {
-            const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
-            blockButtons.forEach((button) => {
-                button.innerHTML = "block";
-                button.setAttribute("onclick", 'blacklistAdd(' + "'" + ip + "'" + ');');
-                button.classList.remove("red");
-            });
-        });
 }
 
 // plot heatmap of log entries by hour and day, potentially including a search term
@@ -582,7 +481,7 @@ function plotHeatmap(searchTerm, plotLogType = null) {
     console.log("plotHeatmap: fetching " + heatmapURL);
     fetch(heatmapURL)
         .then((response) => response.json())
-        .then(jsonToHeatmap);
+        .then(buildHeatmap);
 
     // set interval to update the heatmap every mapWait minutes
     console.log("plotHeatmap: refresh time " + mapWait + " minutes");
@@ -592,7 +491,7 @@ function plotHeatmap(searchTerm, plotLogType = null) {
 }
 
 // Take JSON array of command log data and build SVG heatmap
-function jsonToHeatmap(jsonData) {
+function buildHeatmap(jsonData) {
     // Check if SVG element already exists and remove if so
     const svgElement = document.querySelector("svg");
     if (svgElement) {
@@ -688,7 +587,7 @@ function jsonToHeatmap(jsonData) {
         .range([0.1, 1]);
 
     // Create the tiles and make interactive
-    svg.selectAll()
+    let tiles = svg.selectAll()
         .data(processedData)
         .enter()
         .append("rect")
@@ -696,8 +595,10 @@ function jsonToHeatmap(jsonData) {
         .attr("y", (d) => yScale(d.hour))
         .attr("width", xScale.bandwidth() + 1) // create a gap between tiles
         .attr("height", yScale.bandwidth() + 1) // create a gap between tiles
-        .style("fill", (d) => colorScale(d.count))
-        .on("click", function (d) {
+        .style("fill", (d) => colorScale(d.count));
+
+    // Interactivity    
+    tiles.on("click", function (d) {
             // get the date and hour from the data
             const date = d.date;
             const hour = d.hour;
@@ -820,35 +721,6 @@ function jsonToHeatmap(jsonData) {
         .style("display", "flex")
         .style("justify-content", "center")
         .style("align-items", "center");
-}
-
-// take date of the form YYYY-MM-DD as one parameter, and the hour of the day as another parameter,
-// and return a search string for the beginning of the corresponding common timestamp.
-// example: buildSearch('2020-01-01', '12') would return '01/Jan/2020:12:'
-function buildTimestampSearch(date, hour) {
-    const monthnum = date.substring(5, 7);
-    // convert month number to month name
-    const monthnames = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-    ];
-    const month = monthnames[monthnum - 1];
-    const day = date.substring(8, 10);
-    const year = date.substring(0, 4);
-    // add leading zero to hour if necessary
-    const hourPad = hour.toString().padStart(2, "0");
-    const timestamp = day + "/" + month + "/" + year + ":" + hourPad + ":";
-    return timestamp;
 }
 
 // uiSearch is called when the search button is clicked by user
