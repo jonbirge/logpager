@@ -195,7 +195,46 @@ function searchLog(searchTerm, doSummary) {
         });
 }
 
-// Update table HTML from log array
+// sort table data in logLines by column
+function sortTable(column, isDate = false) {
+    // extract the given column from logLines, minus the header element
+    const columnData = logLines.slice(1).map((row) => row[column]);
+
+    // sort the column data, returning the indices of the sorted data
+    const indices = columnData.map((_, i) => i);
+    if (isDate) {
+        indices.sort((a, b) => {
+            if (parseCLFDate(columnData[a]) < parseCLFDate(columnData[b])) {
+                return 1;
+            } else if (parseCLFDate(columnData[a]) > parseCLFDate(columnData[b])) {
+                return -1;
+            }
+            return 0;
+        });
+    } else {
+        indices.sort((a, b) => {
+            if (columnData[a] < columnData[b]) {
+                return 1;
+            } else if (columnData[a] > columnData[b]) {
+                return -1;
+            }
+            return 0;
+        }
+        );
+    }
+
+    // apply the sorted indices to logLines
+    const sortedLogLines = [logLines[0]];
+    indices.forEach((i) => {
+        sortedLogLines.push(logLines[i + 1]);
+    });
+
+    // write the sorted data to the log div
+    logLines = sortedLogLines;
+    refreshTable();
+}
+
+// update table HTML from log array
 function refreshTable() {
     const logDiv = document.getElementById("log");
     const signal = controller.signal;
@@ -215,16 +254,22 @@ function refreshTable() {
         logDiv.innerHTML = table0;
     }
 
+    // utility function to create HTML link for sorting
+    function addSortLink(idx, name, isDate = false) {
+        return '<a class="header" href="#" onclick="sortTable(' +
+            idx + ', ' + isDate + '); return false;">' + name + "</a>";
+    }
+
     // write table headers from first row
     const headers = logLines[0];
     const headrow = document.getElementById("row-0");
-    let ageIndex = null;  // index of the "Age" header
+    let ageIndex = null;
     let row = "";
     for (let j = 0; j < headers.length; j++) {
         const headerName = headers[j];
         switch (headerName) {
             case "IP":
-                row += "<th>" + headers[j] + "</th>";
+                row += "<th>" + addSortLink(j, headerName) + "</th>";
                 if (geolocate) {
                     row += '<th class="hideable">Domain</th>';
                     row += '<th class="hideable">Organization</th>';
@@ -236,8 +281,10 @@ function refreshTable() {
                 break;
             case "Age":
                 ageIndex = j;
+                row += "<th>" + addSortLink(j, headerName, true) + "</th>";
+                break;
             default:
-                row += "<th>" + headerName + "</th>";
+                row += "<th>" + addSortLink(j, headerName) + "</th>";
         }
     }
     headrow.innerHTML = row;

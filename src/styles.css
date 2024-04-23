@@ -74,6 +74,11 @@ a {
     font-weight: 600;
 }
 
+/* White links for the header */
+a.header {
+    color: white;
+}
+
 /* Style the search span to have everything on one line and be right-justified */
 .search-header {
     align-items: center;
