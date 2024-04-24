@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.licenses=MIT
 
 # Install & configure nginx/PHP-FPM/SQL stack
 RUN apk --no-cache update && apk --no-cache upgrade
-RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
+# RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
 RUN apk add --no-cache nginx php83-fpm php83-mysqli
 RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
 
@@ -23,11 +23,6 @@ ENV SQL_DB=logpager
 
 # setuid root
 RUN chmod u+s /usr/bin/tcptraceroute /usr/bin/nmap
-
-# Copy test log files
-RUN mkdir -p /var/testlogs
-COPY ./test/logs/*.log /var/testlogs/
-RUN chown -R nginx:nginx /var/testlogs && cp /var/testlogs/* /
 
 # Copy the configuration files
 COPY conf/www.conf /etc/php83/php-fpm.d/www.conf
@@ -45,3 +40,4 @@ EXPOSE 80
 
 # Start
 CMD ["/entry.sh"]
+

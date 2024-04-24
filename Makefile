@@ -4,23 +4,24 @@ VERSION=1.8-dev
 DOCKER_HUB_USER=jonbirge
 
 # Derived variables
-FULL_IMAGE_NAME=$(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
+REL_IMAGE_NAME=$(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
+LATEST_IMAGE_NAME=$(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
 
 # Build the Docker image
 build:
-	docker build -t $(FULL_IMAGE_NAME) .
-	docker tag $(FULL_IMAGE_NAME) $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
+	docker build -t $(LATEST_IMAGE_NAME) .
 
 # No cache build (a clear abuse of 'make clean')
 clean:
-	docker build -t $(FULL_IMAGE_NAME) --no-cache .
+	docker build -t $(LATEST_IMAGE_NAME) --no-cache .
 
 # Push into the latest tag
 push: build
-	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
+	docker push $(LATEST_IMAGE_NAME)
 
 # Push into the latest tag and version tag
 release: push
+	docker tag $(LATEST_IMAGE_NAME) $(RELEASE_IMAGE_NAME)
 	docker push $(FULL_IMAGE_NAME)
 
 # Test image for development
@@ -34,15 +35,8 @@ up: test
 down:
 	- cd ./test/stack && ./down.sh
 
-# Run/stop test image
-run: stop test
-	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_test
-
-stop:
-	- docker stop $(IMAGE_NAME)_test
-	- docker rm $(IMAGE_NAME)_test
-
 # Convenience command to build
 all: build
 
 .PHONY: build clean test release stop run it all up down
+
