@@ -34,15 +34,8 @@ up: test
 down:
 	- cd ./test/stack && ./down.sh
 
-# Run/stop test image
-run: stop test
-	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_test
-
-stop:
-	- docker stop $(IMAGE_NAME)_test
-	- docker rm $(IMAGE_NAME)_test
-
 # Convenience command to build
 all: build
 
 .PHONY: build clean test release stop run it all up down
+

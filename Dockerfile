@@ -24,11 +24,6 @@ ENV SQL_DB=logpager
 # setuid root
 RUN chmod u+s /usr/bin/tcptraceroute /usr/bin/nmap
 
-# Copy test log files
-RUN mkdir -p /var/testlogs
-COPY ./test/logs/*.log /var/testlogs/
-RUN chown -R nginx:nginx /var/testlogs && cp /var/testlogs/* /
-
 # Copy the configuration files
 COPY conf/www.conf /etc/php83/php-fpm.d/www.conf
 COPY conf/default.conf /etc/nginx/http.d/default.conf
@@ -45,3 +40,4 @@ EXPOSE 80
 
 # Start
 CMD ["/entry.sh"]
+
