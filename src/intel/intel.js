@@ -172,15 +172,22 @@ function runTrace() {
 
 function runWhois() {
     const whoisDiv = document.getElementById("whois");
-    fetch("whois.php?ip=" + targetIP)
+    fetch("intel/whois.php?ip=" + targetIP)
         .then((response) => response.text())
         .then((data) => {
             // remove whois button
             document.getElementById("whois-button").innerHTML = "";
-            // remove comment lines from whois data
-            data = data.replace(/^#.*$/gm, "");
-            // remove all blank lines from whois data
-            data = data.replace(/^\s*[\r\n]/gm, "");
+
+            // look for the CIDR line and add a block button to the end of the line
+            let cidrIndex = data.indexOf("CIDR:");
+            if (cidrIndex !== -1) {
+                let cidrLine = data.substring(cidrIndex, data.indexOf("\n", cidrIndex));
+                let cidr = cidrLine.split(":")[1].trim();
+                let blockButton =
+                    `<button class='toggle-button tight red' onclick="blacklistAdd('${cidr}','cidr')">Block CIDR</button>`;
+                data = data.replace(cidrLine, cidrLine + " " + blockButton);
+            }
+
             // output to whois div
             whoisDiv.innerHTML = data;
         });

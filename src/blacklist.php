@@ -23,39 +23,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($conn->error) {
         die("SQL error: " . $conn->error);
     }
-
+    
     // Loop through each row in the 'blacklist' table and add the 'cidr' column to the array
     $blacklist = [];
     while ($row = $result->fetch_assoc()) {
         $blacklist[] = $row['cidr'];
     }
-
+    
     // Send the array as a JSON response
     echo json_encode($blacklist);
-
+    
 } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the IP address from the POST request body
     $ip = $_POST['ip'];
-
+    
     // Get the optional data from the POST request body
     $log_type = $_POST['log_type'];
     $log = $_POST['log'];
     $timestamp = $_POST['last_seen'];
-
+    
     // Check to see if IP address is empty
     if (empty($ip)) {
-        echo 'no IP address provided!';
-        exit();
+        die("no IP address provided!");
     }
 
     // Insert $ip and $log (if exists) into the 'blacklist' table
     $sql = "INSERT INTO $table (cidr, last_seen, log_type, log_line) VALUES ('$ip', '$timestamp', '$log_type', '$log')";
-    $conn->query($sql);
-    if ($conn->error) {
-        die("SQL error: " . $conn->error);
+    
+    try {
+        $conn->query($sql);
+        if ($conn->error) {
+            throw new Exception("SQL error: " . $conn->error);
+        }
+    } catch (Exception $e) {
+        $conn->close();
+        echo $e->getMessage();
+        die($e->getMessage());
     }
 
-    // Send a confirmation message
     echo $ip . ' added to blacklist';
 
 } else if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
@@ -66,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $sql = "DELETE FROM $table WHERE cidr = '$ip'";
     $conn->query($sql);
     if ($conn->error) {
+        $conn->close();
         die("SQL error: " . $conn->error);
     }
 

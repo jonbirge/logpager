@@ -13,7 +13,7 @@ header("Pragma: no-cache");
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="../styles.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
     <?php
     // get the target IP from the URL ip parameter. if it's not there use client ip
     if (!isset($_GET['ip'])) {
@@ -47,7 +47,7 @@ header("Pragma: no-cache");
         </table>
         <button class="toggle-button" onclick="runAll()">Execute all...</button>
 
-        <h2>Port scan</h2>
+        <h2>nmap scan</h2>
         <div id="scan-buttons">
             <button class="toggle-button green" onclick="runScan('quick')">Quick port scan</button>
             <button class="toggle-button green" onclick="runScan('deep')">Deep port scan</button>
@@ -56,7 +56,7 @@ header("Pragma: no-cache");
             <!-- This is where the scan will go -->
         </div>
 
-        <h2>Whois</h2>
+        <h2>whois</h2>
         <div id="whois-button">
             <button class="toggle-button green" onclick="runWhois()">Execute whois</button>
         </div>
@@ -64,7 +64,7 @@ header("Pragma: no-cache");
             <!-- This is where the whois will go -->
         </div>
 
-        <h2>TCP route trace</h2>
+        <h2>route trace</h2>
         <div id="trace-button">
             <button class="toggle-button green" onclick="runTrace()">Execute traceroute</button>
         </div>
@@ -72,7 +72,7 @@ header("Pragma: no-cache");
             <!-- This is where the traceroute will go -->
         </div>
 
-        <h2>Ping timing</h2>
+        <h2>ping stats</h2>
         <div id="ping-button">
             <button class="toggle-button green" onclick="runPing()">Ping target</button>
         </div>
@@ -81,7 +81,9 @@ header("Pragma: no-cache");
         </div>
     </div>
 
-    <script src="intel.js"></script>
+    <script src="timeutils.js"></script>
+    <script src="blacklist.js"></script>
+    <script src="intel/intel.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 
