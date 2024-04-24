@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.licenses=MIT
 
 # Install & configure nginx/PHP-FPM/SQL stack
 RUN apk --no-cache update && apk --no-cache upgrade
-RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
+# RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
 RUN apk add --no-cache nginx php83-fpm php83-mysqli
 RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
 
