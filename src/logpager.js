@@ -301,7 +301,7 @@ function refreshTable() {
                     const ip = logLines[i][j];
                     ips.push(ip);
                     // Add cell for IP address with link to search for ip address
-                    const srchlink = "?type=" + logType + "&search=ip:" + ip;
+                    const srchlink = "?type=" + logType + "&summary=false&search=ip:" + ip;
                     row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
                     row += '<nobr>';
                     // Create blacklist links
