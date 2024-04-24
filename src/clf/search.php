@@ -3,8 +3,8 @@
 function search($searchDict, $doSummary = true)
 {
     // Maximum number of items to return
-    $maxItems = 512;  // summary items
-    $maxSearchLines = 32000;  // matching lines
+    $maxItems = 1024;  // summary items
+    $maxSearchLines = 100000;  // matching lines
 
     // Path to the CLF log file
     $logFilePath = '/access.log';
@@ -30,7 +30,7 @@ function search($searchDict, $doSummary = true)
     if ($stat) {
         $grepSearch .= " -e $stat";
     }
-    $cmd = "grep -m $maxSearchLines $grepSearch $escFilePath | tac";
+    $cmd = "tac $escFilePath | grep -m $maxSearchLines $grepSearch";
 
     // execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
@@ -88,12 +88,12 @@ function search($searchDict, $doSummary = true)
     }
 
     // If $doSummary is true, summarize the log lines
-    if ($doSummary) { // return summary format
+    if ($doSummary) { // return summary 
         $searchLines = searchStats($logLines);
         // take the first $maxItems items
-        $searchLines = array_slice($searchLines, 0, $maxItems);
+        $searchLines = array_slice($searchLines, 0, $maxItems + 1);
         echo json_encode($searchLines);
-    } else { // return standard log format
+    } else { // return standard log 
         $searchLines = searchLines($logLines);
         echo json_encode([
             'page' => 0,

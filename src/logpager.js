@@ -4,8 +4,6 @@ const tileLabels = false; // show tile labels on heatmap?
 const fillToNow = true; // fill heatmap to current time?
 const heatmapRatio = 0.5; // width to height ratio of heatmap
 const maxDetailLength = 48; // truncation length of log details
-const maxSearchLength = 512; // truncation length of summary search results
-const maxLogLength = 1024; // truncation length of regular search results
 const maxGeoRequests = 30; // maximum number of IPs to externally geolocate at once
 const pollWait = 30; // seconds to wait between polling the server
 const mapWait = 15;  // minutes to wait between updating the heatmap (always)
@@ -239,8 +237,7 @@ function refreshTable() {
     const logDiv = document.getElementById("log");
     const signal = controller.signal;
 
-    // set dataLength to the minimum of data.length and maxLogLength
-    const dataLength = Math.min(logLines.length, maxLogLength);
+    const dataLength = logLines.length;
 
     // check to see if the table needs to be rebuilt
     if (dataLength != tableLength) {
@@ -378,7 +375,8 @@ function refreshTable() {
     if (geolocate) getGeoLocations(ipSet, signal);
 }
 
-// Take JSON array of common log data and write HTML table
+// take JSON array of common log data and write HTML table
+// TODO: consolidate all table updating into this function
 function updateTable(jsonData) {
     const logdata = JSON.parse(jsonData);
     const pageCount = parseInt(logdata.pageCount, 10);
@@ -429,12 +427,12 @@ function updateTable(jsonData) {
     window.history.replaceState({}, "", url);
 }
 
-// Take JSON array of search log data and write HTML table
+// take JSON array of search log data and write HTML table
 function updateSummaryTable(jsonData) {
     logLines = JSON.parse(jsonData);
     
     // set dataLength to the minimum of data.length and maxLogLength
-    const dataLength = Math.min(logLines.length, maxLogLength);
+    const dataLength = logLines.length;
 
     // go through the data and add up all the counts
     let total = 0;
@@ -452,11 +450,7 @@ function updateSummaryTable(jsonData) {
 
     // update the page number
     const pageSpan = document.getElementById("page");
-    if (dataLength > maxSearchLength) {
-        pageSpan.innerHTML = "first " + maxSearchLength + " summary results";
-    } else {
-        pageSpan.innerHTML = "All summary results";
-    }
+    pageSpan.innerHTML = "Summary search results";
 }
 
 // plot heatmap of log entries by hour and day, potentially including a search term
