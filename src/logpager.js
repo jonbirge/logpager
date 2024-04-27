@@ -21,11 +21,10 @@ let logType = params.get("type") !== null ? params.get("type") : "auth";  // "cl
 let tableLength = 0;  // used to decide when to reuse the table
 let logLines = [];  // cache of current displayed table data
 let geoCache = {};  // cache of geolocation data
-let blackList = [];  // cache of blacklisted IPs
 
 // start initial data fetches
-loadBlacklist(blackList);
 loadManifest();
+loadBlacklist();
 
 // create update interval
 updateClock();

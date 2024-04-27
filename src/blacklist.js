@@ -1,5 +1,8 @@
+// global cache
+let blackList = [];
+
 // update blacklist cache from server
-function loadBlacklist(blackListObject) {
+function loadBlacklist(blackListObject = blackList) {
     fetch("blacklist.php")
         .then((response) => response.json())
         .then((data) => {
@@ -24,9 +27,7 @@ function blacklistAdd(ip, type = "none", lastTime = null, log = null) {
     console.log("blacklist: add " + ip + " as " + type + " at " + lastTimeConv);
     
     // update global blacklist cache manually
-    if (typeof blackList !== 'undefined') {
-        blackList.push(ip);
-    }
+    blackList.push(ip);
     
     // send the IP address to the server
     const formData = new FormData();
@@ -56,9 +57,7 @@ function blacklistRemove(ip) {
     console.log("blacklist: remove " + ip);
 
     // update blacklist cache manually
-    if (blackList !== undefined) {
-        blackList = blackList.filter((item) => item !== ip);
-    }
+    blackList = blackList.filter((item) => item !== ip);
 
     // send the IP address to the server
     fetch("blacklist.php?ip=" + ip, {

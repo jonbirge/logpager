@@ -35,13 +35,30 @@ header("Pragma: no-cache");
                 <th>Property</th>
                 <th>Value</th>
             </tr>
-            <!-- query the ipinfo.io API for the target IP's information and put all data into a table -->
             <?php
+            // geo lookup
             $ipURL = "http://ip-api.com/json/$target_ip?fields=17563647";
             $ipinfo = file_get_contents($ipURL);
             $ipinfo = json_decode($ipinfo, true);
+            // strip the 'status', 'timezone', and 'query' fields
+            unset($ipinfo['status']);
+            unset($ipinfo['timezone']);
+            unset($ipinfo['query']);
+            // make table rows for each key-value pair
             foreach ($ipinfo as $key => $value) {
-                echo "<tr><td><b>$key</b></td><td>$value</td></tr>";
+                echo "<tr><td><b>$key</b></td><td>$value</td></tr>\n";
+            }
+            // cidr lookup
+            $whois = shell_exec("whois $target_ip");
+            // find all CIDR blocks in the whois output of the form xxx.xxx.xxx.xxx/xx
+            preg_match_all('/\b(?:\d{1,3}\.){3}\d{1,3}\/\d{1,2}\b/', $whois, $cidrs);
+            // print each CIDR block as a table row with a button next to the CIDR
+            foreach ($cidrs[0] as $cidr) {
+                //$blockFunction = "blacklistAdd('$cidr', 'cidr', null, 'whois'); toggleCIDRButtons('$cidr');";
+                $blockFunction = 'blacklistAdd("$cidr", "cidr", null, "whois")';
+                $blockButton = "<button id='block-$cidr' class='toggle-button tight red'" .
+                    " onclick='blacklistAdd(\"$cidr\", \"cidr\", null, \"whois\")'>block CIDR</button>";
+                echo "<tr><td><b>CIDR block</b></td><td>$cidr $blockButton</td></tr>";
             }
             ?>
         </table>
@@ -54,14 +71,6 @@ header("Pragma: no-cache");
         </div>
         <div id="scan" class="scan">
             <!-- This is where the scan will go -->
-        </div>
-
-        <h2>whois</h2>
-        <div id="whois-button">
-            <button class="toggle-button green" onclick="runWhois()">Execute whois</button>
-        </div>
-        <div id="whois" class="whois">
-            <!-- This is where the whois will go -->
         </div>
 
         <h2>route trace</h2>
@@ -79,6 +88,15 @@ header("Pragma: no-cache");
         <div id="ping-chart">
             <!-- This is where the chart will go -->
         </div>
+
+        <h2>whois</h2>
+        <div id="whois-button">
+            <button class="toggle-button green" onclick="runWhois()">Execute whois</button>
+        </div>
+        <div id="whois" class="whois">
+            <!-- This is where the whois will go -->
+        </div>
+
     </div>
 
     <script src="timeutils.js"></script>

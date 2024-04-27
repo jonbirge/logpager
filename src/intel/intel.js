@@ -1,6 +1,23 @@
 // global params
 let targetIP = document.body.dataset.ip;
 
+// function which takes a parameter (cidr) and toggles all buttons with id='block-(cidr)' between block and
+// unblock, also flipping the class between .red and .gray.
+function toggleBlockButtons(cidr) {
+    const blockButtons = document.querySelectorAll(`[id^="block-${cidr}"]`);
+    blockButtons.forEach((button) => {
+        if (button.innerHTML === "block") {
+            button.innerHTML = "unblock";
+            button.classList.add("red");
+            button.classList.remove("gray");
+        } else {
+            button.innerHTML = "block";
+            button.classList.remove("red");
+            button.classList.add("gray");
+        }
+    });
+}
+
 function runScan(mode) {
     const uniqueID = Math.random().toString(36).substr(2, 9);
     const scanDiv = document.getElementById('scan');
