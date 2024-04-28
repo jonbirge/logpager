@@ -235,7 +235,6 @@ function sortTable(column, isDate = false) {
 function refreshTable() {
     const logDiv = document.getElementById("log");
     const signal = controller.signal;
-
     const dataLength = logLines.length;
 
     // check to see if the table needs to be rebuilt
@@ -260,7 +259,9 @@ function refreshTable() {
     const headers = logLines[0];
     const headrow = document.getElementById("row-0");
     let ageIndex = null;
+    let detailIndex = null;
     let row = "";
+    console.log("headers: " + headers);
     for (let j = 0; j < headers.length; j++) {
         const headerName = headers[j];
         switch (headerName) {
@@ -273,6 +274,7 @@ function refreshTable() {
                 }
                 break;
             case "Details":
+                detailIndex = j;
                 row += '<th class="hideable">' + headerName + '</th>';
                 break;
             case "Age":
@@ -287,11 +289,17 @@ function refreshTable() {
 
     // write table rows from remaining rows
     let ips = [];
-    for (let i = 1; i < dataLength; i++) {
+    for (let i = 1; i < dataLength; i++) {  // iterate over rows
         const rowElement = document.getElementById("row-" + i);
         const rawTimestamp = logLines[i][ageIndex];
-        const clfStamp = dropTimezone(rawTimestamp);  // remove the timezone (assume UTC)
+        const clfStamp = dropTimezone(rawTimestamp); 
         const dateStamp = parseCLFDate(rawTimestamp);  // assume UTC
+        let logDetails;
+        if (detailIndex !== null) {
+            logDetails = logLines[i][detailIndex];
+        } else {
+            logDetails = "N/A";
+        }
         row = "";
         for (let j = 0; j < logLines[i].length; j++) {  // build row
             const headerName = headers[j];
@@ -306,8 +314,7 @@ function refreshTable() {
                         const blacklistID = `id="block-${ip}"`;
                         row += `<button ${blacklistID} class="toggle-button tight red" ${blacklistCall}">unblock</button>`;
                     } else {  // not blacklisted yet
-                        const logText = logLines[i][2];
-                        const blacklistCall = `onclick="blacklistAdd('${ip}','${logType}','${clfStamp}','${logText}');"`;
+                        const blacklistCall = `onclick="blacklistAdd('${ip}','${logType}','${clfStamp}','${logDetails}');"`;
                         const blacklistID = `id="block-${ip}"`;
                         row += `<button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block</button>`;
                     }

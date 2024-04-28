@@ -34,7 +34,9 @@ function blacklistAdd(ip, type = "none", lastTime = null, log = null) {
     formData.append('ip', ip);
     formData.append('last_seen', lastTimeConv);
     formData.append('log_type', type);
-    if (log !== null) formData.append('log', log);
+    if (log !== null) {
+        formData.append('log', log);
+    }
     fetch("blacklist.php", {
         method: "POST",
         body: formData,
