@@ -1,5 +1,52 @@
 // global params
-let targetIP = document.body.dataset.ip;
+const params = new URLSearchParams(window.location.search);
+const targetIP = params.get("ip");
+
+// initialize the page
+loadBlacklist();
+pullIntel();
+
+// function to pull geolocation and whois data from web services and display it
+// in the intel div in a table
+function pullIntel() {
+    const intelDiv = document.getElementById("intel");
+    fetch("intel/data.php?ip=" + targetIP)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            // generate table of the data object
+            // TODO: share blacklist button functionality in blacklist.js
+            let table = "<table>";
+            table += "<tr><th>Property</th><th>Value</th></tr>";
+            for (const [key, value] of Object.entries(data)) {
+                if (key === "cidr") {
+                    const cidr = value;
+                    table += `<tr><td>${key}</td><td>${cidr}`;
+                    if (blackList.includes(cidr)) {  // already blacklisted it
+                        const blacklistCall = `onclick="blacklistRemove('${cidr}');"`;
+                        const blacklistID = `id="block-${cidr}"`;
+                        table += ` <button ${blacklistID} class="toggle-button tight red" ${blacklistCall}">unblock</button>`;
+                    } else {  // not blacklisted yet
+                        const timeStamp = new Date();
+                        const blacklistCall = `onclick="blacklistAdd('${cidr}','cidr',null,'N/A');"`;
+                        const blacklistID = `id="block-${cidr}"`;
+                        table += ` <button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block</button>`;
+                    }
+                    table += "</td></tr>";
+                } else {
+                    table += `<tr><td>${key}</td><td>${value}</td></tr>`;
+                }
+            }
+            intelDiv.innerHTML = table;
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}
 
 function runScan(mode) {
     const uniqueID = Math.random().toString(36).substr(2, 9);
@@ -11,9 +58,9 @@ function runScan(mode) {
 
     let scanURL;
     if (mode === 'deep') {
-        scanURL = 'startscan.php?ip=' + targetIP + '&id=' + uniqueID + '&mode=deep';
+        scanURL = 'intel/startscan.php?ip=' + targetIP + '&id=' + uniqueID + '&mode=deep';
     } else {
-        scanURL = 'startscan.php?ip=' + targetIP + '&id=' + uniqueID + '&mode=quick';
+        scanURL = 'intel/startscan.php?ip=' + targetIP + '&id=' + uniqueID + '&mode=quick';
     }
     console.log("runScan: " + scanURL);
     scanButtonDiv.innerHTML = "<p><b>Starting port scan...</b></p>";
@@ -31,7 +78,7 @@ function runScan(mode) {
         waitCount++;
         scanButtonDiv.innerHTML = "<p><b>Running port scan" + ".".repeat(waitCount % 4) + "</b></p>";
 
-        fetch('pollscan.php?id=' + uniqueID)
+        fetch('intel/pollscan.php?id=' + uniqueID)
             .then(response => response.text())
             .then(data => {
                 // Parsing JSON data
@@ -50,7 +97,7 @@ function runScan(mode) {
 
                 if (scanDone) {
                     clearInterval(scanPollInterval);
-                    fetch('cleanscan.php?id=' + uniqueID);
+                    fetch('intel/cleanscan.php?id=' + uniqueID);
                     scanButtonDiv.innerHTML = initialButtons;
                 }
             });
@@ -90,7 +137,7 @@ function runPing() {
     });
 
     function pollPingServer() {
-        fetch('pollping.php?id=' + uniqueID)
+        fetch('intel/pollping.php?id=' + uniqueID)
             .then(response => response.text())
             .then(data => {
                 // Parsing JSON data
@@ -114,13 +161,13 @@ function runPing() {
 
                 if (pingDone) {
                     clearInterval(pingPollInterval);
-                    fetch('cleanping.php?id=' + uniqueID);
+                    fetch('intel/cleanping.php?id=' + uniqueID);
                     pingDiv.innerHTML = "<p><button class='toggle-button' onclick='runPing()'>Run ping again</button></p>";
                 }
             });
     }
 
-    fetch('startping.php?ip=' + targetIP + '&id=' + uniqueID)
+    fetch('intel/startping.php?ip=' + targetIP + '&id=' + uniqueID)
         .then(response => {
             pingDiv.innerHTML = "<p>Running ping...</p>";
             if (response.ok) {
@@ -143,21 +190,21 @@ function runTrace() {
         waitCount++;
         traceButtonDiv.innerHTML = "Running traceroute" + ".".repeat(waitCount % 4);
 
-        fetch('polltrace.php?id=' + uniqueID)
+        fetch('intel/polltrace.php?id=' + uniqueID)
             .then(response => response.text())
             .then(data => {
                 if (data.indexOf("END_OF_FILE") !== -1) {
                     clearInterval(tracePollInterval);
                     traceDiv.innerHTML = data;
                     traceButtonDiv.innerHTML = "<button class='toggle-button' onclick='runTrace()'>Run trace again</button>";
-                    fetch('cleantrace.php?id=' + uniqueID);
+                    fetch('intel/cleantrace.php?id=' + uniqueID);
                 } else {
                     traceDiv.innerHTML = data;
                 }
             });
     }
 
-    const traceURL = 'starttrace.php?ip=' + targetIP + '&id=' + uniqueID;
+    const traceURL = 'intel/starttrace.php?ip=' + targetIP + '&id=' + uniqueID;
     console.log(traceURL);
     fetch(traceURL)
         .then(response => {
@@ -172,15 +219,22 @@ function runTrace() {
 
 function runWhois() {
     const whoisDiv = document.getElementById("whois");
-    fetch("whois.php?ip=" + targetIP)
+    fetch("intel/whois.php?ip=" + targetIP)
         .then((response) => response.text())
         .then((data) => {
             // remove whois button
             document.getElementById("whois-button").innerHTML = "";
-            // remove comment lines from whois data
-            data = data.replace(/^#.*$/gm, "");
-            // remove all blank lines from whois data
-            data = data.replace(/^\s*[\r\n]/gm, "");
+
+            // look for the CIDR line and add a block button to the end of the line
+            let cidrIndex = data.indexOf("CIDR:");
+            if (cidrIndex !== -1) {
+                let cidrLine = data.substring(cidrIndex, data.indexOf("\n", cidrIndex));
+                let cidr = cidrLine.split(":")[1].trim();
+                let blockButton =
+                    `<button class='toggle-button tight red' onclick="blacklistAdd('${cidr}','cidr')">Block CIDR</button>`;
+                data = data.replace(cidrLine, cidrLine + " " + blockButton);
+            }
+
             // output to whois div
             whoisDiv.innerHTML = data;
         });

@@ -3,7 +3,7 @@ function dropTimezone(timestamp) {
     return timestamp.replace(/\s.*$/, "");
 }
 
-// create a Date object from a log timestamp of the form DD/Mon/YYYY:HH:MM:SS, assuming UTC timezone
+// create a Date object from a standard log timestamp of the form DD/Mon/YYYY:HH:MM:SS, assuming UTC timezone
 function parseCLFDate(clfstamp) {
     clfstamp = dropTimezone(clfstamp);  // remove the timezone (assume UTC)
     const parts = clfstamp.split(/[:/]/); // split on : and /

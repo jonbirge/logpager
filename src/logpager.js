@@ -21,11 +21,10 @@ let logType = params.get("type") !== null ? params.get("type") : "auth";  // "cl
 let tableLength = 0;  // used to decide when to reuse the table
 let logLines = [];  // cache of current displayed table data
 let geoCache = {};  // cache of geolocation data
-let blackList = [];  // cache of blacklisted IPs
 
 // start initial data fetches
-loadBlacklist(blackList);
 loadManifest();
+loadBlacklist();
 
 // create update interval
 updateClock();
@@ -236,7 +235,6 @@ function sortTable(column, isDate = false) {
 function refreshTable() {
     const logDiv = document.getElementById("log");
     const signal = controller.signal;
-
     const dataLength = logLines.length;
 
     // check to see if the table needs to be rebuilt
@@ -261,7 +259,9 @@ function refreshTable() {
     const headers = logLines[0];
     const headrow = document.getElementById("row-0");
     let ageIndex = null;
+    let detailIndex = null;
     let row = "";
+    console.log("headers: " + headers);
     for (let j = 0; j < headers.length; j++) {
         const headerName = headers[j];
         switch (headerName) {
@@ -274,6 +274,7 @@ function refreshTable() {
                 }
                 break;
             case "Details":
+                detailIndex = j;
                 row += '<th class="hideable">' + headerName + '</th>';
                 break;
             case "Age":
@@ -288,11 +289,17 @@ function refreshTable() {
 
     // write table rows from remaining rows
     let ips = [];
-    for (let i = 1; i < dataLength; i++) {
+    for (let i = 1; i < dataLength; i++) {  // iterate over rows
         const rowElement = document.getElementById("row-" + i);
         const rawTimestamp = logLines[i][ageIndex];
-        const clfStamp = dropTimezone(rawTimestamp);  // remove the timezone (assume UTC)
+        const clfStamp = dropTimezone(rawTimestamp); 
         const dateStamp = parseCLFDate(rawTimestamp);  // assume UTC
+        let logDetails;
+        if (detailIndex !== null) {
+            logDetails = logLines[i][detailIndex];
+        } else {
+            logDetails = "N/A";
+        }
         row = "";
         for (let j = 0; j < logLines[i].length; j++) {  // build row
             const headerName = headers[j];
@@ -300,71 +307,44 @@ function refreshTable() {
                 case "IP":
                     const ip = logLines[i][j];
                     ips.push(ip);
-                    // Add cell for IP address with link to search for ip address
-                    const srchlink = "?type=" + logType + "&summary=false&search=ip:" + ip;
-                    row += '<td><a href=' + srchlink + '>' + ip + '</a><br>';
-                    row += '<nobr>';
-                    // Create blacklist links
-                    if (blackList.includes(ip)) {
-                        const blacklistCall = 'onclick="blacklistRemove(' + "'" + ip + "'" + ');"';
-                        const blacklistid = 'id="block-' + ip + '"';
-                        row += '<button ' + blacklistid + 'class="toggle-button tight red" ' + blacklistCall + ">unblock</button>";
-                    } else {
-                        const logText = logLines[i][2];
-                        const blacklistCall =
-                            'onclick="blacklistAdd(' + "'" + ip + "'" +
-                            ",'" + clfStamp + "'" +
-                            ",'" + logText + "'" + ');"';
-                        const blacklistid = 'id="block-' + ip + '"';
-                        row += '<button ' + blacklistid + 'class="toggle-button tight" '
-                            + blacklistCall + ">block</button>";
-                    }
-                    // Create link string that opens a new tab with /intel/?ip=ip
-                    const traceLink = 'onclick="window.open(' + "'intel/?ip=" + ip + "'" + '); return false"';
-                    row += ' <button class="toggle-button tight" ' + traceLink + ">intel</button>";
-                    row += "</nobr></td>";
-                    // Add new cell for Host name after the first cell
+                    const srchlink = `?type=${logType}&summary=false&search=ip:${ip}`;
+                    row += `<td><a href=${srchlink}>${ip}</a><br><nobr>`;
+                    row += makeBlacklistButton(ip, logType, clfStamp, logDetails);
+                    const intelLink = `onclick="window.open('intel.php?ip=${ip}'); return false"`;
+                    row += ` <button class="toggle-button tight" ${intelLink}>intel</button></nobr></td>`;
                     if (geolocate) {
-                        const hostnameid = "hostname-" + ip;
-                        row += '<td class="hideable" id="' + hostnameid + '"></td>';
-                        const orgid = "org-" + ip;
-                        row += '<td class="hideable" id="' + orgid + '"></td>';
-                        const geoid = "geo-" + ip;
-                        row += '<td id="' + geoid + '"></td>';
+                        const hostnameid = `hostname-${ip}`;
+                        row += `<td class="hideable" id="${hostnameid}"></td>`;
+                        const orgid = `org-${ip}`;
+                        row += `<td class="hideable" id="${orgid}"></td>`;
+                        const geoid = `geo-${ip}`;
+                        row += `<td id="${geoid}"></td>`;
                     }
                     break;
                 case "Age":
                     const timediff = timeDiff(dateStamp, new Date());
                     const jsonDate = dateStamp.toJSON();
-                    row += '<td id=timestamp:' + jsonDate + '>';
-                    row += timediff + "</td>";
+                    row += `<td id=timestamp:${jsonDate}>${timediff}</td>`;
                     break;
                 case "Details":
-                    // request
                     const rawRequest = logLines[i][j];
-                    // truncate request to 32 characters
-                    const truncRequest =
-                        rawRequest.length > maxDetailLength
-                            ? rawRequest.substring(0, maxDetailLength) + "..."
-                            : rawRequest;
-                    row += '<td class="code hideable">' + truncRequest + "</td>";
+                    const truncRequest = rawRequest.length > maxDetailLength ? `${rawRequest.substring(0, maxDetailLength)}...` : rawRequest;
+                    row += `<td class="code hideable">${truncRequest}</td>`;
                     break;
                 case "Status":
-                    // common status handling
                     const greenStatus = ["200", "304", "OK"];
                     const redStatus = ["308", "400", "401", "403", "404", "500", "FAIL"];
                     const status = logLines[i][j];
                     if (greenStatus.includes(status)) {
-                        row += '<td class="green">' + status + "</td>";
+                        row += `<td class="green">${status}</td>`;
                     } else if (redStatus.includes(status)) {
-                        row += '<td class="red">' + status + "</td>";
+                        row += `<td class="red">${status}</td>`;
                     } else {
-                        row += '<td class="gray">' + status + "</td>";
+                        row += `<td class="gray">${status}</td>`;
                     }
                     break;
                 default:
-                    // anything else
-                    row += "<td>" + logLines[i][j] + "</td>";
+                    row += `<td>${logLines[i][j]}</td>`;
             }
         }
         rowElement.innerHTML = row;
@@ -376,7 +356,9 @@ function refreshTable() {
 }
 
 // take JSON array of common log data and write HTML table
-// TODO: consolidate all table updating into this function
+// TODO: consolidate all table updating into this function by having all table
+// data returned with both metadata (as in here) and the actual log table data,
+// adding a new metadata field to denote if the table data is search data.
 function updateTable(jsonData) {
     const logdata = JSON.parse(jsonData);
     const pageCount = parseInt(logdata.pageCount, 10);
