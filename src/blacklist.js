@@ -1,9 +1,8 @@
 // global cache
-// TODO: make this a private member of a blacklist controller object
 let blackList = [];
 
 // TODO: pull everything into this...
-// IP address checker utility class
+// IP blacklist utility class
 class IPChecker {
     constructor(list) {
         this.ipSet = new Set(); // Stores individual IPs for quick lookup
@@ -11,7 +10,7 @@ class IPChecker {
 
         // Initialize by iterating over each entry in the list
         list.forEach(item => {
-            if (item.includes('/')) {
+            if (this.isCIDR(item)) {
                 const [range, bits] = item.split('/');
                 const mask = -1 << (32 - parseInt(bits, 10)) >>> 0;
                 const base = this.ipToInt(range) & mask;
@@ -28,14 +27,19 @@ class IPChecker {
         return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
     }
 
+    // Utility function to check if an IP is a CIDR or not
+    isCIDR(ip) {
+        return ip.includes('/');
+    }
+
     // Function to check if an IP is directly in the list
-    isIPInList(ip) {
+    isInIPList(ip) {
         // Check if the IP is in the set of direct IPs
         return this.ipSet.has(ip);
     }
 
     // Function to check if an IP is in any CIDR block
-    isIPInCIDR(ip) {
+    isInCIDR(ip) {
         // Iterate over CIDR blocks to check if the IP is contained within them
         for (const cidr of this.cidrBlocks) {
             if (this.containsIP(cidr, ip)) return true;
@@ -44,10 +48,10 @@ class IPChecker {
     }
 
     // Function to check if an IP is either in the list or in a CIDR block
-    isIPAnywhere(ip) {
-        return this.isIPInList(ip) || this.isIPInCIDR(ip);
-    }
+    isAnywhere(ip) {
+        return this.isInIPList(ip) || this.isInCIDR(ip);
 
+    }
     // Helper function to check if a given IP matches a precomputed CIDR block
     containsIP(cidr, ip) {
         const ipNum = this.ipToInt(ip);
@@ -106,7 +110,6 @@ function blacklistAdd(ip, type, lastTime, log) {
 
 // Function to send DELETE request to blocklist.php?ip=IP_ADDRESS
 function blacklistRemove(ip, type, lastTime, log) {
-    // log it
     console.log("blacklist: remove " + ip);
 
     // update blacklist cache manually
@@ -118,6 +121,7 @@ function blacklistRemove(ip, type, lastTime, log) {
     })
         .then((response) => response.text())
         .then((data) => {
+            // consolue.log("blacklist: " + data);
             const blockButtons = document.querySelectorAll(`[id^="block-${ip}"]`);
             blockButtons.forEach((button) => {
                 button.outerHTML = makeBlacklistButton(ip, type, lastTime, log);
@@ -128,9 +132,9 @@ function blacklistRemove(ip, type, lastTime, log) {
 // Make blacklist button
 function makeBlacklistButton(ip, type = "none", lastTime = "", log = "N/A") {
     const checker = new IPChecker(blackList);
-    if (checker.isIPInCIDR(ip)) {
+    if (checker.isInCIDR(ip) && !checker.isCIDR(ip)) {  // regular ip covered by cidr block
         return `<button class="toggle-button tight disabled" disabled>cidr</button>`;
-    } else if (checker.isIPInList(ip)) {  // already blacklisted it
+    } else if (checker.isAnywhere(ip)) {  // already blacklisted it
         const blacklistCall =
             `onclick="blacklistRemove('${ip}','${type}','${lastTime}','${log}');"`;
         const blacklistID = `id="block-${ip}"`;
