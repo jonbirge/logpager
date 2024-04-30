@@ -309,15 +309,7 @@ function refreshTable() {
                     ips.push(ip);
                     const srchlink = `?type=${logType}&summary=false&search=ip:${ip}`;
                     row += `<td><a href=${srchlink}>${ip}</a><br><nobr>`;
-                    if (blackList.includes(ip)) {  // already blacklisted it
-                        const blacklistCall = `onclick="blacklistRemove('${ip}');"`;
-                        const blacklistID = `id="block-${ip}"`;
-                        row += `<button ${blacklistID} class="toggle-button tight red" ${blacklistCall}">unblock</button>`;
-                    } else {  // not blacklisted yet
-                        const blacklistCall = `onclick="blacklistAdd('${ip}','${logType}','${clfStamp}','${logDetails}');"`;
-                        const blacklistID = `id="block-${ip}"`;
-                        row += `<button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block</button>`;
-                    }
+                    row += makeBlacklistButton(ip, logType, clfStamp, logDetails);
                     const intelLink = `onclick="window.open('intel.php?ip=${ip}'); return false"`;
                     row += ` <button class="toggle-button tight" ${intelLink}>intel</button></nobr></td>`;
                     if (geolocate) {
@@ -364,7 +356,9 @@ function refreshTable() {
 }
 
 // take JSON array of common log data and write HTML table
-// TODO: consolidate all table updating into this function
+// TODO: consolidate all table updating into this function by having all table
+// data returned with both metadata (as in here) and the actual log table data,
+// adding a new metadata field to denote if the table data is search data.
 function updateTable(jsonData) {
     const logdata = JSON.parse(jsonData);
     const pageCount = parseInt(logdata.pageCount, 10);

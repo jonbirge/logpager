@@ -19,6 +19,7 @@ function pullIntel() {
         })
         .then((data) => {
             // generate table of the data object
+            // TODO: share blacklist button functionality in blacklist.js
             let table = "<table>";
             table += "<tr><th>Property</th><th>Value</th></tr>";
             for (const [key, value] of Object.entries(data)) {
@@ -28,12 +29,12 @@ function pullIntel() {
                     if (blackList.includes(cidr)) {  // already blacklisted it
                         const blacklistCall = `onclick="blacklistRemove('${cidr}');"`;
                         const blacklistID = `id="block-${cidr}"`;
-                        table += ` <button ${blacklistID} class="toggle-button tight red" ${blacklistCall}">unblock range</button>`;
+                        table += ` <button ${blacklistID} class="toggle-button tight red" ${blacklistCall}">unblock</button>`;
                     } else {  // not blacklisted yet
                         const timeStamp = new Date();
                         const blacklistCall = `onclick="blacklistAdd('${cidr}','cidr',null,'N/A');"`;
                         const blacklistID = `id="block-${cidr}"`;
-                        table += ` <button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block range</button>`;
+                        table += ` <button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block</button>`;
                     }
                     table += "</td></tr>";
                 } else {
@@ -45,25 +46,6 @@ function pullIntel() {
         .catch((error) => {
             console.error('Error:', error);
         });
-}
-
-
-// function which takes a parameter (cidr) and toggles all buttons with
-// id='block-(cidr)' between block and unblock, also flipping the class between
-// .red and .gray.
-function toggleBlockButtons(cidr) {
-    const blockButtons = document.querySelectorAll(`[id^="block-${cidr}"]`);
-    blockButtons.forEach((button) => {
-        if (button.innerHTML === "block") {
-            button.innerHTML = "unblock";
-            button.classList.add("red");
-            button.classList.remove("gray");
-        } else {
-            button.innerHTML = "block";
-            button.classList.remove("red");
-            button.classList.add("gray");
-        }
-    });
 }
 
 function runScan(mode) {
