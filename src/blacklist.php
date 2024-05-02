@@ -6,6 +6,7 @@ $user = getenv('SQL_USER');
 $pass = getenv('SQL_PASS');
 $db = getenv('SQL_DB');
 $table = 'ip_blacklist';
+$csv_file = '/blacklist.csv';
 
 // No caching allowed
 header("Cache-Control: no-cache, no-store, must-revalidate");
@@ -17,18 +18,7 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Get all rows from the 'blacklist' table
-    $sql = "SELECT * FROM $table";
-    $result = $conn->query($sql);
-    if ($conn->error) {
-        die("SQL error: " . $conn->error);
-    }
-    
-    // Loop through each row in the 'blacklist' table and add the 'cidr' column to the array
-    $blacklist = [];
-    while ($row = $result->fetch_assoc()) {
-        $blacklist[] = $row['cidr'];
-    }
+    $blacklist = read_sql($conn, $table);
     
     // Send the array as a JSON response
     echo json_encode($blacklist);
@@ -61,6 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         die($e->getMessage());
     }
 
+    // Write to CSV file
+    $blacklist = read_sql($conn, $table);
+    write_csv($blacklist, $csv_file);
+
     echo $ip . ' added to blacklist';
 
 } else if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
@@ -75,6 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         die("SQL error: " . $conn->error);
     }
 
+    // Write to CSV file
+    $blacklist = read_sql($conn, $table);
+    write_csv($blacklist, $csv_file);
+
     // Send a confirmation message
     echo $ip . ' removed from blacklist';
 
@@ -86,3 +84,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 // Close SQL connection
 $conn->close();
+
+
+// function to write all cidr values to a csv file
+function write_csv($blacklist, $csv_file) {
+    $file = fopen($csv_file, 'w');
+    foreach ($blacklist as $cidr) {
+        fputcsv($file, [$cidr]);
+    }
+    fclose($file);
+}
+
+// function to read all cidr values from SQL into array
+function read_sql($conn, $table) {
+    $sql = "SELECT * FROM $table";
+    $result = $conn->query($sql);
+    if ($conn->error) {
+        die("SQL error: " . $conn->error);
+    }
+    
+    $blacklist = [];
+    while ($row = $result->fetch_assoc()) {
+        $blacklist[] = $row['cidr'];
+    }
+
+    return $blacklist;
+}
