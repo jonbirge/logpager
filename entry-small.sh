@@ -10,13 +10,8 @@ echo "SQL_PASS: $SQL_PASS"
 echo "SQL_DB: $SQL_DB"
 
 # Wait for SQL...
-until mysql -h $SQL_HOST -u $SQL_USER -p$SQL_PASS -e 'SELECT 1' > /dev/null; do
-  echo "Waiting for MySQL..."
-  sleep 5
-done
-echo "Creating SQL database and tables, if needed..."
-mysql -h $SQL_HOST -u $SQL_USER -p$SQL_PASS < /db.sql   
-echo "SQL is ready. Continuing..."
+echo "Waiting for MySQL..."
+sleep 5
 
 # Start PHP-FPM
 echo "Starting php-fpm..."
