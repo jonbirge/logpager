@@ -1,5 +1,6 @@
 .env
 .vscode
+*.timestamp
 test/stack/db
 test/stack/certs
 test/stack/logs
