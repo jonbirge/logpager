@@ -225,16 +225,6 @@ function runWhois() {
             // remove whois button
             document.getElementById("whois-button").innerHTML = "";
 
-            // look for the CIDR line and add a block button to the end of the line
-            let cidrIndex = data.indexOf("CIDR:");
-            if (cidrIndex !== -1) {
-                let cidrLine = data.substring(cidrIndex, data.indexOf("\n", cidrIndex));
-                let cidr = cidrLine.split(":")[1].trim();
-                let blockButton =
-                    `<button class='toggle-button tight red' onclick="blacklistAdd('${cidr}','cidr')">Block CIDR</button>`;
-                data = data.replace(cidrLine, cidrLine + " " + blockButton);
-            }
-
             // output to whois div
             whoisDiv.innerHTML = data;
         });

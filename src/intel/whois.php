@@ -24,3 +24,4 @@ $whois = preg_replace('/^\s*[\r\n]/m', '', $whois);
 echo "<pre>";
 echo $whois;
 echo "</pre>";
+

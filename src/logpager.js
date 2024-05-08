@@ -261,7 +261,6 @@ function refreshTable() {
     let ageIndex = null;
     let detailIndex = null;
     let row = "";
-    console.log("headers: " + headers);
     for (let j = 0; j < headers.length; j++) {
         const headerName = headers[j];
         switch (headerName) {
