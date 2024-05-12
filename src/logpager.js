@@ -66,12 +66,12 @@ function loadManifest() {
             const haveAuth = data.includes("auth.log");
             if (!haveCLF) {
                 document.getElementById("clftab").style.display = 'none';
-                logType = "auth";  // because clf is default
             } else {
                 document.getElementById("clftab").style.display = '';
             }
             if (!haveAuth) {
                 document.getElementById("authtab").style.display = 'none';
+                logType = "clf";  // because auth is default
             } else {
                 document.getElementById("authtab").style.display = '';
             }
