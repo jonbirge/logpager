@@ -7,6 +7,7 @@ $pass = getenv('SQL_PASS');
 $db = getenv('SQL_DB');
 $table = 'ip_blacklist';
 $csv_file = '/blacklist.csv';
+$yml_file = '/blacklist.yml';
 
 // No caching allowed
 header("Cache-Control: no-cache, no-store, must-revalidate");
@@ -54,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Write to CSV file
     $blacklist = read_sql($conn, $table);
     write_csv($blacklist, $csv_file);
+    write_yml($blacklist, $yml_file);
 
     echo $ip . ' added to blacklist';
 
@@ -69,9 +71,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         die("SQL error: " . $conn->error);
     }
 
-    // Write to CSV file
+    // Write to files
     $blacklist = read_sql($conn, $table);
     write_csv($blacklist, $csv_file);
+    write_yml($blacklist, $yml_file);
 
     // Send a confirmation message
     echo $ip . ' removed from blacklist';
@@ -91,6 +94,30 @@ function write_csv($blacklist, $csv_file) {
     $file = fopen($csv_file, 'w');
     foreach ($blacklist as $cidr) {
         fputcsv($file, [$cidr]);
+    }
+    fclose($file);
+}
+
+// function to write all ip/cidr values to a yml file suitable for use with traefik's denyip plugin middleware with the following examples format:
+// http:
+//   middlewares:
+//     blacklist:
+//     plugin:
+//       denyip:
+//         ipDenyList:
+//         - 101.126.30.32
+//         - 101.126.31.182
+//         - 102.129.232.53
+function write_yml($blacklist, $yml_file) {
+    $file = fopen($yml_file, 'w');
+    fwrite($file, "http:\n");
+    fwrite($file, "  middlewares:\n");
+    fwrite($file, "    blacklist:\n");
+    fwrite($file, "      plugin:\n");
+    fwrite($file, "        denyip:\n");
+    fwrite($file, "          ipDenyList:\n");
+    foreach ($blacklist as $cidr) {
+        fwrite($file, "          - $cidr\n");
     }
     fclose($file);
 }

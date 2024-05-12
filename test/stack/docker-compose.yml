@@ -11,6 +11,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik.yml:/etc/traefik.yml:ro
+      - ./traefik:/etc/traefik
       - ./logs/:/logs/:rw
     depends_on:
       - logpager
@@ -28,10 +29,9 @@ services:
       - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
-      - ./logs/access.log:/access.log:ro
-      # - /var/log/auth.log:/auth.log:ro  # confirm this is safe to expose
-      - ../logs/auth.log:/auth.log:ro  # for testing of auth.log
-      - ../../src:/var/www:ro  # for live development only
+      # - ../logs/auth.log:/auth.log:ro  # fake auth logs for testing
+      - ./logs/access.log:/access.log:ro  # actual logs from this stack
+      - ../../src:/var/www:ro  # for live development (comment out to run from image)
     depends_on:
       - db
 
@@ -48,6 +48,7 @@ services:
     restart: always
     labels:
       - "traefik.http.routers.www.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.www.middlewares=blacklist@file"
     volumes:
       - ./www:/usr/share/nginx/html:rw
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
@@ -65,4 +66,3 @@ services:
 
 volumes:
   dbdata:
-
