@@ -4,6 +4,9 @@ accesslog:
   filePath: "/logs/access.log"
 
 providers:
+  file:
+    directory: /etc/traefik
+    watch: true
   docker:
     exposedByDefault: true
 
@@ -13,19 +16,9 @@ api:
 entryPoints:
   web:
     address: ":80"
-#   http:
-#     redirections:
-#       entryPoint:
-#         to: websecure
-#         scheme: https
-#         permanent: true
-# websecure:
-#   address: ":443"
 
-# certificatesResolvers:
-#   stackresolver:
-#     acme:
-#       storage: "/letsencrypt/acme.json"
-#       tlsChallenge: true
-#       httpChallenge:
-#         entryPoint: websecure
+experimental:
+  plugins:
+    denyip:
+      modulename: github.com/kevtainer/denyip
+      version: v1.0.0
