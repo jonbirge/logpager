@@ -125,7 +125,7 @@ function pollLog() {
     // update page to show loading...
     const statusDiv = document.getElementById("status");
     statusDiv.innerHTML = "<b>Loading...</b>";
-
+ 
     // get the log from the server
     fetch("logtail.php?type=" + logType + "&page=" + page)
         .then((response) => response.text())
@@ -354,6 +354,18 @@ function refreshTable() {
     if (geolocate) getGeoLocations(ipSet, signal);
 }
 
+// function to enable or disable a set of buttons
+function toggleButtons(buttons, enable) {
+    buttons.forEach((button) => {
+        button.disabled = !enable;
+        if (enable) {
+            button.classList.remove("disabled");
+        } else {
+            button.classList.add("disabled");
+        }
+    });
+}
+
 // take JSON array of common log data and write HTML table
 // TODO: consolidate all table updating into this function by having all table
 // data returned with both metadata (as in here) and the actual log table data,
@@ -377,31 +389,23 @@ function updateTable(jsonData) {
     refreshTable();
 
     // handle case where we're at the last page
-    // TODO: or first page...
     const nextButtons = document.querySelectorAll('[id^="next-"]');
-    if (page >= pageCount) {
-        nextButtons.forEach((button) => {
-            button.disabled = true;
-            button.classList.add("disabled");
-        });
-    } else {
-        nextButtons.forEach((button) => {
-            button.disabled = false;
-            button.classList.remove("disabled");
-        });
-    }
+    toggleButtons(nextButtons, !(page >= pageCount));
     
     // update the page number and URL
     const url = new URL(window.location.href);
     const pageSpan = document.getElementById("page");
+    const prevButtons = document.querySelectorAll('[id^="prev-"]');
     if (page == 0) {
-        if (pageCount == 0) {
-            pageSpan.innerHTML = "All results";
-        } else {
-            pageSpan.innerHTML = "Latest of " + pageCount + " pages";
+        toggleButtons(prevButtons, false);
+        if (pageCount == 0) {  // everything fits on one page
+            pageSpan.innerHTML = "All results";            
+        } else {  // multiple pages
+            pageSpan.innerHTML = "Latest page of " + pageCount;
             url.searchParams.set("page", 0);
         }
     } else {
+        toggleButtons(prevButtons, true);
         pageSpan.innerHTML = "Page " + page + " of " + pageCount;
         url.searchParams.set("page", page);
     }
