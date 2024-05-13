@@ -6,7 +6,7 @@ const heatmapRatio = 0.5; // width to height ratio of heatmap
 const maxDetailLength = 48; // truncation length of log details
 const maxGeoRequests = 30; // maximum number of IPs to externally geolocate at once
 const pollWait = 30; // seconds to wait between polling the server
-const mapWait = 15;  // minutes to wait between updating the heatmap (always)
+const mapWait = 15; // minutes to wait between updating the heatmap (always)
 
 // global variables
 let params = new URLSearchParams(window.location.search);
@@ -16,11 +16,11 @@ let heatmapTimeout;
 let controller;
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
-let summary = params.get("summary");  // applies to search
-let logType = params.get("type") !== null ? params.get("type") : "auth";  // "clf" or "auth"
-let tableLength = 0;  // used to decide when to reuse the table
-let logLines = [];  // cache of current displayed table data
-let geoCache = {};  // cache of geolocation data
+let summary = params.get("summary"); // applies to search
+let logType = params.get("type") !== null ? params.get("type") : "auth"; // "clf" or "auth"
+let tableLength = 0; // used to decide when to reuse the table
+let logLines = []; // cache of current displayed table data
+let geoCache = {}; // cache of geolocation data
 
 // start initial data fetches
 loadManifest();
@@ -31,7 +31,8 @@ updateClock();
 setInterval(updateClock, 1000);
 
 // decide what to do on page load
-if (search !== null) {  // search beats page
+if (search !== null) {
+    // search beats page
     console.log("page load: searching for " + search + ", summary: " + summary);
     let doSummary = !(summary === "false");
     window.onload = doSearch(search, doSummary);
@@ -65,15 +66,15 @@ function loadManifest() {
             const haveCLF = data.includes("access.log");
             const haveAuth = data.includes("auth.log");
             if (!haveCLF) {
-                document.getElementById("clftab").style.display = 'none';
+                document.getElementById("clftab").style.display = "none";
             } else {
-                document.getElementById("clftab").style.display = '';
+                document.getElementById("clftab").style.display = "";
             }
             if (!haveAuth) {
-                document.getElementById("authtab").style.display = 'none';
-                logType = "clf";  // because auth is default
+                document.getElementById("authtab").style.display = "none";
+                logType = "clf"; // because auth is default
             } else {
-                document.getElementById("authtab").style.display = '';
+                document.getElementById("authtab").style.display = "";
             }
             // highlight the current log type
             if (logType == "clf") {
@@ -125,7 +126,7 @@ function pollLog() {
     // update page to show loading...
     const statusDiv = document.getElementById("status");
     statusDiv.innerHTML = "<b>Loading...</b>";
- 
+
     // get the log from the server
     fetch("logtail.php?type=" + logType + "&page=" + page)
         .then((response) => response.text())
@@ -174,13 +175,20 @@ function searchLog(searchTerm, doSummary) {
 
     // run the search on the server
     let summaryKey = doSummary ? "true" : "false";
-    fetch("logsearch.php?type=" + logType + "&search=" + searchTerm + "&summary=" + summaryKey)
+    fetch(
+        "logsearch.php?type=" +
+            logType +
+            "&search=" +
+            searchTerm +
+            "&summary=" +
+            summaryKey
+    )
         .then((response) => response.text())
         .then((data) => {
             // write the search results to the log div
             let dataLength;
             if (summary == null || summary === "true") {
-                dataLength = JSON.parse(data).length - 1;  // don't count header row
+                dataLength = JSON.parse(data).length - 1; // don't count header row
                 console.log("searchLog: summary table");
                 updateSummaryTable(data);
             } else {
@@ -203,7 +211,9 @@ function sortTable(column, isDate = false) {
         indices.sort((a, b) => {
             if (parseCLFDate(columnData[a]) < parseCLFDate(columnData[b])) {
                 return 1;
-            } else if (parseCLFDate(columnData[a]) > parseCLFDate(columnData[b])) {
+            } else if (
+                parseCLFDate(columnData[a]) > parseCLFDate(columnData[b])
+            ) {
                 return -1;
             }
             return 0;
@@ -216,8 +226,7 @@ function sortTable(column, isDate = false) {
                 return -1;
             }
             return 0;
-        }
-        );
+        });
     }
 
     // apply the sorted indices to logLines
@@ -251,8 +260,15 @@ function refreshTable() {
 
     // utility function to create HTML link for sorting
     function addSortLink(idx, name, isDate = false) {
-        return '<a class="header" href="#" onclick="sortTable(' +
-            idx + ', ' + isDate + '); return false;">' + name + "</a>";
+        return (
+            '<a class="header" href="#" onclick="sortTable(' +
+            idx +
+            ", " +
+            isDate +
+            '); return false;">' +
+            name +
+            "</a>"
+        );
     }
 
     // write table headers from first row
@@ -269,12 +285,12 @@ function refreshTable() {
                 if (geolocate) {
                     row += '<th class="hideable">Domain</th>';
                     row += '<th class="hideable">Organization</th>';
-                    row += '<th>Geolocation</th>';
+                    row += "<th>Geolocation</th>";
                 }
                 break;
             case "Details":
                 detailIndex = j;
-                row += '<th class="hideable">' + headerName + '</th>';
+                row += '<th class="hideable">' + headerName + "</th>";
                 break;
             case "Age":
                 ageIndex = j;
@@ -288,11 +304,12 @@ function refreshTable() {
 
     // write table rows from remaining rows
     let ips = [];
-    for (let i = 1; i < dataLength; i++) {  // iterate over rows
+    for (let i = 1; i < dataLength; i++) {
+        // iterate over rows
         const rowElement = document.getElementById("row-" + i);
         const rawTimestamp = logLines[i][ageIndex];
-        const clfStamp = dropTimezone(rawTimestamp); 
-        const dateStamp = parseCLFDate(rawTimestamp);  // assume UTC
+        const clfStamp = dropTimezone(rawTimestamp);
+        const dateStamp = parseCLFDate(rawTimestamp); // assume UTC
         let logDetails;
         if (detailIndex !== null) {
             logDetails = logLines[i][detailIndex];
@@ -300,7 +317,8 @@ function refreshTable() {
             logDetails = "N/A";
         }
         row = "";
-        for (let j = 0; j < logLines[i].length; j++) {  // build row
+        for (let j = 0; j < logLines[i].length; j++) {
+            // build row
             const headerName = headers[j];
             switch (headerName) {
                 case "IP":
@@ -308,7 +326,12 @@ function refreshTable() {
                     ips.push(ip);
                     const srchlink = `?type=${logType}&summary=false&search=ip:${ip}`;
                     row += `<td><a href=${srchlink}>${ip}</a><br><nobr>`;
-                    row += makeBlacklistButton(ip, logType, clfStamp, logDetails);
+                    row += makeBlacklistButton(
+                        ip,
+                        logType,
+                        clfStamp,
+                        logDetails
+                    );
                     const intelLink = `onclick="window.open('intel.php?ip=${ip}'); return false"`;
                     row += ` <button class="toggle-button tight" ${intelLink}>intel</button></nobr></td>`;
                     if (geolocate) {
@@ -327,12 +350,23 @@ function refreshTable() {
                     break;
                 case "Details":
                     const rawRequest = logLines[i][j];
-                    const truncRequest = rawRequest.length > maxDetailLength ? `${rawRequest.substring(0, maxDetailLength)}...` : rawRequest;
+                    const truncRequest =
+                        rawRequest.length > maxDetailLength
+                            ? `${rawRequest.substring(0, maxDetailLength)}...`
+                            : rawRequest;
                     row += `<td class="code hideable">${truncRequest}</td>`;
                     break;
                 case "Status":
                     const greenStatus = ["200", "304", "OK"];
-                    const redStatus = ["308", "400", "401", "403", "404", "500", "FAIL"];
+                    const redStatus = [
+                        "308",
+                        "400",
+                        "401",
+                        "403",
+                        "404",
+                        "500",
+                        "FAIL",
+                    ];
                     const status = logLines[i][j];
                     if (greenStatus.includes(status)) {
                         row += `<td class="green">${status}</td>`;
@@ -380,7 +414,8 @@ function updateTable(jsonData) {
     // report the number of results in the status div
     const searchStatus = document.getElementById("status");
     if (logdata.search !== undefined) {
-        searchStatus.innerHTML = "<b>Found " + lineCount + " matching log entries</b>";
+        searchStatus.innerHTML =
+            "<b>Found " + lineCount + " matching log entries</b>";
     } else {
         searchStatus.innerHTML = "<b>Paging " + lineCount + " log entries</b>";
     }
@@ -391,16 +426,18 @@ function updateTable(jsonData) {
     // handle case where we're at the last page
     const nextButtons = document.querySelectorAll('[id^="next-"]');
     toggleButtons(nextButtons, !(page >= pageCount));
-    
+
     // update the page number and URL
     const url = new URL(window.location.href);
     const pageSpan = document.getElementById("page");
     const prevButtons = document.querySelectorAll('[id^="prev-"]');
     if (page == 0) {
         toggleButtons(prevButtons, false);
-        if (pageCount == 0) {  // everything fits on one page
-            pageSpan.innerHTML = "All results";            
-        } else {  // multiple pages
+        if (pageCount == 0) {
+            // everything fits on one page
+            pageSpan.innerHTML = "All results";
+        } else {
+            // multiple pages
             pageSpan.innerHTML = "Latest page of " + pageCount;
             url.searchParams.set("page", 0);
         }
@@ -415,7 +452,7 @@ function updateTable(jsonData) {
 // take JSON array of search log data and write HTML table
 function updateSummaryTable(jsonData) {
     logLines = JSON.parse(jsonData);
-    
+
     // set dataLength to the minimum of data.length and maxLogLength
     const dataLength = logLines.length;
 
@@ -427,8 +464,12 @@ function updateSummaryTable(jsonData) {
 
     // report the number of results in the status div
     const searchStatus = document.getElementById("status");
-    searchStatus.innerHTML = "<b>Found " + (dataLength - 1) + " IP addresses from " +
-        total + " matching log entries</b>";
+    searchStatus.innerHTML =
+        "<b>Found " +
+        (dataLength - 1) +
+        " IP addresses from " +
+        total +
+        " matching log entries</b>";
 
     // write HTML from data...
     refreshTable();
@@ -464,9 +505,9 @@ function plotHeatmap(searchTerm, plotLogType = null) {
 
     // set interval to update the heatmap every mapWait minutes
     console.log("plotHeatmap: refresh time " + mapWait + " minutes");
-    heatmapTimeout = setTimeout(
-        () => {plotHeatmap(searchTerm, plotLogType)},
-        mapWait * 60 * 1000);
+    heatmapTimeout = setTimeout(() => {
+        plotHeatmap(searchTerm, plotLogType);
+    }, mapWait * 60 * 1000);
 }
 
 // Take JSON array of command log data and build SVG heatmap
@@ -499,7 +540,11 @@ function buildHeatmap(jsonData) {
 
     // Create an array of Date objects for every hour between earliestDate and latestDate
     let processedData = [];
-    for (let thedate = new Date(earliestDate); thedate < latestDate; thedate.setHours(thedate.getHours() + 1)) {
+    for (
+        let thedate = new Date(earliestDate);
+        thedate < latestDate;
+        thedate.setHours(thedate.getHours() + 1)
+    ) {
         const dayStr = thedate.toISOString().slice(0, 10);
         const hourStr = thedate.toISOString().slice(11, 13);
         let count;
@@ -516,20 +561,17 @@ function buildHeatmap(jsonData) {
     }
 
     // Get all unique dates from processedData
-    const allDates = [...new Set(processedData.map(d => d.date))];
+    const allDates = [...new Set(processedData.map((d) => d.date))];
 
     // Set dimensions for the heatmap
     const cellSize = 10; // size of each tile
     const ratio = heatmapRatio; // width to height ratio
     const margin = { top: 0, right: 50, bottom: 50, left: 50 };
     const width = ratio * allDates.length * cellSize;
-    const height = 24 * cellSize;  // 24 hours
+    const height = 24 * cellSize; // 24 hours
 
     // Creating scales for date axes
-    const xScale = d3
-        .scaleBand()
-        .domain(allDates)
-        .range([0, width]);
+    const xScale = d3.scaleBand().domain(allDates).range([0, width]);
 
     // Create array of hour label strings with leading zeros
     const hours = [];
@@ -538,17 +580,15 @@ function buildHeatmap(jsonData) {
     }
 
     // Create d3 scale for hour axis as string categories from hours array
-    const yScale = d3
-        .scaleBand()
-        .domain(hours)
-        .range([0, height]);
+    const yScale = d3.scaleBand().domain(hours).range([0, height]);
 
     // Create SVG element
     const svg = d3
         .select("#heatmap")
         .append("svg")
         .attr("width", "100%") // Set width to 100%
-        .attr("viewBox",
+        .attr(
+            "viewBox",
             `${-margin.left} 0 ${width + margin.right + margin.left + 25}
             ${height + margin.bottom + margin.top}`
         ) // viewBox
@@ -566,7 +606,8 @@ function buildHeatmap(jsonData) {
         .range([0.1, 1]);
 
     // Create the tiles and make interactive
-    let tiles = svg.selectAll()
+    let tiles = svg
+        .selectAll()
         .data(processedData)
         .enter()
         .append("rect")
@@ -576,21 +617,21 @@ function buildHeatmap(jsonData) {
         .attr("height", yScale.bandwidth() + 1) // create a gap between tiles
         .style("fill", (d) => colorScale(d.count));
 
-    // Interactivity    
+    // Interactivity
     tiles.on("click", function (d) {
-            // get the date and hour from the data
-            const date = d.date;
-            const hour = d.hour;
-            // build a partial date and time string for search
-            const partial = date + " " + hour + ":";
-            const searchTerm = "date:" + buildTimestampSearch(date, hour);
-            console.log("plotHeatmap: searching for " + searchTerm);
-            // update the search box
-            const searchInput = document.getElementById("search-input");
-            searchInput.value = searchTerm;
-            // run the search
-            handleSearchForm();
-        });
+        // get the date and hour from the data
+        const date = d.date;
+        const hour = d.hour;
+        // build a partial date and time string for search
+        const partial = date + " " + hour + ":";
+        const searchTerm = "date:" + buildTimestampSearch(date, hour);
+        console.log("plotHeatmap: searching for " + searchTerm);
+        // update the search box
+        const searchInput = document.getElementById("search-input");
+        searchInput.value = searchTerm;
+        // run the search
+        handleSearchForm();
+    });
 
     // Add legend
     const legendWidth = 13;
@@ -606,13 +647,15 @@ function buildHeatmap(jsonData) {
         });
 
     // Add rectangles to the legend elements
-    legend.append("rect")
+    legend
+        .append("rect")
         .attr("width", legendWidth)
         .attr("height", legendWidth)
         .style("fill", colorScale);
 
     // Add text to the legend elements
-    legend.append("text")
+    legend
+        .append("text")
         .attr("x", 24)
         .attr("y", 12)
         .text((d) => d)
@@ -633,9 +676,8 @@ function buildHeatmap(jsonData) {
             .attr("text-anchor", "middle")
             .style("pointer-events", "none")
             .style("opacity", "0.75");
-    }
-    else  // add tooltips to each tile
-    {
+    } // add tooltips to each tile
+    else {
         svg.selectAll("rect")
             .data(processedData)
             .append("title")
@@ -659,8 +701,11 @@ function buildHeatmap(jsonData) {
     // Add Y-axis
     svg.append("g")
         .call(
-            d3.axisLeft(yScale)
-                .tickValues(yScale.domain().filter(function (d, i) { return !(i % 2); }))
+            d3.axisLeft(yScale).tickValues(
+                yScale.domain().filter(function (d, i) {
+                    return !(i % 2);
+                })
+            )
         )
         .selectAll("text")
         .style("font-family", "DM Sans, sans-serif")
@@ -813,7 +858,9 @@ function getGeoLocations(ips, signal) {
                     console.log("geo: bad data from server");
                 } else {
                     cachedips = Object.keys(geodata);
-                    console.log("got " + cachedips.length + " hit(s) from server cache")
+                    console.log(
+                        "got " + cachedips.length + " hit(s) from server cache"
+                    );
                     for (let ip of cachedips) {
                         updateGeoLocation(geodata[ip], ip);
                         ips = ips.filter((value) => value !== ip);
@@ -827,31 +874,28 @@ function getGeoLocations(ips, signal) {
             })
             .catch((error) => {
                 console.log("geo fetch error:", error);
-            }
-        );
+            });
     }
-    
+
     // function to update geo location for given ip in all matching cells
     function updateGeoLocation(data, ip) {
         // Get all cells with id of the form geo-ipAddress
-        const geoCells = document.querySelectorAll(
-            '[id^="geo-' + ip + '"]'
-        );
+        const geoCells = document.querySelectorAll('[id^="geo-' + ip + '"]');
         const hostnameCells = document.querySelectorAll(
             '[id^="hostname-' + ip + '"]'
         );
-        const orgCells = document.querySelectorAll(
-            '[id^="org-' + ip + '"]'
-        );
+        const orgCells = document.querySelectorAll('[id^="org-' + ip + '"]');
         if (data.status !== undefined) {
             if (data.status != "fail") {
                 // set each cell in geoCells to data
                 geoCells.forEach((cell) => {
                     cell.innerHTML =
-                        data.city + ", " +
-                        data.region + ", " +
+                        data.city +
+                        ", " +
+                        data.region +
+                        ", " +
                         data.countryCode;
-                })
+                });
                 // get rDNS and set hostname
                 let hostname;
                 if (data.reverse === "" || data.reverse === undefined) {
@@ -859,7 +903,8 @@ function getGeoLocations(ips, signal) {
                 } else {
                     // extract domain.tld from reverse DNS entry
                     const parts = data.reverse.split(".");
-                    hostname = parts[parts.length - 2] + "." + parts[parts.length - 1];
+                    hostname =
+                        parts[parts.length - 2] + "." + parts[parts.length - 1];
                 }
                 // set each cell in hostnameCells to hostname
                 hostnameCells.forEach((cell) => {
@@ -877,7 +922,8 @@ function getGeoLocations(ips, signal) {
                 orgCells.forEach((cell) => {
                     cell.innerHTML = orgname;
                 });
-            } else { // we have a private address
+            } else {
+                // we have a private address
                 geoCells.forEach((cell) => {
                     cell.innerHTML = "local";
                 });
@@ -888,7 +934,8 @@ function getGeoLocations(ips, signal) {
                     cell.innerHTML = "local";
                 });
             }
-        } else {  // we got bad JSON
+        } else {
+            // we got bad JSON
             console.log("* geo: bad data for " + ip + ":");
             console.log(JSON.stringify(data));
 
@@ -906,7 +953,6 @@ function getGeoLocations(ips, signal) {
                 cell.innerHTML = "-";
             });
         }
-
     }
 
     function recurseFetchGeoLocations(ips, apiCount = 0) {
@@ -960,7 +1006,7 @@ function runWatch() {
     } else {
         pollLog();
         polling = true;
-        pollInterval = setInterval(pollLog, 1000*pollWait);
+        pollInterval = setInterval(pollLog, 1000 * pollWait);
         // disable all other ui elements
         uielements.forEach((uielement) => {
             uielement.disabled = true;
