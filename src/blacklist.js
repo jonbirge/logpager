@@ -133,7 +133,7 @@ function blacklistRemove(ip, type, lastTime, log) {
 function makeBlacklistButton(ip, type = "none", lastTime = "", log = "N/A") {
     const checker = new IPChecker(blackList);
     if (checker.isInCIDR(ip) && !checker.isCIDR(ip)) {  // regular ip covered by cidr block
-        return `<button class="toggle-button tight disabled" disabled>cidr</button>`;
+        return `<button id="block-cidr" class="toggle-button tight disabled" disabled>cidr</button>`;
     } else if (checker.isAnywhere(ip)) {  // already blacklisted it
         const blacklistCall =
             `onclick="blacklistRemove('${ip}','${type}','${lastTime}','${log}');"`;

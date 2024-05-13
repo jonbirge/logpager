@@ -333,7 +333,7 @@ function refreshTable() {
                         logDetails
                     );
                     const intelLink = `onclick="window.open('intel.php?ip=${ip}'); return false"`;
-                    row += ` <button class="toggle-button tight" ${intelLink}>intel</button></nobr></td>`;
+                    row += ` <button id="intel-${ip}" class="toggle-button tight" ${intelLink}>intel</button></nobr></td>`;
                     if (geolocate) {
                         const hostnameid = `hostname-${ip}`;
                         row += `<td class="hideable" id="${hostnameid}"></td>`;
@@ -390,14 +390,21 @@ function refreshTable() {
 
 // function to enable or disable a set of buttons
 function toggleButtons(buttons, enable) {
-    buttons.forEach((button) => {
-        button.disabled = !enable;
-        if (enable) {
-            button.classList.remove("disabled");
-        } else {
+    if (polling) {
+        buttons.forEach((button) => {
+            button.disabled = true;
             button.classList.add("disabled");
-        }
-    });
+        });
+    } else {
+        buttons.forEach((button) => {
+            button.disabled = !enable;
+            if (enable) {
+                button.classList.remove("disabled");
+            } else {
+                button.classList.add("disabled");
+            }
+        });
+    }
 }
 
 // take JSON array of common log data and write HTML table
@@ -986,10 +993,19 @@ function getGeoLocations(ips, signal) {
 
 // function to start and stop log table polling
 function runWatch() {
-    const uielements = [...document.querySelectorAll("button")];
+    let uiElements = [...document.querySelectorAll("button")];
+    const tableButtons = document.querySelectorAll('[id^="block-"], [id^="intel-"]');
     const textedit = document.getElementById("search-input");
     const watchButton = document.getElementById("watch-button");
-    uielements.push(textedit);
+    
+    // remove any nodes from uiElements that are in tableButtons
+    tableButtons.forEach((button) => {
+        uiElements = uiElements.filter((element) => element !== button);
+    });
+
+    // add search box to uiButtons
+    uiElements.push(textedit);
+
     page = 0; // reset page
     if (polling) {
         // stop polling
@@ -998,7 +1014,7 @@ function runWatch() {
         watchButton.innerHTML = "Watch";
         watchButton.classList.remove("red");
         // enable all other ui elements
-        uielements.forEach((uielement) => {
+        uiElements.forEach((uielement) => {
             uielement.disabled = false;
             uielement.classList.remove("disabled");
         });
@@ -1008,7 +1024,7 @@ function runWatch() {
         polling = true;
         pollInterval = setInterval(pollLog, 1000 * pollWait);
         // disable all other ui elements
-        uielements.forEach((uielement) => {
+        uiElements.forEach((uielement) => {
             uielement.disabled = true;
             uielement.classList.add("disabled");
         });
