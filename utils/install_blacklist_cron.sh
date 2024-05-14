@@ -14,6 +14,6 @@ BLACKLIST_FILE="$2"
 chmod +x "$UFW_SCRIPT"
 
 # Write out current root crontab and add new cron job
-(sudo crontab -l 2>/dev/null; echo "*/5 * * * * $UFW_SCRIPT $BLACKLIST_FILE") | sudo crontab -
+(crontab -l 2>/dev/null; echo "*/5 * * * * $UFW_SCRIPT $BLACKLIST_FILE") | crontab -
 
 echo "Cron job set up to run $UFW_SCRIPT with $BLACKLIST_FILE every 5 minutes as root."
