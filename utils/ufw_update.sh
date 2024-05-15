@@ -19,17 +19,17 @@ if ! command -v ufw &> /dev/null; then
 fi
 
 # Enable UFW if it's not already enabled
-if sudo ufw status | grep -q inactive; then
+if ufw status | grep -q inactive; then
     echo "UFW is inactive. Enabling..."
-    sudo ufw enable
+    ufw enable
 fi
 
 # Add new rules from file if they don't already exist
 while IFS= read -r ip; do
     if [[ "$ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(/([0-9]|[1-2][0-9]|3[0-2]))?$ ]]; then
-        if ! sudo ufw status | grep -q "$ip"; then
+        if ! ufw status | grep -q "$ip"; then
             echo "Blocking IP/CIDR: $ip"
-            sudo ufw insert 1 deny from "$ip" comment "$TAG"
+            ufw insert 1 deny from "$ip" comment "$TAG"
         else
             echo "Rule for $ip already exists. Skipping..."
         fi
@@ -39,3 +39,4 @@ while IFS= read -r ip; do
 done < "$IP_FILE"
 
 echo "IP blocking complete."
+

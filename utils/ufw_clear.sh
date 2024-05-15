@@ -12,9 +12,10 @@ fi
 
 # Remove old rules tagged with $TAG
 echo "Removing old firewall rules tagged with $TAG..."
-sudo ufw status numbered | grep "($TAG)" | awk '{ print $1 }' | cut -d ']' -f1 | tr -d '[' | tac | while read -r num; do
+ufw status numbered | grep "$TAG" | awk '{ print $1 }' | cut -d ']' -f1 | tr -d '[' | tac | while read -r num; do
+    echo "Parsed rule number: $num"
     echo "Removing rule #$num"
-    echo "y" | sudo ufw delete "$num"
+    echo "y" | ufw delete "$num"
 done
 
 echo "All tagged rules have been removed."
