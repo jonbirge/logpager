@@ -14,7 +14,9 @@ SET_NAME=auto_blocked
 
 # Define a new ruleset
 nft add table inet filter
-nft add chain inet filter input { type filter hook input priority 0\; }
+
+# Create a new chain for the auto-blocked IPs/CIDRs
+nft add chain inet filter "$SET_NAME" { type filter hook input priority -50\; }
 
 # Create a new set for the auto-blocked IPs/CIDRs
 nft add set inet filter "$SET_NAME" { type ipv4_addr\; }
@@ -31,6 +33,6 @@ do
 done < "$IP_FILE"
 
 # Add a rule to drop packets from IPs in the set
-nft add rule inet filter input ip saddr @"$SET_NAME" drop
+nft add rule inet filter "$SET_NAME" ip saddr @"$SET_NAME" drop
 
 echo "IP blocking complete."
