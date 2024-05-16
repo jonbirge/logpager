@@ -15,24 +15,35 @@ SET_NAME=auto_blocked
 # Define a new ruleset
 nft add table inet filter
 
+# Delete the chain that contains the rule referencing the auto_blocked set, if it exists
+echo "Deleting old chain..."
+nft delete chain inet filter "$SET_NAME" || true
+
 # Create a new chain for the auto-blocked IPs/CIDRs
+echo "Creating new chain..."
 nft add chain inet filter "$SET_NAME" { type filter hook input priority -50\; }
 
-# Create a new set for the auto-blocked IPs/CIDRs
-nft add set inet filter "$SET_NAME" { type ipv4_addr\; }
+# Delete the auto_blocked set if it exists
+nft delete set inet filter "$SET_NAME" || true
+
+# Create a new set for the auto-blocked IPs/CIDRs, with the 'flags interval' option
+echo "Creating new set..."
+nft add set inet filter "$SET_NAME" { type ipv4_addr\; flags interval\; }
 
 # Add new rules from file
+echo "Reading IP addresses and CIDRs from file..."
 while IFS= read -r ip
 do
     if [[ "$ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(/([0-9]|[1-2][0-9]|3[0-2]))?$ ]]; then
         nft add element inet filter "$SET_NAME" { "$ip" }
-        echo "Blocking IP/CIDR: $ip"
+        # echo "Blocking IP/CIDR: $ip"
     else
         echo "Skipping invalid IP/CIDR: $ip"
     fi
 done < "$IP_FILE"
 
 # Add a rule to drop packets from IPs in the set
+echo "Adding rule to drop packets..."
 nft add rule inet filter "$SET_NAME" ip saddr @"$SET_NAME" drop
 
-echo "IP blocking complete."
+echo "IP blocking complete!"
