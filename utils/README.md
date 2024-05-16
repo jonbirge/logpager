@@ -22,7 +22,7 @@ Before running these scripts, make sure you have the following prerequisites ins
 3. Run the `setup_firewall.sh` script to set up the ufw firewall rule:
 
     ```bash
-    ./setup_firewall.sh
+    sudo ./setup_firewall.sh
     ```
 
     This script will configure the firewall to allow incoming connections on the specified port.
@@ -30,7 +30,7 @@ Before running these scripts, make sure you have the following prerequisites ins
 4. To maintain the firewall rule and automatically block IPs from a blacklist, you can set up a cron job to run the `ufw_update.sh` script periodically using the `install_blacklist_cron.sh` script.
 
     ```bash
-    ./install_blacklist_cron.sh /path/to/ufw_update.sh /path/to/blacklist.csv
+    sudo ./install_blacklist_cron.sh /path/to/ufw_update.sh /path/to/blacklist.csv
     ```
 
     This script will set up a cron job to run the `ufw_update.sh` script every 5 minutes, passing the path to the blacklist file as a command-line argument. The `ufw_update.sh` script will update the firewall rules to block the IPs listed in the blacklist file.
