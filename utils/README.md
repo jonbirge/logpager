@@ -35,6 +35,10 @@ Before running these scripts, make sure you have the following prerequisites ins
 
     This script will set up a cron job to run the `ufw_update.sh` script every 5 minutes, passing the path to the blacklist file as a command-line argument. The `ufw_update.sh` script will update the firewall rules to block the IPs listed in the blacklist file.
 
+## Bugs
+
+All of them. In particular, the nft-based scripts don't always manage to install the rules such that they have sufficient priority to override existing rules.
+
 ## Contributing
 
 If you encounter any issues or have suggestions for improvements, feel free to open an issue or submit a pull request on the [GitHub repository](https://github.com/your-username/logpager-utils).

@@ -21,7 +21,7 @@ nft delete chain inet filter "$SET_NAME" || true
 
 # Create a new chain for the auto-blocked IPs/CIDRs
 echo "Creating new chain..."
-nft add chain inet filter "$SET_NAME" { type filter hook input priority -50\; }
+nft add chain inet filter "$SET_NAME" { type filter hook input priority -1000\; }
 
 # Delete the auto_blocked set if it exists
 nft delete set inet filter "$SET_NAME" || true
