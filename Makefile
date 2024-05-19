@@ -5,7 +5,7 @@ VERSION=1.8-dev
 DOCKER_HUB_USER=jonbirge
 BUILD_FILE=build/build.timestamp
 BUILD_SMALL_FILE=build/build-small.timestamp
-DOCKERFILE_SMALL=Dockerfile_small
+DOCKERFILE_SMALL=docker/Dockerfile_small
 
 # Derived variables
 SRC_FILES=$(shell find ./src -type f)
