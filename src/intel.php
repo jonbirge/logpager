@@ -14,6 +14,7 @@ header("Pragma: no-cache");
     <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
     <link href="styles.css" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" href="intel/favicon.ico" type="image/x-icon" />
     <?php
         // get the target IP from the URL ip parameter. if it's not there use client ip address
         if (!isset($_GET['ip'])) {
