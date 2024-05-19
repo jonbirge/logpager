@@ -99,15 +99,6 @@ function write_csv($blacklist, $csv_file) {
 }
 
 // function to write all ip/cidr values to a yml file suitable for use with traefik's denyip plugin middleware with the following examples format:
-// http:
-//   middlewares:
-//     blacklist:
-//     plugin:
-//       denyip:
-//         ipDenyList:
-//         - 101.126.30.32
-//         - 101.126.31.182
-//         - 102.129.232.53
 function write_yml($blacklist, $yml_file) {
     $file = fopen($yml_file, 'w');
     fwrite($file, "http:\n");
