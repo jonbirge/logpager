@@ -32,10 +32,8 @@ $(BUILD_SMALL_FILE): $(SRC_FILES) $(DOCKERFILE_SMALL)
 	mkdir -p build
 	touch $(BUILD_SMALL_FILE)
 
-# No cache build (a clear abuse of 'make clean')
 clean:
-	docker build -t $(LATEST_IMAGE_NAME_SMALL) -f $(DOCKERFILE_SMALL) --no-cache .
-	docker build -t $(LATEST_IMAGE_NAME) --no-cache .
+	docker builder prune --all -f
 	rm -rf build
 
 # Push into the latest tag

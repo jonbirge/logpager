@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo nft list ruleset | less
+sudo nft list ruleset 
