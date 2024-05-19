@@ -35,7 +35,7 @@ COPY src/ /var/www/
 RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
 
 # Startup script
-COPY entry.sh /entry.sh
+COPY docker/entry.sh /entry.sh
 
 # Expose HTTP port 
 EXPOSE 80

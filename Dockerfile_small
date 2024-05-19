@@ -1,5 +1,5 @@
 # Alpine Linux as the base image
-FROM alpine:3.19
+FROM alpine:3
 
 # Labels
 LABEL org.opencontainers.image.source=https://github.com/jonbirge/logpager
@@ -29,7 +29,7 @@ COPY conf/default.conf /etc/nginx/http.d/default.conf
 COPY conf/db.sql /db.sql
 
 # Startup script
-COPY entry-small.sh /entry.sh
+COPY docker/entry_small.sh /entry.sh
 
 # Copy the source files to the web root
 COPY src/ /var/www/

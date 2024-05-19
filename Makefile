@@ -5,9 +5,9 @@ VERSION=1.8-dev
 DOCKER_HUB_USER=jonbirge
 BUILD_FILE=build/build.timestamp
 BUILD_SMALL_FILE=build/build-small.timestamp
+DOCKERFILE_SMALL=Dockerfile_small
 
 # Derived variables
-DOCKERFILE_SMALL=Dockerfile$(SMALL_SUFFIX)
 SRC_FILES=$(shell find ./src -type f)
 BASE_NAME=$(DOCKER_HUB_USER)/$(IMAGE_NAME)
 RELEASE_IMAGE_NAME=$(BASE_NAME):$(VERSION)
@@ -16,9 +16,9 @@ LATEST_IMAGE_NAME=$(BASE_NAME):latest
 LATEST_IMAGE_NAME_SMALL=$(BASE_NAME):latest$(SMALL_SUFFIX)
 
 # Convenience targets
+all: build build-small
 build: $(BUILD_FILE)
 build-small: $(BUILD_SMALL_FILE)
-all: build build-small
 
 # Build the standard Docker image
 $(BUILD_FILE): $(SRC_FILES) Dockerfile
