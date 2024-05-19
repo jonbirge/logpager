@@ -1,0 +1,4 @@
+While this can be used stand-alone and in various configurations, the easiest way to use it, and how it was
+designed to be used, is as part of a stack of docker containers running under some form of container
+orchestration. For a fully working example of logpager running alongside a simple web server,
+look at the docker compose example in the `test` directory.
