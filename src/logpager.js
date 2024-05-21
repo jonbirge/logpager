@@ -16,7 +16,7 @@ let heatmapTimeout;
 let controller;
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
-let summary = params.get("summary"); // applies to search
+let summary = params.get("summary") !== null ? params.get("summary") == "true" : true; // applies to search
 let logType = params.get("type") !== null ? params.get("type") : "auth"; // "clf" or "auth"
 let tableLength = 0; // used to decide when to reuse the table
 let logLines = []; // cache of current displayed table data
@@ -32,10 +32,9 @@ setInterval(updateClock, 1000);
 
 // decide what to do on page load
 if (search !== null) {
-    // search beats page
-    console.log("page load: searching for " + search + ", summary: " + summary);
-    let doSummary = !(summary === "false");
-    window.onload = doSearch(search, doSummary);
+    // search trumps page
+    console.log("page load: searching for " + search + ", summary = " + summary);
+    window.onload = doSearch(search, summary);
 } else {
     console.log("page load: loading " + logType + " log...");
     // on window load run pollServer() and plotHeatmap()
@@ -137,7 +136,7 @@ function pollLog() {
 
 // search the log and return table of results
 function searchLog(searchTerm, doSummary) {
-    console.log("searchLog: searching for " + searchTerm);
+    console.log("searchLog: searching for " + searchTerm + ", summary = " + doSummary);
 
     // abort any pending fetches
     if (controller) {
@@ -187,7 +186,7 @@ function searchLog(searchTerm, doSummary) {
         .then((data) => {
             // write the search results to the log div
             let dataLength;
-            if (summary == null || summary === "true") {
+            if (doSummary == true) {
                 dataLength = JSON.parse(data).length - 1; // don't count header row
                 console.log("searchLog: summary table");
                 updateSummaryTable(data);
