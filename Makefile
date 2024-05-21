@@ -1,7 +1,7 @@
 # Define variables
 IMAGE_NAME=logpager
 SMALL_SUFFIX=-small
-VERSION=1.8-dev
+VERSION=1.8
 DOCKER_HUB_USER=jonbirge
 BUILD_FILE=build/build.timestamp
 BUILD_SMALL_FILE=build/build-small.timestamp
@@ -59,3 +59,4 @@ down:
 	- cd ./test/stack && ./down.sh
 
 .PHONY: all build build-small clean push release test up down
+
