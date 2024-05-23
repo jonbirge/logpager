@@ -1,7 +1,7 @@
 # Define variables
 IMAGE_NAME=logpager
 SMALL_SUFFIX=-small
-VERSION=1.8
+VERSION=1.9-dev
 DOCKER_HUB_USER=jonbirge
 BUILD_FILE=build/build.timestamp
 BUILD_SMALL_FILE=build/build-small.timestamp
