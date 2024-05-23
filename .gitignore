@@ -1,0 +1,7 @@
+.env
+.vscode
+*.timestamp
+*.csv
+test/stack/db
+test/stack/certs
+test/stack/logs

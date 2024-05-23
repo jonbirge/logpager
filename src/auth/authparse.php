@@ -3,7 +3,7 @@
 // Return list of auth log files
 function getAuthLogFiles()
 {
-    // Log files to read
+    // Array of log files to read
     $logFilePaths = ['/auth.log'];
 
     // Remove any log files that don't exist
@@ -41,7 +41,7 @@ function getAuthLogStatus($line)
     return $status;
 }
 
-// Take CLF date format and convert to auth.log date format
+// Take CLF date format and convert to (old) auth.log date format
 function convertCLFDate($date)
 {
     // Convert the month number to a three-letter month string
@@ -64,9 +64,8 @@ function parseAuthLogLine($line)
     // Current year
     $year = date('Y');
 
-    // Check to see if the first character is a letter or a number (to determine
-    // which kind of time stamp is used)
-    if (preg_match('/^[a-zA-Z]/', $line)) {
+    // Determine the kind of time stamp used
+    if (preg_match('/^[a-zA-Z]/', $line)) {  // CLF
         // Extract the month, day, and time from the line
         if (!preg_match('/(\S+)\s+(\d+) (\d+):(\d+):(\d+)/', $line, $matches)) {
             return false; // handle error as appropriate
@@ -80,17 +79,26 @@ function parseAuthLogLine($line)
         // Convert the month to a number
         $dateInfo = date_parse($monthStr);
         $monthNum = $dateInfo['month'];
-    } else {
-        // handle timespace of the type 2017-12-31T23:59:59.999999-00:00
-        if (!preg_match('/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)/', $line, $matches)) {
-            return false; // handle error as appropriate
-        }
-        $year = $matches[1];
-        $month = $matches[2];
-        $day = $matches[3];
-        $hour = $matches[4];
-        $minute = $matches[5];
-        $second = $matches[6];
+    } else {  // auth
+        // Split $line at the first space
+        $parts = explode(' ', $line, 2); // Limiting to 2 parts ensures only the first space is used for splitting
+
+        // Take the first part, which is before the first space
+        $dateTimePart = $parts[0];
+
+        // Now you can parse $dateTimePart with DateTime::createFromFormat
+        $date = DateTime::createFromFormat('Y-m-d\TH:i:s.uP', $dateTimePart);
+
+        // convert to UTC
+        $date->setTimezone(new DateTimeZone('UTC'));
+
+        // extract the year, month, day, hour, minute, and second
+        $year = $date->format('Y');
+        $month = $date->format('m');
+        $day = $date->format('d');
+        $hour = $date->format('H');
+        $minute = $date->format('i');
+        $second = $date->format('s');
 
         // Convert the month number to a three-letter month string
         $monthNum = intval($month);
@@ -119,5 +127,3 @@ function parseAuthLogLine($line)
     // Return the array
     return [$ip, "$day/$monthStr/$year:$hour:$minute:$second", $message];
 }
-
-?>

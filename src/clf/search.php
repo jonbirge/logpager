@@ -1,9 +1,10 @@
 <?php
 
-function clfSearch($searchDict, $doSummary = true)
+function search($searchDict, $doSummary = true)
 {
     // Maximum number of items to return
-    $maxItems = 1024;
+    $maxItems = 1024;  // summary items
+    $maxSearchLines = 100000;  // matching lines
 
     // Path to the CLF log file
     $logFilePath = '/access.log';
@@ -29,7 +30,7 @@ function clfSearch($searchDict, $doSummary = true)
     if ($stat) {
         $grepSearch .= " -e $stat";
     }
-    $cmd = "grep $grepSearch $escFilePath | tac";
+    $cmd = "tac $escFilePath | grep -m $maxSearchLines $grepSearch";
 
     // execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
@@ -69,6 +70,7 @@ function clfSearch($searchDict, $doSummary = true)
         }
 
         $lineCount++;
+
         if ($doSummary) {
             // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object,  ignoring the timezone part
             $theDate = $data[2];
@@ -86,18 +88,19 @@ function clfSearch($searchDict, $doSummary = true)
     }
 
     // If $doSummary is true, summarize the log lines
-    if ($doSummary) { // return summary format
+    if ($doSummary) { // return summary 
         $searchLines = searchStats($logLines);
         // take the first $maxItems items
-        $searchLines = array_slice($searchLines, 0, $maxItems);
+        $searchLines = array_slice($searchLines, 0, $maxItems + 1);
         echo json_encode($searchLines);
-    } else { // return standard log format
+    } else { // return standard log 
         $searchLines = searchLines($logLines);
         echo json_encode([
             'page' => 0,
             'pageCount' => 0,
-            'lineCount' => count($searchLines),
-            'logLines' => $searchLines
+            'lineCount' => count($searchLines) - 1,
+            'logLines' => $searchLines,
+            'search' => $searchDict
         ]);
     }
 }

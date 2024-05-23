@@ -1,0 +1,14 @@
+CREATE DATABASE IF NOT EXISTS logpager;
+USE logpager;
+CREATE TABLE IF NOT EXISTS geo_cache (
+    ip VARCHAR(64) PRIMARY KEY,
+    cache_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    json_data JSON
+);
+CREATE TABLE IF NOT EXISTS ip_blacklist (
+    cidr VARCHAR(64) PRIMARY KEY,
+    add_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_seen TIMESTAMP,
+    log_type VARCHAR(32),
+    log_line TEXT
+);

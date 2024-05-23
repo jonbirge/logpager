@@ -17,5 +17,3 @@ foreach ($logFiles as $logFile) {
 
 // return existing log files as JSON
 echo json_encode($existingLogFiles);
-
-?>

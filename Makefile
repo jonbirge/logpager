@@ -1,41 +1,62 @@
 # Define variables
 IMAGE_NAME=logpager
-VERSION=1.7
+SMALL_SUFFIX=-small
+VERSION=1.8
 DOCKER_HUB_USER=jonbirge
+BUILD_FILE=build/build.timestamp
+BUILD_SMALL_FILE=build/build-small.timestamp
+DOCKERFILE_SMALL=docker/Dockerfile_small
 
 # Derived variables
-FULL_IMAGE_NAME=$(DOCKER_HUB_USER)/$(IMAGE_NAME):$(VERSION)
+SRC_FILES=$(shell find ./src -type f)
+BASE_NAME=$(DOCKER_HUB_USER)/$(IMAGE_NAME)
+RELEASE_IMAGE_NAME=$(BASE_NAME):$(VERSION)
+RELEASE_IMAGE_NAME_SMALL=$(BASE_NAME):$(VERSION)$(SMALL_SUFFIX)
+LATEST_IMAGE_NAME=$(BASE_NAME):latest
+LATEST_IMAGE_NAME_SMALL=$(BASE_NAME):latest$(SMALL_SUFFIX)
 
-# Build the Docker image
-build:
-	docker build -t $(FULL_IMAGE_NAME) .
-	docker tag $(FULL_IMAGE_NAME) $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
+# Convenience targets
+all: build build-small
+build: $(BUILD_FILE)
+build-small: $(BUILD_SMALL_FILE)
 
-# No cache build (a clear abuse of 'make clean')
+# Build the standard Docker image
+$(BUILD_FILE): $(SRC_FILES) Dockerfile
+	docker build -t $(LATEST_IMAGE_NAME) .
+	mkdir -p build
+	touch $(BUILD_FILE)
+
+# Build the small Docker image
+$(BUILD_SMALL_FILE): $(SRC_FILES) $(DOCKERFILE_SMALL)
+	docker build -t $(LATEST_IMAGE_NAME_SMALL) -f $(DOCKERFILE_SMALL) .
+	mkdir -p build
+	touch $(BUILD_SMALL_FILE)
+
 clean:
-	docker build -t $(FULL_IMAGE_NAME) --no-cache .
+	docker builder prune --all -f
+	rm -rf build
 
-latest: build
-	docker push $(DOCKER_HUB_USER)/$(IMAGE_NAME):latest
+# Push into the latest tag
+push: $(BUILD_FILE)
+	docker push $(LATEST_IMAGE_NAME)
 
-# Push the Docker image to Docker Hub
-release: latest
-	docker push $(FULL_IMAGE_NAME)
+# Push into the latest tag and version tag
+release: push $(BUILD_SMALL_FILE)
+	docker tag $(LATEST_IMAGE_NAME_SMALL) $(RELEASE_IMAGE_NAME_SMALL)
+	docker tag $(LATEST_IMAGE_NAME) $(RELEASE_IMAGE_NAME)
+	docker push $(RELEASE_IMAGE_NAME_SMALL)
+	docker push $(RELEASE_IMAGE_NAME)
 
-# Image with test files for development
-dev:
-	docker build -t $(IMAGE_NAME)_dev --build-arg TESTLOGS=true .
+# Test image for development
+test:
+	docker build -t $(IMAGE_NAME)_test .
 
-# Run test image
-local: stop dev
-	docker run --name $(IMAGE_NAME)_test -d -p 8080:80 --volume=./src:/var/www/:ro $(IMAGE_NAME)_dev
+# Bring up/down the test stack
+up: test
+	cd ./test/stack && ./up.sh
 
-# Stop test image
-stop:
-	-docker stop $(IMAGE_NAME)_test
-	-docker rm $(IMAGE_NAME)_test
+down:
+	- cd ./test/stack && ./down.sh
 
-# Convenience command to build
-all: build
+.PHONY: all build build-small clean push release test up down
 
-.PHONY: build clean dev release stop local all

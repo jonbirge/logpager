@@ -1,6 +1,6 @@
 <?php
 
-function clfTail($page, $linesPerPage)
+function tail($page, $linesPerPage)
 {
     // Path to the CLF log file
     $logFilePath = '/access.log';

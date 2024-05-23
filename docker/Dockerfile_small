@@ -28,17 +28,15 @@ COPY conf/www.conf /etc/php83/php-fpm.d/www.conf
 COPY conf/default.conf /etc/nginx/http.d/default.conf
 COPY conf/db.sql /db.sql
 
+# Startup script
+COPY docker/entry_small.sh /entry.sh
+
 # Copy the source files to the web root
 COPY src/ /var/www/
-
-# SQL client
-RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
-
-# Startup script
-COPY docker/entry.sh /entry.sh
 
 # Expose HTTP port 
 EXPOSE 80
 
 # Start
 CMD ["/entry.sh"]
+

@@ -1,42 +1,130 @@
 <?php
 
-// Specify the file path
-$file = '/blacklist';
+// Create array with all host environment variables
+$host = getenv('SQL_HOST');
+$user = getenv('SQL_USER');
+$pass = getenv('SQL_PASS');
+$db = getenv('SQL_DB');
+$table = 'ip_blacklist';
+$csv_file = '/blacklist.csv';
+$yml_file = '/blacklist.yml';
+
+// No caching allowed
+header("Cache-Control: no-cache, no-store, must-revalidate");
+
+// Open SQL connection
+$conn = new mysqli($host, $user, $pass, $db);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // read file contents into an array
-    $blacklist = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
+    $blacklist = read_sql($conn, $table);
+    
     // Send the array as a JSON response
     echo json_encode($blacklist);
+    
 } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the IP address from the POST request body
     $ip = $_POST['ip'];
-
+    
+    // Get the optional data from the POST request body
+    $log_type = $_POST['log_type'];
+    $log = $_POST['log'];
+    $timestamp = $_POST['last_seen'];
+    
     // Check to see if IP address is empty
     if (empty($ip)) {
-        echo 'no IP address provided!';
-        exit();
+        die("no IP address provided!");
     }
 
-    // Check to see if the file exists, and create it if it doesn't
-    if (!file_exists($file)) {
-        touch($file);
+    // Insert $ip and $log (if exists) into the 'blacklist' table
+    $sql = "INSERT INTO $table (cidr, last_seen, log_type, log_line) VALUES ('$ip', '$timestamp', '$log_type', '$log')";
+    
+    try {
+        $conn->query($sql);
+        if ($conn->error) {
+            throw new Exception("SQL error: " . $conn->error);
+        }
+    } catch (Exception $e) {
+        $conn->close();
+        echo $e->getMessage();
+        die($e->getMessage());
     }
 
-    // Check if the IP address is already in the file
-    if (strpos(file_get_contents($file), $ip) !== false) {
-        echo $ip . ' already exists in blacklist';
-        exit();
+    // Write to CSV file
+    $blacklist = read_sql($conn, $table);
+    write_csv($blacklist, $csv_file);
+    write_yml($blacklist, $yml_file);
+
+    echo $ip . ' added to blacklist';
+
+} else if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    // Get the IP address from the URL
+    $ip = $_GET['ip'];
+
+    // Delete $ip from the 'blacklist' table
+    $sql = "DELETE FROM $table WHERE cidr = '$ip'";
+    $conn->query($sql);
+    if ($conn->error) {
+        $conn->close();
+        die("SQL error: " . $conn->error);
     }
 
-    // Append the IP address to the file
-    file_put_contents($file, $ip . PHP_EOL, FILE_APPEND);
+    // Write to files
+    $blacklist = read_sql($conn, $table);
+    write_csv($blacklist, $csv_file);
+    write_yml($blacklist, $yml_file);
 
     // Send a confirmation message
-    echo $ip . ' added to blacklist';
+    echo $ip . ' removed from blacklist';
+
 } else {
     // Send a 405 Method Not Allowed response
     http_response_code(405);
     echo 'Method Not Allowed';
+}
+
+// Close SQL connection
+$conn->close();
+
+
+// function to write all cidr values to a csv file
+function write_csv($blacklist, $csv_file) {
+    $file = fopen($csv_file, 'w');
+    foreach ($blacklist as $cidr) {
+        fputcsv($file, [$cidr]);
+    }
+    fclose($file);
+}
+
+// function to write all ip/cidr values to a yml file suitable for use with traefik's denyip plugin middleware with the following examples format:
+function write_yml($blacklist, $yml_file) {
+    $file = fopen($yml_file, 'w');
+    fwrite($file, "http:\n");
+    fwrite($file, "  middlewares:\n");
+    fwrite($file, "    blacklist:\n");
+    fwrite($file, "      plugin:\n");
+    fwrite($file, "        denyip:\n");
+    fwrite($file, "          ipDenyList:\n");
+    foreach ($blacklist as $cidr) {
+        fwrite($file, "          - $cidr\n");
+    }
+    fclose($file);
+}
+
+// function to read all cidr values from SQL into array
+function read_sql($conn, $table) {
+    $sql = "SELECT * FROM $table";
+    $result = $conn->query($sql);
+    if ($conn->error) {
+        die("SQL error: " . $conn->error);
+    }
+    
+    $blacklist = [];
+    while ($row = $result->fetch_assoc()) {
+        $blacklist[] = $row['cidr'];
+    }
+
+    return $blacklist;
 }

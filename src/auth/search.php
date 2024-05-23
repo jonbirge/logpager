@@ -3,7 +3,7 @@
 // Include the authparse.php file
 include 'authparse.php';
 
-function authSearch($searchDict, $doSummary = true)
+function search($searchDict, $doSummary = true)
 {
     // Parameters
     $maxItems = 1024;  // Maximum number of items to return
@@ -113,8 +113,9 @@ function authSearch($searchDict, $doSummary = true)
         echo json_encode([
             'page' => 0,
             'pageCount' => 0,
-            'lineCount' => count($searchLines),
-            'logLines' => $searchLines
+            'lineCount' => count($searchLines) - 1,
+            'logLines' => $searchLines,
+            'search' => $searchDict
         ]);
     }
 }

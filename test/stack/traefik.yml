@@ -1,0 +1,24 @@
+# Traefik Static Configuration
+
+accesslog:
+  filePath: "/logs/access.log"
+
+providers:
+  file:
+    directory: /etc/traefik
+    watch: true
+  docker:
+    exposedByDefault: true
+
+api:
+  insecure: true
+
+entryPoints:
+  web:
+    address: ":80"
+
+experimental:
+  plugins:
+    denyip:
+      modulename: github.com/kevtainer/denyip
+      version: v1.0.0

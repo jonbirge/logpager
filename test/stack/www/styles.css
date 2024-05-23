@@ -1,0 +1,19 @@
+body {
+    background-color: #333; /* Very dark gray background */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+    color: white;
+}
+
+h1 {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 48px;
+}

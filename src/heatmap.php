@@ -8,15 +8,15 @@ $search = $_GET['search'] ?? null;  // search string
 
 $searchDict = parseSearch($search);
 
-switch ($type) {
-    case 'clf':
-        include 'clfheatmap.php';
-        clfHeatmap($searchDict);
-        break;
-    case 'auth':
-        include 'authheatmap.php';
-        authHeatmap($searchDict);
-        break;
-    default:
-        echo "<p>Invalid log type: $type</p>";
+// Include the appropriate heatmap function based on the log type
+$searchInc = $type . '/heatmap.php';
+
+// Check to see if the file exists
+if (!file_exists($searchInc)) {
+    echo "<p>Invalid log type specified.</p>";
+    return;
 }
+
+// Execute the appropriate heatmap function
+include $searchInc;
+heatmap($searchDict);

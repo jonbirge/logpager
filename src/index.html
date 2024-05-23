@@ -12,18 +12,20 @@
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css" type="text/css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-    <title>Log Pager</title>
+    <title>Log Forensics</title>
 </head>
 
 <body>
-    <div class="container">
+    <div id="logpager" class="container">
         <div class="tab-header">
             <a id="authtab" class="tab" href="./?type=auth&page=0">auth.log</a>
             <a id="clftab" class="tab" href="./?type=clf&page=0">access.log</a>
         </div>
 
-        <!-- summary chart(s) -->
-        <h2 id="heatmap-title" style="text-align: center;">Log entries by time</h2>
+        <!-- summary charts -->
+        <h2 id="heatmap-title" style="text-align: center;">
+            Log entries by time
+        </h2>
         <div id="heatmap"></div>
 
         <!-- search header -->
@@ -37,9 +39,8 @@
             </span>
         </div>
 
-        <!-- empty log file table -->
-        <div id="log">
-        </div>
+        <!-- log file table -->
+        <div id="log"></div>
 
         <!-- paging buttons -->
         <div class="button-set" id="buttons">
@@ -47,17 +48,19 @@
             <button id="next-10" class="toggle-button gray" onclick="page += 10; pollLog();">&lt;&lt;</button>
             <button id="next-1" class="toggle-button gray" onclick="page += 1; pollLog();">&lt;</button>
             <span id="page" class="status" style="margin-left: 5px; margin-right: 5px;">Loading...</span>
-            <button class="toggle-button gray" onclick="page += -1; pollLog();">&gt;</button>
+            <button id="prev-1" class="toggle-button gray" onclick="page += -1; pollLog();">&gt;</button>
             <button class="toggle-button gray" onclick="page = 0; pollLog();">Current</button>
             <button class="toggle-button" id="watch-button" onclick="runWatch()">Live</button>
         </div>
 
-        <!-- version and copyright -->
-        <div>1.7</div>
+        <!-- version footer -->
+        <div>1.8</div>
 
     </div>
 
-    <script src="logpager.js"></script>
+    <script src="timeutils.js?ver=1"></script>
+    <script src="blacklist.js?ver=18"></script>
+    <script src="logpager.js?ver=21"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 </body>
 

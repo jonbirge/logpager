@@ -1,0 +1,68 @@
+services:
+
+  traefik:
+    image: traefik
+    restart: always
+    command:
+      - "--configFile=/etc/traefik.yml"
+    ports:
+      - "80:80"
+      - "8080:8080"  # traefik admin
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik.yml:ro
+      - ./traefik:/etc/traefik
+      - ./logs/:/logs/:rw
+    depends_on:
+      - logpager
+      - www
+
+  logpager:
+    image: logpager_test
+    restart: always
+    environment:
+      SQL_HOST: db
+      SQL_PASS: testpass
+      SQL_USER: root
+    labels:
+      - "traefik.http.routers.logpagerdev.rule=PathPrefix(`/logs`)"
+      - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
+      - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
+    volumes:
+      # - ../logs/auth.log:/auth.log:ro  # fake auth logs for testing
+      - ./logs/access.log:/access.log:ro  # actual logs from this stack
+      - ../../src:/var/www:ro  # for live development (comment out to run from image)
+    depends_on:
+      - db
+
+  db:
+    image: mysql
+    restart: always
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: testpass
+
+  www:
+    image: nginx
+    restart: always
+    labels:
+      - "traefik.http.routers.www.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.www.middlewares=blacklist@file"
+    volumes:
+      - ./www:/usr/share/nginx/html:rw
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      ADMINER_DESIGN: nette
+    labels:
+      - "traefik.http.routers.adminer.rule=PathPrefix(`/adminer`)"
+      - "traefik.port=8080"
+    depends_on:
+      - db
+
+volumes:
+  dbdata:
