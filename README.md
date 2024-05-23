@@ -32,8 +32,15 @@ A public demo of the current development branch may (or may not) be running
 at <https://nyc.birgefuller.com/logs/>
 
 ## Screenshots
-![Screenshot 2024-01-21 122840](https://github.com/jonbirge/logpager/assets/660566/d2e5adb1-2308-476d-9c62-3888ceff5bc9)
-![Screenshot 2024-01-21 122802](https://github.com/jonbirge/logpager/assets/660566/b2f53624-5f2c-46fc-b75b-58e2eb4c9333)
+
+### Default log display
+![Screenshot 2024-05-19 165426](https://github.com/jonbirge/logpager/assets/660566/52c76b9b-dc43-480f-a568-02d4b393b41c)
+
+### Search display
+![Screenshot 2024-05-19 165513](https://github.com/jonbirge/logpager/assets/660566/4fb13ee7-2e25-4ef3-816d-0cb2d2919363)
+
+### Intel page
+![Screenshot 2024-05-19 170507](https://github.com/jonbirge/logpager/assets/660566/ce08c7b3-111e-489b-815d-52241d9d7087)
 
 ## Docker image
 This repo automatically builds a Docker image that can be pulled from the
