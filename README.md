@@ -1,10 +1,13 @@
 # log-pager
 
 ## Overview
-Lightweight security log forensics and blacklisting web interface, intended to
+Lightweight security log inspection and blacklisting web interface, intended to
 provide a dashboard for threats. Displays log events as heatmap using tile plot,
 allowing user to click on a given period to drill down into the log. Performs
 asynchronous geolocation and reverse DNS resolution.
+
+Right now this will handle web logs and auth logs, but is designed to easily allow
+other log types to be added.
 
 ### Threat intel and blocking
 For each IP in the log, there is a button to pull intel about an IP, including
@@ -23,7 +26,7 @@ used.
 
 ### Potential blacklist service
 If enough people adopt this, the next step will be to build a service that would
-collect blacklisted IPs (if you voluntarily configured your instance of
+collect your blacklisted IPs (if you voluntarily configured your instance of
 log-pager to forward blacklist items) and publicly provide provde aggregated
 blacklists based on crowdsourced human judgement, rather than algorithms. If you
 think this would be interesting, please reach out.
@@ -47,24 +50,24 @@ A public demo of the current development branch may (or may not) be running at
 170507](https://github.com/jonbirge/logpager/assets/660566/ce08c7b3-111e-489b-815d-52241d9d7087)
 
 ## Docker image
-This repo automatically builds a Docker image that can be pulled from the GitHub
-Container Registry. See the Packages tab in the GitHub repo for the latest
-version.
+You can get a built image from the Packages section here, or from Docker Hub at
+<https://hub.docker.com/r/jonbirge/logpager>.
 
 ### General usage
-Mount the log files of interest as `/access.log` and `/auth.log` in the Docker
-container. Connect to the container on HTTP port 80 and the default interface
+Mount the web and auth log files as `/access.log` and `/auth.log`, respectively.
+Connect to the container on HTTP port 80 and the default interface
 will be served. There is no security or SSL provided as this is primarily
 intended as an auxilary container to be integrated with other containers and
 hosted behind a reverse proxy, such as Traefik. Right now this only work with
 CLF log files, but will eventually be made to work with at least standard auth
 logs, as well.
 
-You can quickly stand up a fully functional demo using the `docker-compose.yml`
+The best way to use this is within an orchestrated set of containers. You can
+quickly stand up a fully functional demo using the `docker-compose.yml`
 file found in `/test/stack`.
 
-### Use with `docker-compose`
-Here is an example docker-compose.yml file showing how to integrate with a
+### Use with Docker Compose
+Here is an example `docker-compose.yml` file showing how to integrate with a
 reverse proxy (Traefik) to access logs for all proxy traffic. (Obviously, you'll
 want to have other services as well which I haven't shown here.)
 ```
