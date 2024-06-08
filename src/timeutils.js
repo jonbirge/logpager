@@ -23,11 +23,11 @@ function timeDiff(date1, date2) {
     if (days > 2) {
         return days + " days";
     } else if (hours > 2) {
-        return hours + " hrs";
+        return hours + " hr";
     } else if (minutes > 5) {
         return minutes + " min";
     } else {
-        return seconds + " sec";
+        return seconds + " s";
     }
 }
 
