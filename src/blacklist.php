@@ -39,7 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     // Insert $ip and $log (if exists) into the 'blacklist' table
-    $sql = "INSERT INTO $table (cidr, last_seen, log_type, log_line) VALUES ('$ip', '$timestamp', '$log_type', '$log')";
+    if ($log === 'NULL') {
+        $sql = "INSERT INTO $table (cidr, last_seen, log_type) VALUES ('$ip', '$timestamp', '$log_type')";
+    } else {
+        $sql = "INSERT INTO $table (cidr, last_seen, log_type, log_line) VALUES ('$ip', '$timestamp', '$log_type', '$log')";
+    }
     
     try {
         $conn->query($sql);

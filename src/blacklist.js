@@ -72,7 +72,7 @@ function loadBlacklist() {
 }
 
 // Function to send POST request to blacklist.php with a given IP address in the body of the POST
-function blacklistAdd(ip, type, lastTime, log) {
+function blacklistAdd(ip, type, lastTime, log = null) {
     // convert lastTime (a CLF timestamp string) to Date object and then to SQL timestamp
     let lastTimeDate;
     if (lastTime === null || lastTime === "") {
@@ -130,7 +130,7 @@ function blacklistRemove(ip, type, lastTime, log) {
 }
 
 // Make blacklist button
-function makeBlacklistButton(ip, type = "none", lastTime = "", log = "N/A") {
+function makeBlacklistButton(ip, type = "none", lastTime = "", log = "NULL") {
     const checker = new IPChecker(blackList);
     if (checker.isInCIDR(ip) && !checker.isCIDR(ip)) {  // regular ip covered by cidr block
         return `<button id="block-cidr" class="toggle-button tight disabled" disabled>cidr</button>`;

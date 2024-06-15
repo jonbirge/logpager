@@ -32,7 +32,7 @@ function pullIntel() {
                         table += ` <button ${blacklistID} class="toggle-button tight red" ${blacklistCall}">unblock</button>`;
                     } else {  // not blacklisted yet
                         const timeStamp = new Date();
-                        const blacklistCall = `onclick="blacklistAdd('${cidr}','cidr',null,'N/A');"`;
+                        const blacklistCall = `onclick="blacklistAdd('${cidr}','cidr',null,'NULL');"`;
                         const blacklistID = `id="block-${cidr}"`;
                         table += ` <button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block</button>`;
                     }
