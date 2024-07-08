@@ -51,18 +51,25 @@ The best way to use this is within an orchestrated set of containers. You can qu
 Here is an example `docker-compose.yml` file showing how to integrate with a reverse proxy (Traefik) to access logs for all proxy traffic in the context of a simple NGINX webserver. However, if you want to get started quickly, I recommend just looking at the example full stack (which includes configuration files) in `test/stack`.
 
 ```
+version: '3.7'
+
 services:
 
   traefik:
     image: traefik
     restart: always
     command:
-      - "--configFile=/etc/traefik.yml"
+      - "--accesslog.filePath=/logs/access.log"
+      - "--providers.file.directory=/etc/traefik"
+      - "--providers.file.watch=true"
+      - "--providers.docker.exposedByDefault=true"
+      - "--api.insecure=true"
+      - "--entryPoints.web.address=:80"
     ports:
       - "80:80"
+      - "8080:8080"  # traefik admin
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik.yml:/etc/traefik.yml:ro
       - ./traefik:/etc/traefik
       - ./logs/:/logs/:rw
     depends_on:
@@ -70,7 +77,7 @@ services:
       - www
 
   logpager:
-    image: jonbirge/logpager
+    image: logpager_test
     restart: always
     environment:
       SQL_HOST: db
@@ -81,7 +88,12 @@ services:
       - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
+    # You can uncomment the following line to reference your actual server auth.log file
+    # You may need to adjust permissions on that file to allow the docker container to read it.
+    # - /var/log/auth.log:/auth.log:ro
+      - ../logs/auth.log:/auth.log:ro  # fake auth logs for testing
       - ./logs/access.log:/access.log:ro  # actual logs from this stack
+      - ../../src:/var/www:ro  # for live development (comment out to run from image)
     depends_on:
       - db
 
@@ -93,12 +105,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: testpass
 
-  www:
-    image: nginx
-    restart: always
-    labels:
-      - "traefik.http.routers.www.rule=PathPrefix(`/`)"
-    volumes:
-      - ./www:/usr/share/nginx/html:rw
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+# Other services
+
+volumes:
+  dbdata:
 ```

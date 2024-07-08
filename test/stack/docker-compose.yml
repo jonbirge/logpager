@@ -29,9 +29,9 @@ services:
       - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
+      - ../../src:/var/www:ro  # for live development (comment out to run from image)
       - ../logs/auth.log:/auth.log:ro  # fake auth logs for testing
       - ./logs/access.log:/access.log:ro  # actual logs from this stack
-      - ../../src:/var/www:ro  # for live development (comment out to run from image)
     depends_on:
       - db
 
