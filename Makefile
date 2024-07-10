@@ -47,7 +47,7 @@ release: push $(BUILD_SMALL_FILE)
 	docker push $(RELEASE_IMAGE_NAME_SMALL)
 	docker push $(RELEASE_IMAGE_NAME)
 
-# Test image for development
+# Local test image for development
 test:
 	docker build -t $(IMAGE_NAME)_test .
 

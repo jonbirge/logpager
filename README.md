@@ -18,7 +18,7 @@ The approach is to treat the log file itself as truth and run UNIX tool commands
 
 ## Demo
 
-A public demo of the current development branch may (or may not) be running at <https://nyc.birgefuller.com/logs/>
+You can run a demo container stack locally by running `make up` at the top level of the distribution and connecting a browser to <http://localhost/logs/>. In addition, a public demo of the current development branch may (or may not) be running at <https://nyc.birgefuller.com/logs/>.
 
 ## Screenshots
 
@@ -40,15 +40,13 @@ You can get a pre-built image from the Packages section here, or from Docker Hub
 
 ### Usage
 
-Mount the web and auth log files as `/access.log` and `/auth.log`, respectively. Connect to the container on HTTP port 80 and the default interface will be served. There is no security or SSL provided as this is primarily intended as an auxilary container to be integrated with other containers and hosted behind a reverse proxy, such as Traefik. Right now this only work with CLF log files, but will eventually be made to work with at least standard auth logs, as well.
+Mount your server's web and/or auth log files into the logpager container as `/access.log` and `/auth.log`, respectively. Connect to the container on HTTP port 80 and the default interface will be served. There is no security or SSL provided as this is primarily intended as an auxilary container to be integrated with other containers and hosted behind a reverse proxy, such as Traefik. Right now this only work with CLF log files, but will eventually be made to work with at least standard auth logs, as well.
 
 Export `/blacklist.csv` to provide a live list of blacklisted IP addresses and CIDRs. There are scripts showing how to use this file to update iptable-based firewalls in Linux.
 
 ### Docker Compose
 
-The best way to use this is within an orchestrated set of containers. You can quickly stand up a fully functional demo using the `docker-compose.yml` file found in `/test/stack`.
-
-Here is an example `docker-compose.yml` file showing how to integrate with a reverse proxy (Traefik) to access logs for all proxy traffic in the context of a simple NGINX webserver. However, if you want to get started quickly, I recommend just looking at the example full stack (which includes configuration files) in `test/stack`.
+The easiest way to use this is within an orchestrated set of containers that includes a reverse proxy and an SQL database (to handle the backlisting functionality). You can quickly stand up a fully functional instance of logpager using the `docker-compose.yml` file found in `/test/stack`. Below is an example `docker-compose.yml` file showing how to integrate with a reverse proxy (Traefik) to access logs for all proxy traffic.
 
 ```
 version: '3.7'
@@ -88,12 +86,8 @@ services:
       - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
-    # You can uncomment the following line to reference your actual server auth.log file
-    # You may need to adjust permissions on that file to allow the docker container to read it.
-    # - /var/log/auth.log:/auth.log:ro
-      - ../logs/auth.log:/auth.log:ro  # fake auth logs for testing
-      - ./logs/access.log:/access.log:ro  # actual logs from this stack
-      - ../../src:/var/www:ro  # for live development (comment out to run from image)
+      - /var/log/auth.log:/auth.log:ro
+      - ./logs/access.log:/access.log:ro  # web logs from this stack
     depends_on:
       - db
 
