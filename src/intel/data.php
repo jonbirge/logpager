@@ -21,6 +21,7 @@ function getIntelData($ip) {
     unset($ipinfo['query']);
     unset($ipinfo['lat']);
     unset($ipinfo['lon']);
+    unset($ipinfo['countryCode']);
 
     // remove any blank fields
     $ipinfo = array_filter($ipinfo);

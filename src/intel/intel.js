@@ -7,7 +7,6 @@ loadBlacklist();
 pullIntel();
 
 // function to pull geolocation and whois data from web services and display it
-// in the intel div in a table
 function pullIntel() {
     const intelDiv = document.getElementById("intel");
     fetch("intel/data.php?ip=" + targetIP)
@@ -18,27 +17,34 @@ function pullIntel() {
             return response.json();
         })
         .then((data) => {
-            // generate table of the data object
-            // TODO: share blacklist button functionality in blacklist.js
             let table = "<table>";
             table += "<tr><th>Property</th><th>Value</th></tr>";
             for (const [key, value] of Object.entries(data)) {
+                let displayValue = value;
+
+                // Check for boolean true or false values and replace with HTML for colored dots
+                if (value === true) {
+                    displayValue = '<span style="color: green;">●</span>';
+                } else if (value === false) {
+                    displayValue = '<span style="color: darkred;">●</span>';
+                }
+
+                // Handle special cases
                 if (key === "cidr") {
                     const cidr = value;
-                    table += `<tr><td>${key}</td><td>${cidr}`;
-                    if (blackList.includes(cidr)) {  // already blacklisted it
+                    table += `<tr><td>${key}</td><td>${displayValue}`;
+                    if (blackList.includes(cidr)) {
                         const blacklistCall = `onclick="blacklistRemove('${cidr}');"`;
                         const blacklistID = `id="block-${cidr}"`;
                         table += ` <button ${blacklistID} class="toggle-button tight red" ${blacklistCall}">unblock</button>`;
-                    } else {  // not blacklisted yet
-                        const timeStamp = new Date();
+                    } else {
                         const blacklistCall = `onclick="blacklistAdd('${cidr}','cidr',null,'NULL');"`;
                         const blacklistID = `id="block-${cidr}"`;
                         table += ` <button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block</button>`;
                     }
                     table += "</td></tr>";
                 } else {
-                    table += `<tr><td>${key}</td><td>${value}</td></tr>`;
+                    table += `<tr><td>${key}</td><td>${displayValue}</td></tr>`;
                 }
             }
             intelDiv.innerHTML = table;
