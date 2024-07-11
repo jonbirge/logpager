@@ -10,16 +10,20 @@ $ipinfo = getIntelData($target_ip);
 echo json_encode($ipinfo);
 
 function getIntelData($ip) {
-    // geo lookup
+    // perform geo lookup
     $ipURL = "http://ip-api.com/json/$ip?fields=17563647";
     $ipinfo = file_get_contents($ipURL);
     $ipinfo = json_decode($ipinfo, true);
-    // strip some of the dumber fields
+    
+    // strip some of the more useless fields
     unset($ipinfo['status']);
     unset($ipinfo['timezone']);
     unset($ipinfo['query']);
     unset($ipinfo['lat']);
     unset($ipinfo['lon']);
+
+    // remove any blank fields
+    $ipinfo = array_filter($ipinfo);
     
     // whois lookup
     $whois = shell_exec("whois $ip");
