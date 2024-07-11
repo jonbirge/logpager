@@ -59,11 +59,13 @@ function ipRange2cidr($start_ip, $end_ip) {
     $mask = $start ^ $end;
     $masklen = 32 - log(($mask + 1), 2);
     
-    if (is_int($masklen)) {
+    // Check if $masklen has a very small fractional part
+    if (fmod($masklen, 1) < 0.0001) {
+        // Round $masklen to the nearest whole number to avoid small truncation errors
+        $masklen = round($masklen);
         return long2ip($start) . "/" . $masklen;
     } else {
         // If we can't create a clean CIDR, return null
         return null;
     }
 }
-
