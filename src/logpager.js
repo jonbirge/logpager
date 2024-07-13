@@ -1,5 +1,6 @@
 // hard-wired settings
 const geolocate = true; // pull IP geolocation from external service?
+const includeDomain = false; // include domain in geolocation?
 const tileLabels = false; // show tile labels on heatmap?
 const fillToNow = true; // fill heatmap to current time?
 const heatmapRatio = 0.5; // width to height ratio of heatmap
@@ -282,7 +283,9 @@ function refreshTable() {
             case "IP":
                 row += "<th>" + addSortLink(j, headerName) + "</th>";
                 if (geolocate) {
-                    row += '<th class="hideable">Domain</th>';
+                    if (includeDomain) {
+                        row += '<th class="hideable">Domain</th>';
+                    }
                     row += '<th class="hideable">Organization</th>';
                     row += "<th>Geolocation</th>";
                 }
@@ -334,8 +337,10 @@ function refreshTable() {
                     const intelLink = `onclick="window.open('intel.php?ip=${ip}'); return false"`;
                     row += ` <button id="intel-${ip}" class="toggle-button tight" ${intelLink}>intel</button></nobr></td>`;
                     if (geolocate) {
-                        const hostnameid = `hostname-${ip}`;
-                        row += `<td class="hideable" id="${hostnameid}"></td>`;
+                        if (includeDomain) {
+                            const hostnameid = `hostname-${ip}`;
+                            row += `<td class="hideable" id="${hostnameid}"></td>`;
+                        }
                         const orgid = `org-${ip}`;
                         row += `<td class="hideable" id="${orgid}"></td>`;
                         const geoid = `geo-${ip}`;
