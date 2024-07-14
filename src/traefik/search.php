@@ -7,7 +7,7 @@ function search($searchDict, $doSummary = true)
     $maxSearchLines = 100000;  // matching lines
 
     // Path to the CLF log file
-    $logFilePath = '/clf.log';
+    $logFilePath = '/access.log';
     $escFilePath = escapeshellarg($logFilePath);
 
     // get search parameters
@@ -47,7 +47,12 @@ function search($searchDict, $doSummary = true)
     $lineCount = 0;
     foreach ($lines as $line) {
         // Extract the CLF fields from the line
-        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $data);
+        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) \S+ \"-\" \"-\" \S+ \"(\S+)\" \"\S+\" \S+/', $line, $data);
+
+        // swap the last two matches so the status is always last
+        $temp = $data[4];
+        $data[4] = $data[5];
+        $data[5] = $temp;
 
         // If $ip is set, skip this line if it doesn't contain $ip
         if ($ip !== null && strpos($data[1], $ip) === false) {
@@ -95,7 +100,7 @@ function search($searchDict, $doSummary = true)
         echo json_encode($searchLines);
     } else {  // return standard log 
         // read in loghead.json and prepend to $logLines to create $searchLines
-        $headers = json_decode(file_get_contents('clf/loghead.json'));
+        $headers = json_decode(file_get_contents('traefik/loghead.json'));
         $searchLines = [];
         $searchLines[] = $headers;
         $searchLines = array_merge($searchLines, $logLines);

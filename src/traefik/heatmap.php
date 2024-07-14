@@ -3,7 +3,7 @@
 function heatmap($searchDict)
 {
     // Log file to read
-    $logFilePath = '/clf.log';
+    $logFilePath = '/access.log';
 
     // Get search parameters
     $search = $searchDict['search'];

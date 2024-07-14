@@ -4,7 +4,7 @@
 include 'searchparse.php';
 
 // Get parameters from URL
-$type = $_GET['type'] ?? "auth";  // auth or clf
+$type = $_GET['type'] ?? "auth";  // auth, traefik, or clf
 $search = $_GET['search'] ?? "publickey";  // search string
 $summary = $_GET['summary'] ?? "true";  // true or false
 $doSummary = $summary === "true";
@@ -19,6 +19,6 @@ if (!file_exists($searchInc)) {
     return;
 }
 
-// Execute the appropriate heatmap function
+// Execute the appropriate function
 include $searchInc;
 search($searchDict, $doSummary);

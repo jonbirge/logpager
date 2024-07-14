@@ -237,7 +237,7 @@ function runWhois() {
 }
 
 function runAll() {
-    runScan();
+    runScan('deep');
     runPing();
     runTrace();
     runWhois(targetIP);

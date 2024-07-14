@@ -17,9 +17,11 @@
 
 <body>
     <div id="logpager" class="container">
+        <!-- log tabs -->
         <div class="tab-header">
-            <a id="authtab" class="tab" href="./?type=auth&page=0">auth.log</a>
-            <a id="clftab" class="tab" href="./?type=clf&page=0">access.log</a>
+            <a id="authtab" class="tab" href="./?type=auth&page=0">Auth</a>
+            <a id="traefiktab" class="tab" href="./?type=traefik&page=0">Træfik</a>
+            <a id="clftab" class="tab" href="./?type=clf&page=0">CLF</a>
         </div>
 
         <!-- summary charts -->
@@ -54,13 +56,13 @@
         </div>
 
         <!-- version footer -->
-        <div>1.9-dev</div>
+        <div>1.9-d2</div>
 
     </div>
 
-    <script src="timeutils.js?ver=1"></script>
-    <script src="blacklist.js?ver=18"></script>
-    <script src="logpager.js?ver=21"></script>
+    <script src="timeutils.js"></script>
+    <script src="blacklist.js"></script>
+    <script src="logpager.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 </body>
 

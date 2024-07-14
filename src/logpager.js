@@ -18,13 +18,13 @@ let controller;
 let page = params.get("page") !== null ? Number(params.get("page")) : 0;
 let search = params.get("search");
 let summary = params.get("summary") !== null ? params.get("summary") == "true" : true; // applies to search
-let logType = params.get("type") !== null ? params.get("type") : "auth"; // "clf" or "auth"
+let logType = params.get("type") !== null ? params.get("type") : "auth"; // "auth", "clf", or "traefik"
 let tableLength = 0; // used to decide when to reuse the table
 let logLines = []; // cache of current displayed table data
 let geoCache = {}; // cache of geolocation data
 
 // start initial data fetches
-loadManifest();
+updateTabs();
 loadBlacklist();
 
 // create update interval
@@ -59,16 +59,22 @@ document.getElementById("search-input").oninput = function () {
 };
 
 // load the log manifest and update the log type tabs
-function loadManifest() {
+function updateTabs() {
     fetch("manifest.php")
         .then((response) => response.json())
         .then((data) => {
-            const haveCLF = data.includes("access.log");
+            const haveCLF = data.includes("clf.log");
             const haveAuth = data.includes("auth.log");
+            const haveTraefik = data.includes("access.log");
             if (!haveCLF) {
                 document.getElementById("clftab").style.display = "none";
             } else {
                 document.getElementById("clftab").style.display = "";
+            }
+            if (!haveTraefik) {
+                document.getElementById("traefiktab").style.display = "none";
+            } else {
+                document.getElementById("traefiktab").style.display = "";
             }
             if (!haveAuth) {
                 document.getElementById("authtab").style.display = "none";
@@ -77,12 +83,24 @@ function loadManifest() {
                 document.getElementById("authtab").style.display = "";
             }
             // highlight the current log type
-            if (logType == "clf") {
-                document.getElementById("clftab").classList.add("selected");
-                document.getElementById("authtab").classList.remove("selected");
-            } else {
-                document.getElementById("authtab").classList.add("selected");
-                document.getElementById("clftab").classList.remove("selected");
+            switch (logType) {
+                case "clf":
+                    document.getElementById("clftab").classList.add("selected");
+                    document.getElementById("authtab").classList.remove("selected");
+                    document.getElementById("traefiktab").classList.remove("selected");
+                    break;
+                case "auth":
+                    document.getElementById("clftab").classList.remove("selected");
+                    document.getElementById("authtab").classList.add("selected");
+                    document.getElementById("traefiktab").classList.remove("selected");
+                    break;
+                case "traefik":
+                    document.getElementById("clftab").classList.remove("selected");
+                    document.getElementById("authtab").classList.remove("selected");
+                    document.getElementById("traefiktab").classList.add("selected");
+                    break;
+                default:
+                    console.error("Unknown log type: " + logType);
             }
         });
 }
