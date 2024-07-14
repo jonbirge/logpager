@@ -7,7 +7,7 @@ function search($searchDict, $doSummary = true)
     $maxSearchLines = 100000;  // matching lines
 
     // Path to the CLF log file
-    $logFilePath = '/clf.log';
+    $logFilePath = '/access.log';
     $escFilePath = escapeshellarg($logFilePath);
 
     // get search parameters

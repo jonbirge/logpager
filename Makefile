@@ -49,7 +49,7 @@ release: push $(BUILD_SMALL_FILE)
 
 # Local test image for live development
 dev:
-	docker build -t $(IMAGE_NAME)_test .
+	docker build -t $(IMAGE_NAME)-dev .
 
 # Bring up/down the local dev stack
 up: dev

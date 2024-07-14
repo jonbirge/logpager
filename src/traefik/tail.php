@@ -3,7 +3,7 @@
 function tail($page, $linesPerPage)
 {
     // Path to the CLF log file
-    $logFilePath = '/clf.log';
+    $logFilePath = '/access.log';
     $escFilePath = escapeshellarg($logFilePath);
 
     // use UNIX wc command to count lines in file

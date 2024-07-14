@@ -17,7 +17,7 @@ services:
       - logpager
 
   logpager:
-    image: logpager_test
+    image: logpager-dev
     restart: always
     environment:
       SQL_HOST: db
@@ -28,8 +28,9 @@ services:
       - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
-      - ../../src:/var/www:ro  # for live development (comment out to run from image)
-      - ../logs/auth.log:/auth.log:ro  # fake auth logs for testing
+      - ../../src:/var/www:ro  # live development
+      - ../logs/auth.log:/auth.log:ro  # test auth logs
+      - ../logs/clf.log:/clf.log:ro  # test clf logs
       - ./logs/access.log:/access.log:ro  # actual logs from this stack
     depends_on:
       - db
