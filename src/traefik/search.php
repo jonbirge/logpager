@@ -95,7 +95,7 @@ function search($searchDict, $doSummary = true)
         echo json_encode($searchLines);
     } else {  // return standard log 
         // read in loghead.json and prepend to $logLines to create $searchLines
-        $headers = json_decode(file_get_contents('clf/loghead.json'));
+        $headers = json_decode(file_get_contents('traefik/loghead.json'));
         $searchLines = [];
         $searchLines[] = $headers;
         $searchLines = array_merge($searchLines, $logLines);

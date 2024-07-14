@@ -22,4 +22,3 @@ if (!file_exists($searchInc)) {
 // Execute the appropriate function
 include $searchInc;
 search($searchDict, $doSummary);
-

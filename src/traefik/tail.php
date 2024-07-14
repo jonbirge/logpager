@@ -32,7 +32,7 @@ function tail($page, $linesPerPage)
     pclose($fp);
 
     // Read in CLF header name array from loghead.json
-    $headers = json_decode(file_get_contents('clf/loghead.json'));
+    $headers = json_decode(file_get_contents('traefik/loghead.json'));
 
     // Create array of CLF log lines
     $logLines = [];
@@ -41,7 +41,13 @@ function tail($page, $linesPerPage)
     // Process each line and add to the array
     foreach ($lines as $line) {
         // Extract the CLF fields from the line
-        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $matches);
+        // preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $matches);
+        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) \S+ \"-\" \"-\" \S+ \"\S+\" \"(.*?)\" \S+/', $line, $matches);
+
+        // swap the last two matches so the status is always last
+        $temp = $matches[4];
+        $matches[4] = $matches[5];
+        $matches[5] = $temp;
 
         // Go through each match and add to the array with htmlspecialchars()
         $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));
