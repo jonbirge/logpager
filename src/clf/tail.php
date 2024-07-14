@@ -31,8 +31,8 @@ function tail($page, $linesPerPage)
     }
     pclose($fp);
 
-    // Read in CLF header name array from clfhead.json
-    $headers = json_decode(file_get_contents('loghead.json'));
+    // Read in CLF header name array from loghead.json
+    $headers = json_decode(file_get_contents('clf/loghead.json'));
 
     // Create array of CLF log lines
     $logLines = [];

@@ -109,7 +109,11 @@ function search($searchDict, $doSummary = true)
         $searchLines = array_slice($searchLines, 0, $maxItems);
         echo json_encode($searchLines);
     } else {
-        $searchLines = searchLines($logLines);
+        // read in loghead.json and prepend to $logLines to create $searchLines
+        $headers = json_decode(file_get_contents('auth/loghead.json'));
+        $searchLines = [];
+        $searchLines[] = $headers;
+        $searchLines = array_merge($searchLines, $logLines);
         echo json_encode([
             'page' => 0,
             'pageCount' => 0,

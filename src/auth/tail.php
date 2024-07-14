@@ -58,7 +58,7 @@ function tail($page, $linesPerPage)
     unlink($tmpFilePath);
 
     // Read in CLF header name array from clfhead.json
-    $headers = json_decode(file_get_contents('loghead.json'));
+    $headers = json_decode(file_get_contents('auth/loghead.json'));
 
     // Create array of auth log lines
     $logLines = [];

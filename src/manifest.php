@@ -2,8 +2,9 @@
 
 // parameters
 $logFiles = [
-    'access.log',
-    'auth.log'
+    'access.log',  // traefik extended CLF file
+    'auth.log',
+    'clf.log'
 ];
 $filePrefix = '/';
 

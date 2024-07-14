@@ -19,6 +19,7 @@ if (!file_exists($searchInc)) {
     return;
 }
 
-// Execute the appropriate heatmap function
+// Execute the appropriate function
 include $searchInc;
 search($searchDict, $doSummary);
+

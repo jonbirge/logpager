@@ -4,7 +4,7 @@
 $defaultLines = 12;
 
 // Get parameters from URL
-$type = $_GET['type'] ?? "auth";  // auth or clf
+$type = $_GET['type'] ?? "auth";  // auth, clf, or traefik
 $page = $_GET['page'] ?? 0;  // page size
 $linesPerPage = $_GET['n'] ?? $defaultLines;  // number of lines per page
 

@@ -15,7 +15,6 @@ services:
       - ./logs/:/logs/:rw
     depends_on:
       - logpager
-      - www
 
   logpager:
     image: logpager_test

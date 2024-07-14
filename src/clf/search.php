@@ -88,13 +88,17 @@ function search($searchDict, $doSummary = true)
     }
 
     // If $doSummary is true, summarize the log lines
-    if ($doSummary) { // return summary 
+    if ($doSummary) {  // return summary 
         $searchLines = searchStats($logLines);
         // take the first $maxItems items
         $searchLines = array_slice($searchLines, 0, $maxItems + 1);
         echo json_encode($searchLines);
-    } else { // return standard log 
-        $searchLines = searchLines($logLines);
+    } else {  // return standard log 
+        // read in loghead.json and prepend to $logLines to create $searchLines
+        $headers = json_decode(file_get_contents('clf/loghead.json'));
+        $searchLines = [];
+        $searchLines[] = $headers;
+        $searchLines = array_merge($searchLines, $logLines);
         echo json_encode([
             'page' => 0,
             'pageCount' => 0,

@@ -47,16 +47,16 @@ release: push $(BUILD_SMALL_FILE)
 	docker push $(RELEASE_IMAGE_NAME_SMALL)
 	docker push $(RELEASE_IMAGE_NAME)
 
-# Local test image for development
-test:
+# Local test image for live development
+dev:
 	docker build -t $(IMAGE_NAME)_test .
 
-# Bring up/down the test stack
-up: test
+# Bring up/down the local dev stack
+up: dev
 	cd ./test/stack && ./up.sh
 
 down:
 	- cd ./test/stack && ./down.sh
 
-.PHONY: all build build-small clean push release test up down
+.PHONY: all build build-small clean push release dev up down
 
