@@ -40,9 +40,8 @@ function tail($page, $linesPerPage)
 
     // Process each line and add to the array
     foreach ($lines as $line) {
-        // Extract the CLF fields from the line
-        // preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $matches);
-        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) \S+ \"-\" \"-\" \S+ \"\S+\" \"(.*?)\" \S+/', $line, $matches);
+        // Extract the important CLF and Traefik special fields from the line
+        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) \S+ \"-\" \"-\" \S+ \"(\S+)\" \"\S+\" \S+/', $line, $matches);
 
         // swap the last two matches so the status is always last
         $temp = $matches[4];

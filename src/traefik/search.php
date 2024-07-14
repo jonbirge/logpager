@@ -47,7 +47,12 @@ function search($searchDict, $doSummary = true)
     $lineCount = 0;
     foreach ($lines as $line) {
         // Extract the CLF fields from the line
-        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $data);
+        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) \S+ \"-\" \"-\" \S+ \"(\S+)\" \"\S+\" \S+/', $line, $data);
+
+        // swap the last two matches so the status is always last
+        $temp = $data[4];
+        $data[4] = $data[5];
+        $data[5] = $temp;
 
         // If $ip is set, skip this line if it doesn't contain $ip
         if ($ip !== null && strpos($data[1], $ip) === false) {
