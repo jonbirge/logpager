@@ -4,7 +4,7 @@
 
 Lightweight security log inspection and blacklisting web interface, intended to provide a dashboard for threats. Displays log events as heatmap using tile plot, allowing user to click on a given period to drill down into the log. Performs asynchronous geolocation and reverse DNS resolution.
 
-Right now this will handle web logs and auth logs, but is designed to easily allow other log types to be added.
+Right now this will handle web logs, Traefik logs, and auth logs (e.g. sshd), but is designed to allow other log types to be added via a quasi-object-oriented programming interface.
 
 ### Threat intel and blocking
 
@@ -40,9 +40,9 @@ You can get a pre-built image from the Packages section here, or from Docker Hub
 
 ### Usage
 
-Mount your server's web and/or auth log files into the logpager container as `/access.log` and `/auth.log`, respectively. Connect to the container on HTTP port 80 and the default interface will be served. There is no security or SSL provided as this is primarily intended as an auxilary container to be integrated with other containers and hosted behind a reverse proxy, such as Traefik. Right now this only work with CLF log files, but will eventually be made to work with at least standard auth logs, as well.
+Mount your server's log files into the logpager container as shown below. Connect to the container on HTTP port 80 and the default interface will be served. There is no security or SSL provided as this is primarily intended as an auxilary container to be integrated with other containers and hosted behind a reverse proxy, such as Traefik.
 
-Export `/blacklist.csv` to provide a live list of blacklisted IP addresses and CIDRs. There are scripts showing how to use this file to update iptable-based firewalls in Linux.
+Export `/blacklist.csv` to provide a live list of blacklisted IP addresses and CIDRs. There are scripts in `/utils` showing how to use this file to update iptable-based firewalls in Linux.
 
 ### Docker Compose
 
