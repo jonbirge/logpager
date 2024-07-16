@@ -15,6 +15,7 @@ function search($searchDict, $doSummary = true)
     $ip = $searchDict['ip'];
     $date = $searchDict['date'];
     $stat = $searchDict['stat'];
+    $serv = $searchDict['serv'];
 
     // build UNIX command
     $grepSearch = '';
@@ -29,6 +30,9 @@ function search($searchDict, $doSummary = true)
     }
     if ($stat) {
         $grepSearch .= " -e $stat";
+    }
+    if ($serv) {
+        $grepSearch .= " -e $serv";
     }
     $cmd = "tac $escFilePath | grep -m $maxSearchLines $grepSearch";
 
@@ -64,8 +68,13 @@ function search($searchDict, $doSummary = true)
             continue;
         }
 
+        // If $serv is set, skip this line if it doesn't contain $serv
+        if ($serv !== null && strpos($data[4], $serv) === false) {
+            continue;
+        }
+
         // If $stat is set, skip this line if it doesn't contain $stat
-        if ($stat !== null && strpos($data[4], $stat) === false) {
+        if ($stat !== null && strpos($data[5], $stat) === false) {
             continue;
         }
 
@@ -76,27 +85,26 @@ function search($searchDict, $doSummary = true)
 
         $lineCount++;
 
+        // If we're summarizing, store less data and use a date object
         if ($doSummary) {
-            // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object,  ignoring the timezone part
+            // convert the standard log date format to a PHP DateTime object
             $theDate = $data[2];
-            // remove time zone from $theDate
             $theDate = preg_replace('/\s+\S+$/', '', $theDate);
             $dateObj = DateTime::createFromFormat('d/M/Y:H:i:s', $theDate);
             if ($dateObj === false) {
                 echo "Error parsing date: $theDate\n";
             }
-            $logLines[] = [$data[1], $dateObj, $data[4]];
+            $logLines[] = [$data[1], $dateObj, $data[5]];  // IP, date, stat
         } else {
             $logLines[] = array_map('htmlspecialchars', array_slice($data, 1));
             if ($lineCount >= $maxItems) break;
         }
     }
 
-    // If $doSummary is true, summarize the log lines
+    // If $doSummary is true, run the statistics function
     if ($doSummary) {  // return summary 
         $searchLines = searchStats($logLines);
-        // take the first $maxItems items
-        $searchLines = array_slice($searchLines, 0, $maxItems + 1);
+        $searchLines = array_slice($searchLines, 0, $maxItems + 1);  // take the first $maxItems items
         echo json_encode($searchLines);
     } else {  // return standard log 
         // read in loghead.json and prepend to $logLines to create $searchLines

@@ -7,11 +7,13 @@ function parseSearch($search)
     $ip = null;
     $dateStr = null;
     $stat = null;
+    $serv = null;
     if ($search) {
         $search = trim($search);
         $ipPos = strpos($search, 'ip:');
         $datePos = strpos($search, 'date:');
         $statPos = strpos($search, 'stat:');
+        $servPos = strpos($search, 'serv:');
         if ($ipPos !== false) {
             $ip = substr($search, $ipPos + 3);
             $search = trim(substr($search, 0, $ipPos));
@@ -24,6 +26,10 @@ function parseSearch($search)
             $stat = substr($search, $statPos + 5);
             $search = trim(substr($search, 0, $statPos));
         }
+        if ($servPos !== false) {
+            $serv = substr($search, $servPos + 5);
+            $search = trim(substr($search, 0, $servPos));
+        }
         if ($search === '') {
             $search = null;
         }
@@ -33,7 +39,8 @@ function parseSearch($search)
             'search' => $search,
             'ip' => $ip,
             'date' => $dateStr,
-            'stat' => $stat
+            'stat' => $stat,
+            'serv' => $serv
         );
     } else {
         return null;
