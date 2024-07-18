@@ -6,7 +6,8 @@ include 'authparse.php';
 function search($searchDict, $doSummary = true)
 {
     // Parameters
-    $maxItems = 1024;  // Maximum number of items to return
+    $maxLines = 1024;  // Maximum number of items to return
+    $maxSummarize = 100000;  // Maximum number of items to summarize
 
     // Path to the auth log file
     $logFilePaths = getAuthLogFiles();
@@ -21,7 +22,7 @@ function search($searchDict, $doSummary = true)
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
 
     // generate UNIX grep command line arguments to include services we care about
-    $services = ['sshd', 'sudo'];
+    $services = ['sshd'];
     $grepArgs = '';
     foreach ($services as $service) {
         $grepArgs .= " -e $service";
@@ -29,10 +30,11 @@ function search($searchDict, $doSummary = true)
     $grepSrvCmd = "grep $grepArgs";
 
     // generate cat command to concatenate all log files
-    $catCmd = 'cat ' . implode(' ', $logFilePaths);
+    $catCmd = 'tac ' . implode(' ', $logFilePaths);
 
     // build UNIX command
-    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tac ";
+    // $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tac ";
+    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd";
 
     // execute the UNIX command
     $fp = popen($cmd, 'r');
@@ -92,13 +94,13 @@ function search($searchDict, $doSummary = true)
         $lineCount++;
         if ($doSummary) {
             // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object
-            // this is required by the searchStats() function
             $theDate = $data[1];
             $dateObj = DateTime::createFromFormat('d/M/Y:H:i:s', $theDate);
             $logLines[] = [$data[0], $dateObj, $status];
+            if ($lineCount >= $maxSummarize) break;
         } else {
             $logLines[] = [$data[0], $data[1], $data[2], $status];
-            if ($lineCount >= $maxItems) break;
+            if ($lineCount >= $maxLines) break;
         }
     }  // end foreach
 
