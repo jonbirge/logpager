@@ -1,9 +1,12 @@
 <?php
 
+// Include traefik.php
+include 'traefik.php';
+
 function heatmap($searchDict)
 {
-    // Log file to read
-    $logFilePath = '/access.log';
+    // Concatenate log files
+    $tmpFilePath = getTempLogFilePath();
 
     // Get search parameters
     $search = $searchDict['search'];
@@ -12,7 +15,7 @@ function heatmap($searchDict)
     $stat = $searchDict['stat'];
 
     // Open the log file for reading
-    $logFile = fopen($logFilePath, 'r');
+    $logFile = fopen($tmpFilePath, 'r');
     if (!$logFile) {
         echo "<p>Failed to open log file.</p>";
         return;
@@ -86,6 +89,9 @@ function heatmap($searchDict)
 
     // Close the log file
     fclose($logFile);
+
+    // Delete the temporary log file
+    unlink($tmpFilePath);
 
     // Echo the log summary data as JSON
     echo json_encode($logSummary);

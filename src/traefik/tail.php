@@ -1,13 +1,15 @@
 <?php
 
+// Include traefik.php
+include 'traefik.php';
+
 function tail($page, $linesPerPage)
 {
-    // Path to the CLF log file
-    $logFilePath = '/access.log';
-    $escFilePath = escapeshellarg($logFilePath);
+    // Concatenate log files
+    $tmpFilePath = getTempLogFilePath();
 
     // use UNIX wc command to count lines in file
-    $cmd = "wc -l $escFilePath";
+    $cmd = "wc -l $tmpFilePath";
     $fp = popen($cmd, 'r');
     $lineCount = intval(fgets($fp));
     pclose($fp);
@@ -19,9 +21,8 @@ function tail($page, $linesPerPage)
     $page = min($page, $pageCount);
 
     // build UNIX command
-    $firstLine = $page * $linesPerPage + 1;
-    $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "tail -n $lastLine $escFilePath | head -n $linesPerPage | tac";
+    $lastLine = ($page + 1) * $linesPerPage;  // counting back from end
+    $cmd = "tail -n $lastLine $tmpFilePath | head -n $linesPerPage | tac";  // faster near the end of the file
 
     // execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
@@ -30,6 +31,9 @@ function tail($page, $linesPerPage)
         $lines[] = $line;
     }
     pclose($fp);
+
+    // delete temp file
+    unlink($tmpFilePath);
 
     // Read in CLF header name array from loghead.json
     $headers = json_decode(file_get_contents('traefik/loghead.json'));

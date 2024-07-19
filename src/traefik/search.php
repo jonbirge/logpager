@@ -1,23 +1,25 @@
 <?php
 
+// Include traefik.php
+include 'traefik.php';
+
 function search($searchDict, $doSummary = true)
 {
     // Maximum number of items to return
     $maxItems = 1024;  // summary items
     $maxSearchLines = 100000;  // matching lines
 
-    // Path to the CLF log file
-    $logFilePath = '/access.log';
-    $escFilePath = escapeshellarg($logFilePath);
+    // Concatenate log files
+    $tmpFilePath = getTempLogFilePath();
 
-    // get search parameters
+    // Get search parameters
     $search = $searchDict['search'];
     $ip = $searchDict['ip'];
     $date = $searchDict['date'];
     $stat = $searchDict['stat'];
     $serv = $searchDict['serv'];
 
-    // build UNIX command
+    // Build UNIX command
     $grepSearch = '';
     if ($search) {
         $grepSearch .= " -e $search";
@@ -34,15 +36,19 @@ function search($searchDict, $doSummary = true)
     if ($serv) {
         $grepSearch .= " -e $serv";
     }
-    $cmd = "tac $escFilePath | grep -m $maxSearchLines $grepSearch";
+    $cmd = "tac $tmpFilePath | grep -m $maxSearchLines $grepSearch";
 
-    // execute UNIX command and read lines from pipe
+
+    // Execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
     $lines = [];
     while ($line = fgets($fp)) {
         $lines[] = $line;
     }
     pclose($fp);
+
+    // Delete temp file
+    unlink($tmpFilePath);
 
     // Create array of CLF log lines
     $logLines = [];
