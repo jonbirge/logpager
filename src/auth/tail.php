@@ -13,20 +13,20 @@ function tail($page, $linesPerPage)
 
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
-
+    
     // generate UNIX grep command line arguments to include services we care about
-    $services = ['sshd'];
-    $grepArgs = '';
-    foreach ($services as $service) {
-        $grepArgs .= " -e $service";
-    }
-    $grepSrvCmd = "grep $grepArgs";
+    // $services = ['sshd'];
+    // $grepArgs = '';
+    // foreach ($services as $service) {
+    //     $grepArgs .= " -e $service";
+    // }
+    // $grepSrvCmd = "grep $grepArgs";
 
     // generate cat command to concatenate all log files
     $catCmd = 'cat ' . implode(' ', $logFilePaths);
 
     // build and execute UNIX command to generate filtered log
-    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd > $tmpFilePath";
+    $cmd = "$catCmd | $grepIPCmd > $tmpFilePath";
     exec($cmd);
 
     // use UNIX wc command to count lines in temporary file
