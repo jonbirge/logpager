@@ -18,7 +18,7 @@ function heatmap($searchDict)
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
 
     // generate UNIX grep command line arguments to include services we care about
-    $services = ['sshd', 'sudo'];
+    $services = ['sshd'];
     $grepArgs = '';
     foreach ($services as $service) {
         $grepArgs .= " -e $service";
@@ -37,16 +37,10 @@ function heatmap($searchDict)
     // Initialize an empty array to store the log summary data
     $logSummary = [];
 
-    // Add each failed login attempt to the log summary
+    // Add each login attempt to the log summary
     while (($line = fgets($fp)) !== false) {
         $status = getAuthLogStatus($line);
         $data = parseAuthLogLine($line);
-
-        // Extract the timestamp from the auth log entry
-        $timeStamp = $data[1];
-
-        // Convert the timestamp to a DateTime object
-        $date = DateTime::createFromFormat('d/M/Y:H:i:s', $timeStamp);
 
         // If $stat is set, check if $status matches $stat
         if ($stat) {
@@ -63,7 +57,7 @@ function heatmap($searchDict)
         }
 
         // If $date is set, check if $data[1] contains $date
-        if ($date) {
+        if ($dateStr) {
             if (strpos($data[1], $dateStr) === false) {
                 continue;
             }
@@ -75,6 +69,12 @@ function heatmap($searchDict)
                 continue;
             }
         }
+
+        // Extract the timestamp from the auth log entry
+        $timeStamp = $data[1];
+
+        // Convert the timestamp to a DateTime object
+        $date = DateTime::createFromFormat('d/M/Y:H:i:s', $timeStamp);
 
         // Check if the DateTime object was created successfully
         if ($date !== false) {

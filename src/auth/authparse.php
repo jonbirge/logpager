@@ -65,7 +65,7 @@ function parseAuthLogLine($line)
     $year = date('Y');
 
     // Determine the kind of time stamp used
-    if (preg_match('/^[a-zA-Z]/', $line)) {  // CLF
+    if (preg_match('/^[a-zA-Z]/', $line)) {  // CLF format
         // Extract the month, day, and time from the line
         if (!preg_match('/(\S+)\s+(\d+) (\d+):(\d+):(\d+)/', $line, $matches)) {
             return false; // handle error as appropriate
@@ -79,7 +79,7 @@ function parseAuthLogLine($line)
         // Convert the month to a number
         $dateInfo = date_parse($monthStr);
         $monthNum = $dateInfo['month'];
-    } else {  // auth
+    } else {  // auth format
         // Split $line at the first space
         $parts = explode(' ', $line, 2); // Limiting to 2 parts ensures only the first space is used for splitting
 

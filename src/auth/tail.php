@@ -39,12 +39,11 @@ function tail($page, $linesPerPage)
     $pageCount = ceil($lineCount / $linesPerPage);
 
     // calculate the page number we'll actually be returning
-    $page = min($page, $pageCount);
+    $page = min($page, $pageCount);  // counting from back of file, where page zero is the last page
 
     // build UNIX command to get the lines we want
-    $firstLine = $page * $linesPerPage + 1;
-    $lastLine = $firstLine + ($linesPerPage - 1);
-    $cmd = "tail -n $lastLine $tmpFilePath | head -n $linesPerPage | tac";
+    $lastLine = ($page + 1) * $linesPerPage;  // counting back from end
+    $cmd = "tail -n $lastLine $tmpFilePath | head -n $linesPerPage | tac";  // faster near the end of the file
 
     // read the lines from UNIX pipe
     $fp = popen($cmd, 'r');
@@ -74,10 +73,11 @@ function tail($page, $linesPerPage)
         $status = getAuthLogStatus($data[2]);
 
         $logLines[] = [$data[0], $data[1], $data[2], $status];
-        $pageLineCount++;
-        if ($pageLineCount >= $linesPerPage) {
-            break;
-        }
+
+        // $pageLineCount++;
+        // if ($pageLineCount >= $linesPerPage) {
+        //     break;
+        // }
     }
 
     // Output $logLines, $page and $lineCount as a JSON dictionary
