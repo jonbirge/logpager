@@ -6,8 +6,8 @@ const fillToNow = true; // fill heatmap to current time?
 const heatmapRatio = 0.5; // width to height ratio of heatmap
 const maxDetailLength = 96; // truncation length of log details
 const maxGeoRequests = 30; // maximum number of IPs to externally geolocate at once
-const pollWait = 30; // seconds to wait between polling the server
-const mapWait = 15; // minutes to wait between updating the heatmap (always)
+const pollWait = 15; // seconds to wait between polling the server
+const mapWait = 15; // minutes to wait between updating the heatmap
 
 // global variables
 let params = new URLSearchParams(window.location.search);
@@ -23,11 +23,9 @@ let tableLength = 0; // used to decide when to reuse the table
 let logLines = []; // cache of current displayed table data
 let geoCache = {}; // cache of geolocation data
 
-// start initial data fetches
+// init
 updateTabs();
 loadBlacklist();
-
-// create update interval
 updateClock();
 setInterval(updateClock, 1000);
 
@@ -125,6 +123,10 @@ function updateClock() {
 function pollLog() {
     console.log("***** pollLog: fetching page " + page + " of type " + logType);
 
+    // Add spinning loading icon to log div
+    // const heatmapDiv = document.getElementById("log");
+    // heatmapDiv.innerHTML = '<div class="loader"></div>';
+
     // abort any pending fetches
     if (controller) {
         controller.abort();
@@ -156,6 +158,10 @@ function pollLog() {
 // search the log and return table of results
 function searchLog(searchTerm, doSummary) {
     console.log("searchLog: searching for " + searchTerm + ", summary = " + doSummary);
+
+    // Add spinning loading icon to log div
+    const heatmapDiv = document.getElementById("log");
+    heatmapDiv.innerHTML = '<div class="loader"></div>';
 
     // abort any pending fetches
     if (controller) {
@@ -339,7 +345,7 @@ function refreshTable() {
         row = "";
         for (let j = 0; j < logLines[i].length; j++) {
             // build row
-            const headerName = headers[j];
+            const headerName/*  */ = headers[j];
             switch (headerName) {
                 case "IP":
                     const ip = logLines[i][j];
@@ -510,10 +516,20 @@ function updateSummaryTable(jsonData) {
 
 // plot heatmap of log entries by hour and day, potentially including a search term
 function plotHeatmap(searchTerm, plotLogType = null) {
-    // cancel existing heatmap timeout
-    if (heatmapTimeout) {
-        clearTimeout(heatmapTimeout);
+    // Check if SVG element already exists and remove if so
+    const svgElement = document.querySelector("svg");
+    if (svgElement) {
+        svgElement.remove();
     }
+
+    // Add spinning loading icon to heatmap div
+    const heatmapDiv = document.getElementById("heatmap");
+    heatmapDiv.innerHTML = '<div class="loader"></div>';
+
+    // cancel existing heatmap timeout
+    // if (heatmapTimeout) {
+    //     clearTimeout(heatmapTimeout);
+    // }
 
     // set plotLogType to global logType if not provided
     if (plotLogType === null) {
@@ -533,10 +549,10 @@ function plotHeatmap(searchTerm, plotLogType = null) {
         .then(buildHeatmap);
 
     // set interval to update the heatmap every mapWait minutes
-    console.log("plotHeatmap: refresh time " + mapWait + " minutes");
-    heatmapTimeout = setTimeout(() => {
-        plotHeatmap(searchTerm, plotLogType);
-    }, mapWait * 60 * 1000);
+    // console.log("plotHeatmap: refresh time " + mapWait + " minutes");
+    // heatmapTimeout = setTimeout(() => {
+    //     plotHeatmap(searchTerm, plotLogType);
+    // }, mapWait * 60 * 1000);
 }
 
 // Take JSON array of command log data and build SVG heatmap
@@ -546,6 +562,10 @@ function buildHeatmap(jsonData) {
     if (svgElement) {
         svgElement.remove();
     }
+
+    // Remove wait animation
+    const heatmapDiv = document.getElementById("heatmap");
+    heatmapDiv.innerHTML = '';
 
     // Iterate through every entry in jsonDate[date][hour] and create an array of Date objects
     let dateObjs = [];
