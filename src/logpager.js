@@ -124,8 +124,8 @@ function pollLog() {
     console.log("***** pollLog: fetching page " + page + " of type " + logType);
 
     // Add spinning loading icon to log div
-    // const heatmapDiv = document.getElementById("log");
-    // heatmapDiv.innerHTML = '<div class="loader"></div>';
+    const statusDiv = document.getElementById("status");
+    statusDiv.innerHTML = '<div class="loader"></div>';
 
     // abort any pending fetches
     if (controller) {
@@ -144,8 +144,8 @@ function pollLog() {
     search = null;
 
     // update page to show loading...
-    const statusDiv = document.getElementById("status");
-    statusDiv.innerHTML = "<b>Loading...</b>";
+    // const statusDiv = document.getElementById("status");
+    // statusDiv.innerHTML = "<b>Loading...</b>";
 
     // get the log from the server
     fetch("logtail.php?type=" + logType + "&page=" + page)

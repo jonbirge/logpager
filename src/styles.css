@@ -122,7 +122,6 @@ a.header {
     display: inline;
 }
 
-/* Text box with 16pt font and wide left and right margins */
 .text-box {
     font-family: inherit;
     font-size: inherit;
@@ -134,6 +133,7 @@ a.header {
 /* Status text styling */
 .status {
     margin: 5px;
+    font-size: 12pt;
 }
 
 /* Style tables to have a smaller font size */
@@ -282,6 +282,7 @@ tr:nth-child(even) {
     }
     .status {
         margin: 1px;
+        font-size: 9pt;
     }
     th.hideable, td.hideable {
         display: none;
