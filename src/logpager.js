@@ -125,7 +125,7 @@ function pollLog() {
 
     // Add spinning loading icon to log div
     const statusDiv = document.getElementById("status");
-    statusDiv.innerHTML = '<div class="loader"></div>';
+    statusDiv.innerHTML = '<div class="loader small"></div>';
 
     // abort any pending fetches
     if (controller) {
