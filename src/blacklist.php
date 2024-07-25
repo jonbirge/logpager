@@ -7,7 +7,7 @@ $pass = getenv('SQL_PASS');
 $db = getenv('SQL_DB');
 $table = 'ip_blacklist';
 $csv_file = '/blacklist.csv';
-$yml_file = '/blacklist.yml';
+// $yml_file = '/blacklist.yml';
 
 // No caching allowed
 header("Cache-Control: no-cache, no-store, must-revalidate");
@@ -57,9 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     // Write to CSV file
-    $blacklist = read_sql($conn, $table);
+    $blacklist = read_sql_recent($conn, $table);
     write_csv($blacklist, $csv_file);
-    write_yml($blacklist, $yml_file);
+    // write_yml($blacklist, $yml_file);
 
     echo $ip . ' added to blacklist';
 
@@ -76,9 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     // Write to files
-    $blacklist = read_sql($conn, $table);
+    $blacklist = read_sql_recent($conn, $table);
     write_csv($blacklist, $csv_file);
-    write_yml($blacklist, $yml_file);
+    // write_yml($blacklist, $yml_file);
 
     // Send a confirmation message
     echo $ip . ' removed from blacklist';
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 $conn->close();
 
 
-// function to write all cidr values to a csv file
+// function to write all blacklist IPs/CIDRs to a csv file
 function write_csv($blacklist, $csv_file) {
     $file = fopen($csv_file, 'w');
     foreach ($blacklist as $cidr) {
@@ -103,24 +103,28 @@ function write_csv($blacklist, $csv_file) {
 }
 
 // function to write all ip/cidr values to a yml file suitable for use with traefik's denyip plugin middleware with the following examples format:
-function write_yml($blacklist, $yml_file) {
-    $file = fopen($yml_file, 'w');
-    fwrite($file, "http:\n");
-    fwrite($file, "  middlewares:\n");
-    fwrite($file, "    blacklist:\n");
-    fwrite($file, "      plugin:\n");
-    fwrite($file, "        denyip:\n");
-    fwrite($file, "          ipDenyList:\n");
-    foreach ($blacklist as $cidr) {
-        fwrite($file, "          - $cidr\n");
-    }
-    fclose($file);
-}
+// function write_yml($blacklist, $yml_file) {
+//     $file = fopen($yml_file, 'w');
+//     fwrite($file, "http:\n");
+//     fwrite($file, "  middlewares:\n");
+//     fwrite($file, "    blacklist:\n");
+//     fwrite($file, "      plugin:\n");
+//     fwrite($file, "        denyip:\n");
+//     fwrite($file, "          ipDenyList:\n");
+//     foreach ($blacklist as $cidr) {
+//         fwrite($file, "          - $cidr\n");
+//     }
+//     fclose($file);
+// }
 
 // function to read all cidr values from SQL into array
-function read_sql($conn, $table) {
-    $sql = "SELECT * FROM $table";
-    $result = $conn->query($sql);
+function read_sql_recent($conn, $table, $days = 30) {
+    $sql = "SELECT * FROM $table WHERE last_seen >= DATE_SUB(CURDATE(), INTERVAL ? DAY)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $days);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
     if ($conn->error) {
         die("SQL error: " . $conn->error);
     }
