@@ -19,7 +19,7 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $blacklist = read_sql($conn, $table);
+    $blacklist = read_sql_recent($conn, $table, 120);
     
     // Send the array as a JSON response
     echo json_encode($blacklist);
