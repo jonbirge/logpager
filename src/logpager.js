@@ -800,7 +800,7 @@ function buildHeatmap(jsonData) {
 function handleSearchForm() {
     const searchInput = document.getElementById("search-input");
     let searchStr = searchInput.value;
-    console.log("handleSearchButton: searching for " + searchStr);
+    // console.log("handleSearchButton: searching for " + searchStr);
 
     // add search term to URL
     const url = new URL(window.location.href);
@@ -816,7 +816,7 @@ function handleSearchForm() {
 function doSearch(searchTerm, doSummary) {
     const searchInput = document.getElementById("search-input");
     searchInput.value = searchTerm; // set search box to search term
-    console.log("doSearch: searching for " + searchTerm);
+    // console.log("doSearch: searching for " + searchTerm);
 
     // abort any pending fetches
     if (controller) {
