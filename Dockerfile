@@ -10,9 +10,11 @@ LABEL org.opencontainers.image.licenses=MIT
 RUN apk --no-cache update && apk --no-cache upgrade
 RUN apk add --no-cache nginx php83-fpm php83-mysqli
 RUN apk add --no-cache whois tcptraceroute nmap nmap-scripts
-
 RUN echo "variables_order = 'EGPCS'" > /etc/php83/conf.d/00_variables.ini
 RUN rm -rf /var/www && mkdir -p /var/www && chown -R nginx:nginx /var/www
+
+# Install SQL client
+RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
 
 # Setup default environment variables for local SQL
 ENV SQL_HOST=localhost
@@ -31,14 +33,11 @@ COPY conf/db.sql /db.sql
 # Copy the source files to the web root
 COPY src/ /var/www/
 
-# SQL client
-RUN apk add --no-cache mariadb-client mariadb-connector-c-dev
-
 # Startup script
 COPY docker/entry.sh /entry.sh
 
 # Expose HTTP port 
 EXPOSE 80
 
-# Start
+# Startup script
 CMD ["/entry.sh"]
