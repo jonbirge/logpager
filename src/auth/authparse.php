@@ -4,7 +4,7 @@
 function getAuthLogFiles()
 {
     // Array of log files to read
-    $logFilePaths = ['/auth.log'];
+    $logFilePaths = ['/auth.log.1', '/auth.log'];
 
     // Remove any log files that don't exist
     foreach ($logFilePaths as $key => $logFilePath) {
