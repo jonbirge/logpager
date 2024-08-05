@@ -6,7 +6,7 @@ include 'authparse.php';
 function heatmap($searchDict)
 {
     // Log files to read
-    $logFilePaths = getAuthLogFiles();
+    $logFilePaths = array_reverse(getAuthLogFiles());
 
     // Get search parameters
     $search = $searchDict['search'];
@@ -16,14 +16,6 @@ function heatmap($searchDict)
 
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
-
-    // generate UNIX grep command line arguments to include services we care about
-    // $services = ['sshd'];
-    // $grepArgs = '';
-    // foreach ($services as $service) {
-    //     $grepArgs .= " -e $service";
-    // }
-    // $grepSrvCmd = "grep $grepArgs";
 
     // generate cat command to concatenate all log files
     $catCmd = 'cat ' . implode(' ', $logFilePaths);

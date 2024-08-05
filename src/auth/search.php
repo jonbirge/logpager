@@ -10,7 +10,7 @@ function search($searchDict, $doSummary = true)
     $maxSummarize = 100000;  // Maximum number of items to summarize
 
     // Path to the auth log file
-    $logFilePaths = getAuthLogFiles();
+    $logFilePaths = array_reverse(getAuthLogFiles());
 
     // get search parameters
     $search = $searchDict['search'];
@@ -21,38 +21,21 @@ function search($searchDict, $doSummary = true)
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
 
-    // generate UNIX grep command line arguments to include services we care about
-    $services = ['sshd'];
-    $grepArgs = '';
-    foreach ($services as $service) {
-        $grepArgs .= " -e $service";
-    }
-    $grepSrvCmd = "grep $grepArgs";
-
     // generate cat command to concatenate all log files
     $catCmd = 'tac ' . implode(' ', $logFilePaths);
 
     // build UNIX command
-    // $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tac ";
-    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd";
+    $cmd = "$catCmd | $grepIPCmd";
 
     // execute the UNIX command
     $fp = popen($cmd, 'r');
-
-    // read the lines from UNIX pipe
-    $lines = [];
-    while ($line = fgets($fp)) {
-        $lines[] = $line;
-    }
-
-    pclose($fp);
 
     // Create array of auth log lines
     $logLines = [];
 
     // Process each line and add to the array
     $lineCount = 0;
-    foreach ($lines as $line) {
+    while ($line = fgets($fp)) {
         $data = parseAuthLogLine($line);
 
         if ($data === false) {
@@ -103,6 +86,8 @@ function search($searchDict, $doSummary = true)
             if ($lineCount >= $maxLines) break;
         }
     }  // end foreach
+
+    pclose($fp);
 
     // If $doSummary is true, summarize the log lines
     if ($doSummary) { // return summary format
