@@ -7,7 +7,6 @@ $pass = getenv('SQL_PASS');
 $db = getenv('SQL_DB');
 
 // No caching allowed
-// header("Cache-Control: max-age=86400, must-revalidate");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
 // Get HTML request method

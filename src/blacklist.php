@@ -7,7 +7,6 @@ $pass = getenv('SQL_PASS');
 $db = getenv('SQL_DB');
 $table = 'ip_blacklist';
 $csv_file = '/blacklist.csv';
-// $yml_file = '/blacklist.yml';
 
 // No caching allowed
 header("Cache-Control: no-cache, no-store, must-revalidate");
@@ -18,13 +17,34 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Handle HTTP methods
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Set doc type to JSON
     header('Content-Type: application/json');
 
-    // Send the array as a JSON response
-    $blacklist = read_sql_recent($conn, $table, 120);
-    echo json_encode($blacklist);
+    // Get the IP address from the URL
+    $ip = $_GET['ip'];
+
+    // Send the entire database if no IP address given
+    if (empty($ip)) {
+        $blacklist = read_sql_recent($conn, $table);
+        echo json_encode($blacklist);
+    } else {
+        // Get the IP address from the 'blacklist' table and output the entire row as JSON if it exists
+        $sql = "SELECT * FROM $table WHERE cidr = '$ip'";
+        $result = $conn->query($sql);
+        if ($conn->error) {
+            $conn->close();
+            die("SQL error: " . $conn->error);
+        }
+
+        $row = $result->fetch_assoc();
+        if ($row) {
+            echo json_encode($row);
+        } else {
+            echo json_encode([]);
+        }
+    }
     
 } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the IP address from the POST request body
@@ -61,7 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Write to CSV file
     $blacklist = read_sql_recent($conn, $table);
     write_csv($blacklist, $csv_file);
-    // write_yml($blacklist, $yml_file);
 
     echo $ip . ' added to blacklist';
 
@@ -80,13 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Write to files
     $blacklist = read_sql_recent($conn, $table);
     write_csv($blacklist, $csv_file);
-    // write_yml($blacklist, $yml_file);
 
     // Send a confirmation message
     echo $ip . ' removed from blacklist';
 
-} else {
-    // Send a 405 Method Not Allowed response
+} else {  // Send a 405 Method Not Allowed response
     http_response_code(405);
     echo 'Method Not Allowed';
 }
@@ -105,22 +122,22 @@ function write_csv($blacklist, $csv_file) {
 }
 
 // function to write all ip/cidr values to a yml file suitable for use with traefik's denyip plugin middleware with the following examples format:
-// function write_yml($blacklist, $yml_file) {
-//     $file = fopen($yml_file, 'w');
-//     fwrite($file, "http:\n");
-//     fwrite($file, "  middlewares:\n");
-//     fwrite($file, "    blacklist:\n");
-//     fwrite($file, "      plugin:\n");
-//     fwrite($file, "        denyip:\n");
-//     fwrite($file, "          ipDenyList:\n");
-//     foreach ($blacklist as $cidr) {
-//         fwrite($file, "          - $cidr\n");
-//     }
-//     fclose($file);
-// }
+function write_yml($blacklist, $yml_file) {
+    $file = fopen($yml_file, 'w');
+    fwrite($file, "http:\n");
+    fwrite($file, "  middlewares:\n");
+    fwrite($file, "    blacklist:\n");
+    fwrite($file, "      plugin:\n");
+    fwrite($file, "        denyip:\n");
+    fwrite($file, "          ipDenyList:\n");
+    foreach ($blacklist as $cidr) {
+        fwrite($file, "          - $cidr\n");
+    }
+    fclose($file);
+}
 
 // function to read all cidr values from SQL into array
-function read_sql_recent($conn, $table, $days = 30) {
+function read_sql_recent($conn, $table, $days = 90) {
     $sql = "SELECT * FROM $table WHERE last_seen >= DATE_SUB(CURDATE(), INTERVAL ? DAY)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $days);
