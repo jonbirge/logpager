@@ -22,7 +22,7 @@ if ($conn->connect_error) {
 // Use case to handle GET versus POST requests
 $locJSON = "";
 switch ($method) {
-    case 'GET':  // get get data by hook or crook
+    case 'GET':  // check the cache, with fail-over to external service
         // Get parameters from URL
         $ipAddress = $_GET['ip'];
         if ($ipAddress == "") {
@@ -54,6 +54,7 @@ switch ($method) {
 $conn->close();
 
 // Output
+header('Content-Type: application/json');
 echo $locJSON;
 
 
