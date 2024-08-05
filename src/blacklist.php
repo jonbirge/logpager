@@ -19,9 +19,11 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $blacklist = read_sql_recent($conn, $table, 120);
-    
+    // Set doc type to JSON
+    header('Content-Type: application/json');
+
     // Send the array as a JSON response
+    $blacklist = read_sql_recent($conn, $table, 120);
     echo json_encode($blacklist);
     
 } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {

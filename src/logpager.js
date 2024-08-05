@@ -22,10 +22,14 @@ let logType = params.get("type") !== null ? params.get("type") : "auth"; // "aut
 let tableLength = 0; // used to decide when to reuse the table
 let logLines = []; // cache of current displayed table data
 let geoCache = {}; // cache of geolocation data
+let serverTimeOffset = 0;  // offset between client and server time (pos if client is ahead)
 
-// init
+
+// ***** init *****
+
 updateTabs();
 loadBlacklist();
+getServerTimeOffset();
 updateClock();
 setInterval(updateClock, 1000);
 
@@ -55,6 +59,9 @@ document.getElementById("search-input").oninput = function () {
         searchButton.classList.remove("disabled");
     }
 };
+
+
+// ***** function definitions *****
 
 // load the log manifest and update the log type tabs
 function updateTabs() {
@@ -103,18 +110,32 @@ function updateTabs() {
         });
 }
 
-// ***** function definitions *****
+// get the server time offset from the client
+function getServerTimeOffset() {
+    fetch("time.php")
+        .then((response) => response.json())
+        .then((data) => {
+            serverTimeCLF = data;
+            serverDate = parseCLFDate(serverTimeCLF);  // Date obj
+            clientDate = new Date();  // Date obj
+            serverTimeOffset = clientDate - serverDate;
+            console.log("server time offset: " + serverTimeOffset + " ms");
+        });
+}
 
 // update time sensitive elements every second
 function updateClock() {
-    // find all elements with id of the form timestamp:*
+    // client time
+    const curTime = new Date();
+
+    // all elements with id of the form timestamp:*
     const timestampElements = document.querySelectorAll('[id^="timestamp:"]');
 
     // update each timestamp element
     timestampElements.forEach((element) => {
         const timestamp = element.id.replace("timestamp:", "");
         const dateObj = new Date(timestamp);
-        const timediff = timeDiff(dateObj, new Date());
+        const timediff = timeDiff(dateObj, curTime, serverTimeOffset);
         element.innerHTML = timediff;
     });
 }
