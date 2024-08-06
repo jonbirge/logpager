@@ -68,6 +68,9 @@ header("Pragma: no-cache");
         <div id="whois" class="whois">
             <!-- This is where the whois will go -->
         </div>
+
+        <!-- version footer -->
+        <div>1.9-d14</div>
     </div>
 
     <script src="timeutils.js"></script>

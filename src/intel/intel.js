@@ -3,7 +3,6 @@ const params = new URLSearchParams(window.location.search);
 const targetIP = params.get("ip");
 
 // initialize the page
-loadBlacklist();
 pullIntel();
 
 // function to pull geolocation and whois data from web services and display it
@@ -32,16 +31,32 @@ function pullIntel() {
                 // Handle special cases
                 if (key === "cidr") {
                     const cidr = value;
-                    table += `<tr><td>${key}</td><td>${displayValue}`;
-                    if (blackList.includes(cidr)) {
-                        const blacklistCall = `onclick="blacklistRemove('${cidr}');"`;
-                        const blacklistID = `id="block-${cidr}"`;
-                        table += ` <button ${blacklistID} class="toggle-button tight red" ${blacklistCall}">unblock</button>`;
-                    } else {
-                        const blacklistCall = `onclick="blacklistAdd('${cidr}','cidr',null,'NULL');"`;
-                        const blacklistID = `id="block-${cidr}"`;
-                        table += ` <button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block</button>`;
-                    }
+                    const blacklistURL = `blacklist.php?ip=${cidr}`;
+
+                    // add a block button
+                    const blacklistCall = `onclick="blacklistAdd('${cidr}','cidr',null,'NULL');"`;
+                    const blacklistID = `id="block-${cidr}"`;
+                    table += `<tr><td>${key}</td><td>${displayValue} <button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block</button></td></tr>`;
+
+                    // query the blacklistURL synchronously to see if the CIDR is blacklisted
+                    fetch(blacklistURL)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            // check if the blacklist is an empty array
+                            const isblack = data.length > 0;
+                            if (isblack) {
+                                // disable the block button
+                                const button = document.getElementById(`block-${cidr}`);
+                                button.disabled = true;
+                                button.classList.add("tight");
+                                button.classList.add("disabled");
+                                button.innerHTML = "blocked";
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                        });
+
                     table += "</td></tr>";
                 } else {
                     table += `<tr><td>${key}</td><td>${displayValue}</td></tr>`;
