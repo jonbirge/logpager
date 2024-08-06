@@ -135,11 +135,11 @@ function runPing() {
     pingCanvas.innerHTML = '<canvas id="pingChart" style="width: 80%"></canvas>';
     var ctx = document.getElementById('pingChart').getContext('2d');
     var pingChart = new Chart(ctx, {
-        type: 'line', // You can change this to 'bar' if you prefer a bar chart
+        type: 'bar', // Using bar chart to represent histogram
         data: {
             labels: [], // Empty labels
             datasets: [{
-                label: 'Ping Time (ms)',
+                label: 'Ping Time Frequency',
                 data: [], // Empty data
                 backgroundColor: 'rgba(0, 123, 255, 0.5)',
                 borderColor: 'rgba(0, 123, 255, 1)',
@@ -172,12 +172,30 @@ function runPing() {
                     console.log("Ping done!");
                 }
 
-                // Preparing labels for each data point (assuming sequential labels)
-                var labels = pingData.map((_, index) => `Ping ${index + 1}`);
+                // Calculate min and max ping values
+                const minPing = Math.min(...pingData);
+                const maxPing = Math.max(...pingData);
+                const binCount = 15;
+                const binSize = (maxPing - minPing) / binCount;
+
+                // Create bins for histogram
+                const histogram = new Array(binCount).fill(0);
+
+                pingData.forEach(ping => {
+                    const binIndex = Math.floor((ping - minPing) / binSize);
+                    histogram[Math.min(binIndex, binCount - 1)]++;
+                });
+
+                // Preparing labels for each bin
+                const labels = histogram.map((_, index) => {
+                    const start = (minPing + index * binSize).toFixed(2);
+                    const end = (minPing + (index + 1) * binSize).toFixed(2);
+                    return `${start}-${end} ms`;
+                });
 
                 // Updating chart with new data
                 pingChart.data.labels = labels;
-                pingChart.data.datasets[0].data = pingData;
+                pingChart.data.datasets[0].data = histogram;
                 pingChart.update();
 
                 if (pingDone) {
