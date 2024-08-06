@@ -18,18 +18,97 @@ if ($conn->connect_error) {
 }
 
 // Handle HTTP methods
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Set doc type to JSON
-    header('Content-Type: application/json');
+switch ($_SERVER['REQUEST_METHOD']) {
+    case 'GET':  // search for info on IP address or list of them
+        // Set doc type to JSON
+        header('Content-Type: application/json');
 
-    // Get the IP address from the URL
-    $ip = $_GET['ip'];
+        // Get the IP address from the URL
+        $ip = $_GET['ip'];
 
-    if (empty($ip)) { // Send the entire database if no IP address given
+        if (empty($ip)) {  // Get IP list from body
+            $blacklist = read_sql_recent($conn, $table);
+            echo json_encode($blacklist);
+        } else {  // Get single IP from URL
+            $blacklist = search_blacklist($ip, $conn, $table);
+            echo json_encode($blacklist);
+        }
+        break;
+
+    case 'POST':  // add new IP address to the blacklist
+        // Get the IP address from the query string
+        $ip = $_GET['ip'];
+
+        // Get the optional data from the POST request body
+        $log_type = $_POST['log_type'];
+        $log = $_POST['log'];
+        $timestamp = $_POST['last_seen'];
+
+        // Check to see if IP address is empty
+        if (empty($ip)) {
+            die("no IP address provided!");
+        }
+
+        // Insert $ip and $log (if exists) into the 'blacklist' table
+        if ($log === 'NULL') {
+            $sql = "INSERT INTO $table (cidr, last_seen, log_type) VALUES ('$ip', '$timestamp', '$log_type')";
+        } else {
+            $sql = "INSERT INTO $table (cidr, last_seen, log_type, log_line) VALUES ('$ip', '$timestamp', '$log_type', '$log')";
+        }
+
+        try {
+            $conn->query($sql);
+            if ($conn->error) {
+                throw new Exception("SQL error: " . $conn->error);
+            }
+        } catch (Exception $e) {
+            $conn->close();
+            echo $e->getMessage();
+            die($e->getMessage());
+        }
+
+        // Write to CSV file
         $blacklist = read_sql_recent($conn, $table);
-        echo json_encode($blacklist);
-    } else { // Check if the IP address exists in the database, either directly or contained in a CIDR block
-        $sql = "
+        write_csv($blacklist, $csv_file);
+
+        echo $ip . ' added to blacklist';
+        break;
+
+    case 'DELETE':  // delete IP address from the blacklist
+        // Get the IP address from the URL
+        $ip = $_GET['ip'];
+
+        // Delete $ip from the 'blacklist' table
+        $sql = "DELETE FROM $table WHERE cidr = '$ip'";
+        $conn->query($sql);
+        if ($conn->error) {
+            $conn->close();
+            die("SQL error: " . $conn->error);
+        }
+
+        // Write to files
+        $blacklist = read_sql_recent($conn, $table);
+        write_csv($blacklist, $csv_file);
+
+        // Send a confirmation message
+        echo $ip . ' removed from blacklist';
+        break;
+
+    default:  // Send a 405 Method Not Allowed response
+        http_response_code(405);
+        echo 'Method Not Allowed';
+        break;
+}
+
+// Close SQL connection
+$conn->close();
+
+
+// ***** Utility Functions *****
+
+function search_blacklist($ip, $conn, $table) {
+    // SQL query
+    $sql = "
             SELECT * FROM $table 
             WHERE 
                 cidr = ? 
@@ -41,89 +120,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     INET_ATON(SUBSTRING_INDEX(cidr, '/', 1)) + POW(2, 32 - SUBSTRING_INDEX(cidr, '/', -1)) - 1
                 )
         ";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ss", $ip, $ip);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($conn->error) {
-            die("SQL error: " . $conn->error);
-        }
-        
-        // create an array of the rows returned
-        $blacklist = [];
-        while ($row = $result->fetch_assoc()) {
-            $blacklist[] = $row;
-        }
 
-        echo json_encode($blacklist);
-    }
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $ip, $ip);
+    $stmt->execute();
+    $result = $stmt->get_result();
     
-} else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get the IP address from the POST request body
-    $ip = $_POST['ip'];
-    
-    // Get the optional data from the POST request body
-    $log_type = $_POST['log_type'];
-    $log = $_POST['log'];
-    $timestamp = $_POST['last_seen'];
-    
-    // Check to see if IP address is empty
-    if (empty($ip)) {
-        die("no IP address provided!");
-    }
-
-    // Insert $ip and $log (if exists) into the 'blacklist' table
-    if ($log === 'NULL') {
-        $sql = "INSERT INTO $table (cidr, last_seen, log_type) VALUES ('$ip', '$timestamp', '$log_type')";
-    } else {
-        $sql = "INSERT INTO $table (cidr, last_seen, log_type, log_line) VALUES ('$ip', '$timestamp', '$log_type', '$log')";
-    }
-    
-    try {
-        $conn->query($sql);
-        if ($conn->error) {
-            throw new Exception("SQL error: " . $conn->error);
-        }
-    } catch (Exception $e) {
-        $conn->close();
-        echo $e->getMessage();
-        die($e->getMessage());
-    }
-
-    // Write to CSV file
-    $blacklist = read_sql_recent($conn, $table);
-    write_csv($blacklist, $csv_file);
-
-    echo $ip . ' added to blacklist';
-
-} else if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-    // Get the IP address from the URL
-    $ip = $_GET['ip'];
-
-    // Delete $ip from the 'blacklist' table
-    $sql = "DELETE FROM $table WHERE cidr = '$ip'";
-    $conn->query($sql);
     if ($conn->error) {
-        $conn->close();
         die("SQL error: " . $conn->error);
     }
 
-    // Write to files
-    $blacklist = read_sql_recent($conn, $table);
-    write_csv($blacklist, $csv_file);
+    // create an array of the rows returned
+    $blacklist = [];
+    while ($row = $result->fetch_assoc()) {
+        $blacklist[] = $row;
+    }
 
-    // Send a confirmation message
-    echo $ip . ' removed from blacklist';
-
-} else {  // Send a 405 Method Not Allowed response
-    http_response_code(405);
-    echo 'Method Not Allowed';
+    return $blacklist;
 }
-
-// Close SQL connection
-$conn->close();
-
 
 // function to write all blacklist IPs/CIDRs to a csv file
 function write_csv($blacklist, $csv_file) {

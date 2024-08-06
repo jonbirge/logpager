@@ -10,9 +10,6 @@ function blacklistAdd(ip, type, lastTime, log = null) {
     const lastTimeConv = lastTimeDate.toISOString().slice(0, 19).replace("T", " ");
     console.log("blacklist: add " + ip + " as " + type + " at " + lastTimeConv);
     
-    // update global blacklist cache manually
-    blackList.push(ip);
-    
     // send the IP address to the server
     const formData = new FormData();
     formData.append('ip', ip);
