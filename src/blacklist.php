@@ -25,25 +25,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Get the IP address from the URL
     $ip = $_GET['ip'];
 
-    // Send the entire database if no IP address given
-    if (empty($ip)) {
+    if (empty($ip)) { // Send the entire database if no IP address given
         $blacklist = read_sql_recent($conn, $table);
         echo json_encode($blacklist);
-    } else {
-        // Get the IP address from the 'blacklist' table and output the entire row as JSON if it exists
-        $sql = "SELECT * FROM $table WHERE cidr = '$ip'";
-        $result = $conn->query($sql);
+    } else { // Check if the IP address exists in the database, either directly or contained in a CIDR block
+        $sql = "
+            SELECT * FROM $table 
+            WHERE 
+                cidr = ? 
+                OR (
+                    cidr LIKE '%.%.%.%/%' AND
+                    INET_ATON(?) BETWEEN 
+                    INET_ATON(SUBSTRING_INDEX(cidr, '/', 1)) 
+                    AND 
+                    INET_ATON(SUBSTRING_INDEX(cidr, '/', 1)) + POW(2, 32 - SUBSTRING_INDEX(cidr, '/', -1)) - 1
+                )
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ss", $ip, $ip);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
         if ($conn->error) {
-            $conn->close();
             die("SQL error: " . $conn->error);
         }
-
-        $row = $result->fetch_assoc();
-        if ($row) {
-            echo json_encode($row);
-        } else {
-            echo json_encode([]);
+        
+        // create an array of the rows returned
+        $blacklist = [];
+        while ($row = $result->fetch_assoc()) {
+            $blacklist[] = $row;
         }
+
+        echo json_encode($blacklist);
     }
     
 } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
