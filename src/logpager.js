@@ -28,7 +28,6 @@ let serverTimeOffset = 0;  // offset between client and server time (pos if clie
 // ***** init *****
 
 updateTabs();
-loadBlacklist();
 getServerTimeOffset();
 updateClock();
 setInterval(updateClock, 1000);
@@ -432,9 +431,10 @@ function refreshTable() {
         rowElement.innerHTML = row;
     }
 
-    // asyncronously get the host locations from the IPs
+    // asyncronously get the geolocation and blacklist data from the IPs
     const ipSet = [...new Set(ips)]; // Get unique IP addresses
     if (geolocate) getGeoLocations(ipSet, signal);
+    getBlacklistStatus(ipSet, signal);
 }
 
 // function to enable or disable a set of buttons
@@ -1049,6 +1049,56 @@ function getGeoLocations(ips, signal) {
                 } else {
                     console.log("fetch error:", ip, error);
                     updateGeoLocation(null, ip);
+                }
+            });
+    }
+}
+
+// get blacklist status and update table cells
+function getBlacklistStatus(ips, signal) {
+    // send remaining ips to remote sql cache, and of those that aren't satisfied, send to external web service
+    if (ips.length > 0) {
+        setTimeout(() => recurseFetchBlacklist(ips), 0);
+    }
+
+    // function to update blacklist for given ip in all matching cells
+    function updateBlacklist(ip) {
+        // Get all cells with id of the form geo-ipAddress
+        const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
+        const hostnameCells = document.querySelectorAll(
+            '[id^="hostname-' + ip + '"]'
+        );
+        
+        // disable all block buttons and change name to "blocked"
+        blockButtons.forEach((button) => {
+            button.innerHTML = "blocked";
+            button.disabled = true;
+            button.classList.add("tight");
+            button.classList.add("disabled");
+        });
+    }
+
+    function recurseFetchBlacklist(ips) {
+        // pop the first ip off of ips
+        const ip = ips.shift();
+        console.log("checking blacklist: " + ip);
+        fetch("blacklist.php?ip=" + ip, { signal })
+            .then((response) => response.json())
+            .then((blacklistdata) => {
+                // if not empty, update the blacklist status
+                if (blacklistdata.length > 0) {
+                    updateBlacklist(ip);
+                }
+                // handle the next one
+                if (ips.length > 0) {
+                    recurseFetchBlacklist(ips);
+                }
+            })
+            .catch((error) => {
+                if (error.name === "AbortError") {
+                    console.log("blacklist fetch aborted for " + ip);
+                } else {
+                    console.log("fetch error:", ip, error);
                 }
             });
     }
