@@ -30,11 +30,28 @@ switch ($_SERVER['REQUEST_METHOD']) {
         }
         break;
 
-    // case 'POST':  // search for list of IP addresses
-    //     // Get the ip list the POST request body
-    //     $ips= $_POST['ips'];
-    //     echo json_encode($ips);
-    //     break;
+    case 'POST':  // search for list of IP addresses
+        // Get the ip list the POST request body
+        $ips = json_decode(file_get_contents('php://input'), true);
+
+        // Check JSON
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Handle JSON parse error
+            http_response_code(400); // Bad Request
+            die("Invalid JSON payload");
+        }
+
+        // Go through each ip in $ips and search for it in the blacklist
+        $blacklist = [];
+        foreach ($ips as $ip) {
+            $response = search_blacklist($ip, $conn, $table);
+            if ($response) {
+                $blacklist[] = $ip;
+            }
+        }
+        echo json_encode($blacklist);
+
+        break;
 
     case 'DELETE':  // delete IP address from the blacklist
         // Get the IP address from the URL

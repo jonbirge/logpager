@@ -365,7 +365,7 @@ function refreshTable() {
         row = "";
         for (let j = 0; j < logLines[i].length; j++) {
             // build row
-            const headerName/*  */ = headers[j];
+            const headerName = headers[j];
             switch (headerName) {
                 case "IP":
                     const ip = logLines[i][j];
@@ -434,7 +434,7 @@ function refreshTable() {
     // asyncronously get the geolocation and blacklist data from the IPs
     const ipSet = [...new Set(ips)]; // Get unique IP addresses
     if (geolocate) getGeoLocations(ipSet, signal);
-    getBlacklistStatus(ipSet, signal);
+    getBlacklistStatus(ipSet);
 }
 
 // function to enable or disable a set of buttons
@@ -899,7 +899,10 @@ function resetSearch() {
 }
 
 // get geolocations and update table cells
-function getGeoLocations(ips, signal) {
+function getGeoLocations(ipList, signal) {
+    // make local copy of ipList
+    let ips = ipList.slice();
+
     // take care of everything locally cached
     localHits = 0;
     ips.forEach((ip) => {
@@ -1055,52 +1058,33 @@ function getGeoLocations(ips, signal) {
 }
 
 // get blacklist status and update table cells
-function getBlacklistStatus(ips, signal) {
-    // send remaining ips to remote sql cache, and of those that aren't satisfied, send to external web service
-    if (ips.length > 0) {
-        setTimeout(() => recurseFetchBlacklist(ips), 0);
-    }
+function getBlacklistStatus(ips) {
+    const ipsJSON = JSON.stringify(ips);
+    // console.log("getBlacklistStatus: fetching " + ips.length + " ips...");
+    fetch("blacklist.php", {
+        method: "POST",
+        body: ipsJSON,
+    })
+        .then((response) => response.json())
+        .then((blacklistData) => {
+            console.log("blacklist: got " + blacklistData.length + " results");
+            blacklistData.forEach((ip) => {
+                updateBlacklist(ip);
+            });
+        })
+        .catch((error) => {
+            console.log("blacklist fetch error:", error);
+        });
 
-    // function to update blacklist for given ip in all matching cells
+    // function to update button for given ip in all matching cells
     function updateBlacklist(ip) {
-        // Get all cells with id of the form geo-ipAddress
         const blockButtons = document.querySelectorAll('[id^="block-' + ip + '"]');
-        const hostnameCells = document.querySelectorAll(
-            '[id^="hostname-' + ip + '"]'
-        );
-        
-        // disable all block buttons and change name to "blocked"
         blockButtons.forEach((button) => {
             button.innerHTML = "blocked";
             button.disabled = true;
             button.classList.add("tight");
             button.classList.add("disabled");
         });
-    }
-
-    function recurseFetchBlacklist(ips) {
-        // pop the first ip off of ips
-        const ip = ips.shift();
-        console.log("checking blacklist: " + ip);
-        fetch("blacklist.php?ip=" + ip, { signal })
-            .then((response) => response.json())
-            .then((blacklistdata) => {
-                // if not empty, update the blacklist status
-                if (blacklistdata.length > 0) {
-                    updateBlacklist(ip);
-                }
-                // handle the next one
-                if (ips.length > 0) {
-                    recurseFetchBlacklist(ips);
-                }
-            })
-            .catch((error) => {
-                if (error.name === "AbortError") {
-                    console.log("blacklist fetch aborted for " + ip);
-                } else {
-                    console.log("fetch error:", ip, error);
-                }
-            });
     }
 }
 
