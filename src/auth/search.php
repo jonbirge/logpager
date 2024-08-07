@@ -6,8 +6,8 @@ include 'authparse.php';
 function search($searchDict, $doSummary = true)
 {
     // Parameters
-    $maxLines = 1024;  // Maximum number of items to return
-    $maxSummarize = 100000;  // Maximum number of items to summarize
+    $maxItems = 2500;  // line items
+    $maxSummarize = 100000;  // matching lines
 
     // Path to the auth log file
     $logFilePaths = array_reverse(getAuthLogFiles());
@@ -79,6 +79,9 @@ function search($searchDict, $doSummary = true)
             // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object
             $theDate = $data[1];
             $dateObj = DateTime::createFromFormat('d/M/Y:H:i:s', $theDate);
+            if ($dateObj === false) {
+                echo "Error parsing date: $theDate\n";
+            }
             $logLines[] = [$data[0], $dateObj, $status];
             if ($lineCount >= $maxSummarize) break;
         } else {
@@ -87,16 +90,15 @@ function search($searchDict, $doSummary = true)
         }
     }  // end foreach
 
+    // Clean up
     pclose($fp);
 
     // If $doSummary is true, summarize the log lines
-    if ($doSummary) { // return summary format
+    if ($doSummary) { // return summary
         $searchLines = searchStats($logLines);
-        // take the first $maxItems items
-        $searchLines = array_slice($searchLines, 0, $maxItems);
+        $searchLines = array_slice($searchLines, 0, $maxItems + 1);
         echo json_encode($searchLines);
-    } else {
-        // read in loghead.json and prepend to $logLines to create $searchLines
+    } else {  // return standard log
         $headers = json_decode(file_get_contents('auth/loghead.json'));
         $searchLines = [];
         $searchLines[] = $headers;

@@ -6,9 +6,11 @@ include 'traefik.php';
 function search($searchDict, $doSummary = true)
 {
     // Maximum number of items to return
-    $maxItems = 1024;  // summary items
+    $maxItems = 2500;  // line items
     $maxSearchLines = 100000;  // matching lines
+    $maxSummarize = 100000;  // max summary items
 
+    // TODO: Follow auth pattern here...
     // Concatenate log files
     $tmpFilePath = getTempLogFilePath();
 
@@ -38,24 +40,15 @@ function search($searchDict, $doSummary = true)
     }
     $cmd = "tac $tmpFilePath | grep -m $maxSearchLines $grepSearch";
 
-
     // Execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
-    $lines = [];
-    while ($line = fgets($fp)) {
-        $lines[] = $line;
-    }
-    pclose($fp);
-
-    // Delete temp file
-    unlink($tmpFilePath);
-
+    
     // Create array of CLF log lines
     $logLines = [];
 
     // Process each line and add to the array
     $lineCount = 0;
-    foreach ($lines as $line) {
+    while ($line = fgets($fp)) {
         // Extract the CLF fields from the line
         preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) \S+ \"-\" \"-\" \S+ \"(\S+)\" \"\S+\" \S+/', $line, $data);
 
@@ -90,8 +83,6 @@ function search($searchDict, $doSummary = true)
         }
 
         $lineCount++;
-
-        // If we're summarizing, store less data and use a date object
         if ($doSummary) {
             // convert the standard log date format to a PHP DateTime object
             $theDate = $data[2];
@@ -101,19 +92,23 @@ function search($searchDict, $doSummary = true)
                 echo "Error parsing date: $theDate\n";
             }
             $logLines[] = [$data[1], $dateObj, $data[5]];  // IP, date, stat
+            if ($lineCount >= $maxSummarize) break;
         } else {
             $logLines[] = array_map('htmlspecialchars', array_slice($data, 1));
             if ($lineCount >= $maxItems) break;
         }
     }
 
-    // If $doSummary is true, run the statistics function
+    // Clean up
+    pclose($fp);
+    unlink($tmpFilePath);
+
+    // If $doSummary is true, summarize the log lines
     if ($doSummary) {  // return summary 
         $searchLines = searchStats($logLines);
-        $searchLines = array_slice($searchLines, 0, $maxItems + 1);  // take the first $maxItems items
+        $searchLines = array_slice($searchLines, 0, $maxItems + 1);
         echo json_encode($searchLines);
     } else {  // return standard log 
-        // read in loghead.json and prepend to $logLines to create $searchLines
         $headers = json_decode(file_get_contents('traefik/loghead.json'));
         $searchLines = [];
         $searchLines[] = $headers;
