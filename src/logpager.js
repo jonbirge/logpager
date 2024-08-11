@@ -134,9 +134,6 @@ async function getServerTimeOffset(repeatCount = 5) {
     console.log(`Average server time offset: ${serverTimeOffset} ms`);
 }
 
-// Example usage
-getServerTimeOffset(5);
-
 // update time sensitive elements every second
 function updateClock() {
     // client time
