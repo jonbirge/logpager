@@ -967,9 +967,10 @@ function asyncUpdate(ips, signal) {
             console.log("got " + localHits + " hit(s) from local cache");
         }
 
-        // send remaining geoips to remote sql cache, and of those that aren't satisfied, send to external web service
+        // send remaining geoips to remote sql cache
         if (geoips.length > 0) {
-            let geoipsJSON = JSON.stringify(ips);
+            console.log("checking server geo cache for " + geoips.length + " ips...");
+            let geoipsJSON = JSON.stringify(geoips);
             fetch("geo.php", {
                 method: "POST",
                 body: geoipsJSON,
@@ -994,7 +995,8 @@ function asyncUpdate(ips, signal) {
                     }
                     // asyncronously recurse queries to external web service for remaining ips
                     if (geoips.length > 0) {
-                        setTimeout(() => recurseFetchGeoLocations(ips), 0);
+                        console.log("recursing external server for " + geoips.length + " ips...");
+                        setTimeout(() => recurseFetchGeoLocations(geoips), 0);
                     }
                 })
                 .catch((error) => {
