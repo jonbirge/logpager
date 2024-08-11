@@ -50,8 +50,8 @@ if (search !== null) {
 }
 
 // enable the search button when something is typed in the search box
+const searchButton = document.getElementById("search-button");
 document.getElementById("search-input").oninput = function () {
-    const searchButton = document.getElementById("search-button");
     // if the search box is empty, disable the search button
     if (this.value === "") {
         searchButton.disabled = true;
@@ -114,13 +114,16 @@ function updateTabs() {
 
 // get the server time offset from the client
 function getServerTimeOffset() {
+    const txTime = new Date();
     fetch("time.php")
         .then((response) => response.json())
         .then((data) => {
+            const rxTime = new Date();
+            const rtDelay = rxTime - txTime;  // ms
             serverTimeCLF = data;
             serverDate = parseCLFDate(serverTimeCLF);  // Date obj
-            clientDate = new Date();  // Date obj
-            serverTimeOffset = clientDate - serverDate;
+            serverTimeOffset = (rxTime - serverDate) - rtDelay/2 - 500;  // ms (plus margin)
+            console.log("round trip delay: " + rtDelay + " ms");
             console.log("server time offset: " + serverTimeOffset + " ms");
         });
 }

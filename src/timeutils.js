@@ -15,7 +15,7 @@ function parseCLFDate(clfstamp) {
 
 // take two Date objects and return the difference in time in simple human-readable terms, such as "3 days" or "5 s"
 function timeDiff(date1, date2, offset = 0) {
-    const diff = date2 - date1 + offset + 500;
+    const diff = date2 - date1 - offset;
     const seconds = Math.ceil(diff / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
