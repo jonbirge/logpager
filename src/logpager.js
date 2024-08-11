@@ -917,14 +917,12 @@ function resetSearch() {
     plotHeatmap();
 }
 
-// Function to handle all async updates
+// Function to handle all async updates (geolocation and blacklists)
 function asyncUpdate(ips, signal) {
-    const ipsJSON = JSON.stringify(ips);
-    
     console.log("getBlacklistStatus: fetching " + ips.length + " ips...");
     fetch("blacklist.php", {
         method: "POST",
-        body: ipsJSON,
+        body: JSON.stringify(ips),
     })
         .then((response) => response.json())
         .then((blacklistData) => {
@@ -962,7 +960,6 @@ function asyncUpdate(ips, signal) {
             if (geoCache[ip]) {
                 localHits += 1;
                 updateGeoLocation(geoCache[ip], ip);
-                // remove ip from ips
                 geoips = geoips.filter((value) => value !== ip);
             }
         });
@@ -970,7 +967,7 @@ function asyncUpdate(ips, signal) {
             console.log("got " + localHits + " hit(s) from local cache");
         }
 
-        // send remaining ips to remote sql cache, and of those that aren't satisfied, send to external web service
+        // send remaining geoips to remote sql cache, and of those that aren't satisfied, send to external web service
         if (geoips.length > 0) {
             let geoipsJSON = JSON.stringify(ips);
             fetch("geo.php", {
@@ -1092,7 +1089,7 @@ function asyncUpdate(ips, signal) {
         function recurseFetchGeoLocations(ips, apiCount = 0) {
             // pop the first ip off of ips
             const ip = ips.shift();
-            console.log("fetching geo from web service: " + ip);
+            console.log("fetching geo web service: " + ip);
             fetch("geo.php?ip=" + ip, { signal })
                 .then((response) => response.json())
                 .then((geodata) => {
@@ -1100,11 +1097,18 @@ function asyncUpdate(ips, signal) {
                     geoCache[ip] = geodata;
                     updateGeoLocation(geodata, ip);
                     apiCount++;
-                    if (apiCount >= maxGeoRequests) {
+                    if (apiCount == maxGeoRequests) {
                         console.log("geo api limit reached!");
                     }
-                    if (ips.length > 0 && apiCount < maxGeoRequests) {
-                        recurseFetchGeoLocations(ips, apiCount);
+                    if (ips.length > 0) {
+                        if (apiCount < maxGeoRequests) {
+                            recurseFetchGeoLocations(ips, apiCount);
+                        } else {
+                            // wait for one second before making more requests
+                            setTimeout( () => recurseFetchGeoLocations(ips, apiCount), 2000);
+                        }
+                    } else {
+                        console.log("geo: done!");
                     }
                 })
                 .catch((error) => {
