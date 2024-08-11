@@ -28,7 +28,6 @@ let logType;
 
 updateTabs();
 getServerTimeOffset();
-updateClock();
 setInterval(updateClock, 1000);
 
 // decide what to do on page load
@@ -113,20 +112,30 @@ function updateTabs() {
 }
 
 // get the server time offset from the client
-function getServerTimeOffset() {
-    const txTime = new Date();
-    fetch("time.php")
-        .then((response) => response.json())
-        .then((data) => {
-            const rxTime = new Date();
-            const rtDelay = rxTime - txTime;  // ms
-            serverTimeCLF = data;
-            serverDate = parseCLFDate(serverTimeCLF);  // Date obj
-            serverTimeOffset = (rxTime - serverDate) - rtDelay/2 - 500;  // ms (plus margin)
-            console.log("round trip delay: " + rtDelay + " ms");
-            console.log("server time offset: " + serverTimeOffset + " ms");
-        });
+async function getServerTimeOffset(repeatCount = 5) {
+    const offsets = [];
+
+    for (let i = 0; i < repeatCount; i++) {
+        const txTime = new Date();
+        const response = await fetch("time.php");
+        const data = await response.json();
+        const rxTime = new Date();
+        const rtDelay = rxTime - txTime;  // ms
+        const serverTimeISO = data;
+        const serverDate = parseISODate(serverTimeISO);  // Date obj
+        const timeOffset = (rxTime - serverDate) - rtDelay / 2 - 500;  // ms (plus margin)
+        offsets.push(timeOffset);
+
+        console.log(`Round trip delay [${i + 1}]: ${rtDelay} ms`);
+        console.log(`Server time offset [${i + 1}]: ${timeOffset} ms`);
+    }
+
+    serverTimeOffset = offsets.reduce((sum, offset) => sum + offset, 0) / offsets.length;
+    console.log(`Average server time offset: ${serverTimeOffset} ms`);
 }
+
+// Example usage
+getServerTimeOffset(5);
 
 // update time sensitive elements every second
 function updateClock() {

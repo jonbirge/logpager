@@ -13,6 +13,11 @@ function parseCLFDate(clfstamp) {
     return dateObj;
 }
 
+// take a timestamp in ISO 8601 format and return a Date object
+function parseISODate(isostamp) {
+    return new Date(isostamp);
+}
+
 // take two Date objects and return the difference in time in simple human-readable terms, such as "3 days" or "5 s"
 function timeDiff(date1, date2, offset = 0) {
     const diff = date2 - date1 - offset;

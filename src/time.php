@@ -6,9 +6,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     echo json_encode(get_time());
 }
 
-// get server time in CLF format in UTF (minus the time zone offset)
+// get server time in ISO 8601 format with ms
 function get_time() {
-    return date('d/M/Y:H:i:s');
+    $now = new DateTime();
+    return $now->format('Y-m-d\TH:i:s.v\Z');
 }
 
 // get server time in ISO 8601 format
