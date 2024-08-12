@@ -521,11 +521,9 @@ function updateSummaryTable(jsonData) {
     // report the number of results in the status div
     const searchStatus = document.getElementById("status");
     searchStatus.innerHTML =
-        "<b>Found " +
-        (dataLength - 1) +
-        " IP addresses from " +
-        total +
-        " matching log entries</b>";
+        "<b>" + (dataLength - 1) +
+        " IPs from " + total +
+        " matching lines</b>";
 
     // write HTML from data...
     refreshTable();
@@ -1107,7 +1105,7 @@ function asyncUpdate(ips, signal) {
                             recurseFetchGeoLocations(ips, apiCount);
                         } else {
                             // wait for one second before making more requests
-                            setTimeout( () => recurseFetchGeoLocations(ips, apiCount), 2000);
+                            setTimeout( () => recurseFetchGeoLocations(ips, apiCount), 1000);
                         }
                     } else {
                         console.log("geo: done!");
