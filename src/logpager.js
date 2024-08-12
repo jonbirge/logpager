@@ -112,7 +112,7 @@ function updateTabs() {
 }
 
 // get the server time offset from the client
-async function getServerTimeOffset(repeatCount = 5) {
+async function getServerTimeOffset(repeatCount = 1) {
     const offsets = [];
 
     for (let i = 0; i < repeatCount; i++) {
@@ -1104,8 +1104,8 @@ function asyncUpdate(ips, signal) {
                         if (apiCount < maxGeoRequests) {
                             recurseFetchGeoLocations(ips, apiCount);
                         } else {
-                            // wait for one second before making more requests
-                            setTimeout( () => recurseFetchGeoLocations(ips, apiCount), 1000);
+                            // throttle back the request rate
+                            setTimeout( () => recurseFetchGeoLocations(ips, apiCount), 1500);
                         }
                     } else {
                         console.log("geo: done!");
