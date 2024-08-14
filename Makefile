@@ -37,7 +37,7 @@ clean:
 	rm -rf build
 
 # Push into the latest tag
-push: $(BUILD_FILE)
+latest: $(BUILD_FILE)
 	docker push $(LATEST_IMAGE_NAME)
 
 # Push into the latest tag and version tag
