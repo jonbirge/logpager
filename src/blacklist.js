@@ -8,7 +8,6 @@ function blacklistAdd(ip, type, lastTime, log = null) {
         lastTimeDate = parseCLFDate(lastTime);
     }
     const lastTimeConv = lastTimeDate.toISOString().slice(0, 19).replace("T", " ");
-    // console.log("blacklist: adding " + ip + " as " + type + " at " + lastTimeConv);
     
     // send the IP address to the server
     const formData = new FormData();
@@ -27,7 +26,7 @@ function blacklistAdd(ip, type, lastTime, log = null) {
             console.log("addblacklist.php => " + data);
             const blockButtons = document.querySelectorAll(`[id^="block-${ip}"]`);
             blockButtons.forEach((button) => {
-                button.outerHTML = makeDisabledButton();
+                button.outerHTML = makeUnblacklistButton(ip);
             });
         });
 }

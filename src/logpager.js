@@ -3,10 +3,11 @@ const geolocate = true; // pull IP geolocation from external service?
 const includeDomain = false; // include domain in geolocation?
 const tileLabels = false; // show tile labels on heatmap?
 const fillToNow = true; // fill heatmap to current time?
+const chunkSize = 200; // number of IPs to check against server at a time
+const maxGeoRequests = 32; // maximum number of IPs to externally geolocate at once
 const heatmapRatio = 0.5; // width to height ratio of heatmap
 const maxDetailLength = 96; // truncation length of log details
-const maxGeoRequests = 30; // maximum number of IPs to externally geolocate at once
-const pollWait = 15; // seconds to wait between polling the server
+const pollWait = 10; // seconds to wait between polling the server
 const mapWait = 15; // minutes to wait between updating the heatmap
 
 // global variables
@@ -917,43 +918,60 @@ function resetSearch() {
 
 // Function to handle all async updates (geolocation and blacklists)
 function asyncUpdate(ips, signal) {
-    console.log("getBlacklistStatus: fetching " + ips.length + " ips...");
-    fetch("blacklist.php", {
-        method: "POST",
-        body: JSON.stringify(ips),
-    })
-        .then((response) => response.json())
-        .then((blacklistData) => {
-            console.log("blacklist: got " + blacklistData.length + " results");
-            blacklistData.forEach((ip) => {
+    console.log("asyncUpdate: updating " + ips.length + " ips...");
+    if (geolocate) {
+        handleGeolocation();
+    }
+    handleBlacklist();
+    console.log("asyncUpdate: leaving");
+
+    // asynchronously check list of ips for blacklist
+    async function handleBlacklist() {
+        // split ips into chunks of chunkSize and send to fetchBlacklist
+        for (let i = 0; i < ips.length; i += chunkSize) {
+            const chunk = ips.slice(i, i + chunkSize);
+            await fetchBlacklist(chunk);
+        }
+
+        // check list of ips against server and update table
+        async function fetchBlacklist(ips) {
+            console.log("blacklist: checking " + ips.length + " ips...");
+            const ipList = JSON.stringify(ips);
+            const resp = await fetch("blacklist.php", {
+                method: "POST",
+                body: ipList,
+                signal,
+            });
+            const blacklist = await resp.json();
+            console.log("blacklist: got " + blacklist.length + " hits");
+            blacklist.forEach((ip) => {
                 updateBlacklist(ip);
             });
-            if (geolocate) getGeoLocations();
-        })
-        .catch((error) => {
-            console.log("blacklist fetch error:", error);
-        });
+        }
 
-    // function to update button for given ip in all matching cells
-    function updateBlacklist(ip) {
-        const blockButtons = document.querySelectorAll(
-            '[id^="block-' + ip + '"]'
-        );
-        blockButtons.forEach((button) => {
-            button.innerHTML = "blocked";
-            button.disabled = true;
-            button.classList.add("tight");
-            button.classList.add("disabled");
-        });
+        // function to update buttons for a given ip in all matching cells
+        function updateBlacklist(ip) {
+            const blockButtons = document.querySelectorAll(
+                '[id^="block-' + ip + '"]'
+            );
+            blockButtons.forEach((button) => {
+                button.innerHTML = "blocked";
+                button.disabled = true;
+                button.classList.add("tight");
+                button.classList.add("disabled");
+            });
+        }
     }
 
-    // get geolocations and update table cells
-    function getGeoLocations() {
-        // make local copy of ipList
+    // asynchronously geolocate list of ips
+    async function handleGeolocation() {
+        console.log("geo: checking " + ips.length + " ips...");
+
+        // make local copy of ips
         let geoips = ips.slice();
 
         // take care of everything locally cached
-        localHits = 0;
+        let localHits = 0;
         geoips.forEach((ip) => {
             if (geoCache[ip]) {
                 localHits += 1;
@@ -962,43 +980,89 @@ function asyncUpdate(ips, signal) {
             }
         });
         if (localHits > 0) {
-            console.log("got " + localHits + " hit(s) from local cache");
+            console.log("got " + localHits + " hits from local cache");
         }
 
-        // send remaining geoips to remote sql cache
+        // split geoips into chunks of chunkSize and send to checkRemoteCache
+        let checkips = geoips.slice(); // yet another copy
+        for (let i = 0; i < checkips.length; i += chunkSize) {
+            const ipchunk = checkips.slice(i, i + chunkSize);
+            await checkRemoteCache(ipchunk);
+        }
+
+        // asyncronously recurse queries to external web service for remaining geoips
         if (geoips.length > 0) {
-            console.log("checking server geo cache for " + geoips.length + " ips...");
-            let geoipsJSON = JSON.stringify(geoips);
-            fetch("geo.php", {
+            console.log(
+                "recursing external server for " + geoips.length + " ips..."
+            );
+            setTimeout(() => recurseFetchGeoLocations(geoips), 0);
+        }
+
+        // check server cache for first n geoips
+        async function checkRemoteCache(ipchunk) {
+            console.log(
+                "checking server geo cache for " + ipchunk.length + " ips..."
+            );
+            const geoipsJSON = JSON.stringify(ipchunk);
+            const resp = await fetch("geo.php", {
                 method: "POST",
                 body: geoipsJSON,
                 signal,
-            })
+            });
+            const geodata = await resp.json();
+            if (geodata === null) {
+                console.log("geo: bad data from server");
+            } else {
+                let cachedips = Object.keys(geodata);
+                console.log(
+                    "got " + cachedips.length + " hits from server cache"
+                );
+                for (let ip of cachedips) {
+                    updateGeoLocation(geodata[ip], ip);
+                    geoips = geoips.filter((value) => value !== ip);
+                    geoCache[ip] = geodata[ip];
+                }
+            }
+        }
+
+        // recursively fetch geolocation data for ips
+        function recurseFetchGeoLocations(ips, apiCount = 0) {
+            // wait time
+            const waitTime = 1200;
+            // pop the first ip off of ips
+            const ip = ips.shift();
+            console.log("fetching geo web service: " + ip);
+            fetch("geo.php?ip=" + ip, { signal })
                 .then((response) => response.json())
                 .then((geodata) => {
-                    if (geodata === null) {
-                        console.log("geo: bad data from server");
-                    } else {
-                        cachedips = Object.keys(geodata);
-                        console.log(
-                            "got " +
-                                cachedips.length +
-                                " hit(s) from server cache"
-                        );
-                        for (let ip of cachedips) {
-                            updateGeoLocation(geodata[ip], ip);
-                            geoips = geoips.filter((value) => value !== ip);
-                            geoCache[ip] = geodata[ip];
-                        }
+                    // cache the data
+                    geoCache[ip] = geodata;
+                    updateGeoLocation(geodata, ip);
+                    apiCount++;
+                    if (apiCount == maxGeoRequests) {
+                        console.log("geo api limit reached!");
                     }
-                    // asyncronously recurse queries to external web service for remaining ips
-                    if (geoips.length > 0) {
-                        console.log("recursing external server for " + geoips.length + " ips...");
-                        setTimeout(() => recurseFetchGeoLocations(geoips), 0);
+                    if (ips.length > 0) {
+                        if (apiCount < maxGeoRequests) {
+                            recurseFetchGeoLocations(ips, apiCount);
+                        } else {
+                            // throttle back the request rate
+                            setTimeout(
+                                () => recurseFetchGeoLocations(ips, apiCount),
+                                waitTime
+                            );
+                        }
+                    } else {
+                        console.log("geo: done!");
                     }
                 })
                 .catch((error) => {
-                    console.log("geo fetch error:", error);
+                    if (error.name === "AbortError") {
+                        console.log("geo fetch aborted for " + ip);
+                    } else {
+                        console.log("fetch error:", ip, error);
+                        updateGeoLocation(null, ip);
+                    }
                 });
         }
 
@@ -1084,41 +1148,6 @@ function asyncUpdate(ips, signal) {
                     cell.innerHTML = "-";
                 });
             }
-        }
-
-        function recurseFetchGeoLocations(ips, apiCount = 0) {
-            // pop the first ip off of ips
-            const ip = ips.shift();
-            console.log("fetching geo web service: " + ip);
-            fetch("geo.php?ip=" + ip, { signal })
-                .then((response) => response.json())
-                .then((geodata) => {
-                    // cache the data
-                    geoCache[ip] = geodata;
-                    updateGeoLocation(geodata, ip);
-                    apiCount++;
-                    if (apiCount == maxGeoRequests) {
-                        console.log("geo api limit reached!");
-                    }
-                    if (ips.length > 0) {
-                        if (apiCount < maxGeoRequests) {
-                            recurseFetchGeoLocations(ips, apiCount);
-                        } else {
-                            // throttle back the request rate
-                            setTimeout( () => recurseFetchGeoLocations(ips, apiCount), 1500);
-                        }
-                    } else {
-                        console.log("geo: done!");
-                    }
-                })
-                .catch((error) => {
-                    if (error.name === "AbortError") {
-                        console.log("geo fetch aborted for " + ip);
-                    } else {
-                        console.log("fetch error:", ip, error);
-                        updateGeoLocation(null, ip);
-                    }
-                });
         }
     }
 }
