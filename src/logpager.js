@@ -917,27 +917,26 @@ function resetSearch() {
 
 // Function to handle all async updates (geolocation and blacklists)
 function asyncUpdate(ips, signal) {
-    const chunkSize = 100;
+    const chunkSize = 128;
     
     console.log("asyncUpdate: updating " + ips.length + " ips...");
+    if (geolocate) {
+        handleGeolocation();
+    }
     handleBlacklist();
-    handleGeolocation();
     console.log("asyncUpdate: leaving");
 
     // asynchronously check list of ips for blacklist
     async function handleBlacklist() {
-        // split ips into initial chunk and send to fetchBlacklist
-        const ipchunk = ips.slice(0, chunkSize);
-        await fetchBlacklist(ipchunk);
-        // get rest of ips and send to fetchBlacklist
-        const restips = ips.slice(chunkSize);
-        if (restips.length > 0) {
-            fetchBlacklist(restips);
+        // split ips into chunks of chunkSize and send to fetchBlacklist
+        for (let i = 0; i < ips.length; i += chunkSize) {
+            const chunk = ips.slice(i, i + chunkSize);
+            await fetchBlacklist(chunk);
         }
 
         // check list of ips against server and update table
         async function fetchBlacklist(ips) {
-            console.log("blacklist: fetching " + ips.length + " ips...");
+            console.log("blacklist: checking " + ips.length + " ips...");
             const ipList = JSON.stringify(ips);
             const resp = await fetch("blacklist.php", {
                 method: "POST",
@@ -985,24 +984,21 @@ function asyncUpdate(ips, signal) {
             console.log("got " + localHits + " hit(s) from local cache");
         }
 
-        // send remaining geoips to server to check cache
-        if (geoips.length > 0) {
-            await checkRemoteCache(chunkSize); // quick initial check
-        }
-        if (geoips.length > 0) {
-            await checkRemoteCache();
+        // split geoips into chunks of chunkSize and send to checkRemoteCache
+        let checkips = geoips.slice();  // yet another copy
+        for (let i = 0; i < checkips.length; i += chunkSize) {
+            const ipchunk = checkips.slice(i, i + chunkSize);
+            await checkRemoteCache(ipchunk);
         }
 
-        // asyncronously recurse queries to external web service for remaining ips
+        // asyncronously recurse queries to external web service for remaining geoips
         if (geoips.length > 0) {
             console.log("recursing external server for " + geoips.length + " ips...");
             setTimeout(() => recurseFetchGeoLocations(geoips), 0);
         }
 
         // check server cache for first n geoips
-        async function checkRemoteCache(n = 10000) {
-            // get first n ips from geoips
-            const ipchunk = geoips.slice(0, n);
+        async function checkRemoteCache(ipchunk) {
             console.log(
                 "checking server geo cache for " + ipchunk.length + " ips..."
             );
