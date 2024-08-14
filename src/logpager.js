@@ -3,10 +3,11 @@ const geolocate = true; // pull IP geolocation from external service?
 const includeDomain = false; // include domain in geolocation?
 const tileLabels = false; // show tile labels on heatmap?
 const fillToNow = true; // fill heatmap to current time?
+const chunkSize = 200; // number of IPs to check against server at a time
+const maxGeoRequests = 32; // maximum number of IPs to externally geolocate at once
 const heatmapRatio = 0.5; // width to height ratio of heatmap
 const maxDetailLength = 96; // truncation length of log details
-const maxGeoRequests = 30; // maximum number of IPs to externally geolocate at once
-const pollWait = 15; // seconds to wait between polling the server
+const pollWait = 10; // seconds to wait between polling the server
 const mapWait = 15; // minutes to wait between updating the heatmap
 
 // global variables
@@ -917,8 +918,6 @@ function resetSearch() {
 
 // Function to handle all async updates (geolocation and blacklists)
 function asyncUpdate(ips, signal) {
-    const chunkSize = 128;
-    
     console.log("asyncUpdate: updating " + ips.length + " ips...");
     if (geolocate) {
         handleGeolocation();
@@ -981,11 +980,11 @@ function asyncUpdate(ips, signal) {
             }
         });
         if (localHits > 0) {
-            console.log("got " + localHits + " hit(s) from local cache");
+            console.log("got " + localHits + " hits from local cache");
         }
 
         // split geoips into chunks of chunkSize and send to checkRemoteCache
-        let checkips = geoips.slice();  // yet another copy
+        let checkips = geoips.slice(); // yet another copy
         for (let i = 0; i < checkips.length; i += chunkSize) {
             const ipchunk = checkips.slice(i, i + chunkSize);
             await checkRemoteCache(ipchunk);
@@ -993,7 +992,9 @@ function asyncUpdate(ips, signal) {
 
         // asyncronously recurse queries to external web service for remaining geoips
         if (geoips.length > 0) {
-            console.log("recursing external server for " + geoips.length + " ips...");
+            console.log(
+                "recursing external server for " + geoips.length + " ips..."
+            );
             setTimeout(() => recurseFetchGeoLocations(geoips), 0);
         }
 
@@ -1014,7 +1015,7 @@ function asyncUpdate(ips, signal) {
             } else {
                 let cachedips = Object.keys(geodata);
                 console.log(
-                    "got " + cachedips.length + " hit(s) from server cache"
+                    "got " + cachedips.length + " hits from server cache"
                 );
                 for (let ip of cachedips) {
                     updateGeoLocation(geodata[ip], ip);
@@ -1046,7 +1047,10 @@ function asyncUpdate(ips, signal) {
                             recurseFetchGeoLocations(ips, apiCount);
                         } else {
                             // throttle back the request rate
-                            setTimeout( () => recurseFetchGeoLocations(ips, apiCount), waitTime);
+                            setTimeout(
+                                () => recurseFetchGeoLocations(ips, apiCount),
+                                waitTime
+                            );
                         }
                     } else {
                         console.log("geo: done!");
