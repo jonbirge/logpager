@@ -5,56 +5,33 @@ include 'authparse.php';
 
 function tail($page, $linesPerPage)
 {
-    // path to the auth log file
+    // path to the auth log files
     $logFilePaths = getAuthLogFiles();
 
-    // create random temporary file path
-    $tmpFilePath = '/tmp/authlog-' . bin2hex(random_int(0, PHP_INT_MAX)) . '.log';
+    $allLines = [];
 
-    // UNIX grep command line argument to only include lines containing IP addresses
-    $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
-    
-    // generate UNIX grep command line arguments to include services we care about
-    // $services = ['sshd'];
-    // $grepArgs = '';
-    // foreach ($services as $service) {
-    //     $grepArgs .= " -e $service";
-    // }
-    // $grepSrvCmd = "grep $grepArgs";
-
-    // generate cat command to concatenate all log files
-    $catCmd = 'cat ' . implode(' ', $logFilePaths);
-
-    // build and execute UNIX command to generate filtered log
-    $cmd = "$catCmd | $grepIPCmd > $tmpFilePath";
-    exec($cmd);
-
-    // use UNIX wc command to count lines in temporary file
-    $cmd = "wc -l $tmpFilePath";
-    $fp = popen($cmd, 'r');
-    $lineCount = intval(fgets($fp));
-    pclose($fp);
-
-    // calculate number of pages
-    $pageCount = ceil($lineCount / $linesPerPage);
-
-    // calculate the page number we'll actually be returning
-    $page = min($page, $pageCount);  // counting from back of file, where page zero is the last page
-
-    // build UNIX command to get the lines we want
-    $lastLine = ($page + 1) * $linesPerPage;  // counting back from end
-    $cmd = "tail -n $lastLine $tmpFilePath | head -n $linesPerPage | tac";  // faster near the end of the file
-
-    // read the lines from UNIX pipe
-    $fp = popen($cmd, 'r');
-    $lines = [];
-    while ($line = fgets($fp)) {
-        $lines[] = $line;
+    // Concatenate all log files into an array in memory
+    foreach ($logFilePaths as $filePath) {
+        $file = new SplFileObject($filePath, 'r');
+        while (!$file->eof()) {
+            $line = $file->fgets();
+            if (preg_match('/([0-9]{1,3}\.){3}[0-9]{1,3}/', $line)) {
+                $allLines[] = $line;
+            }
+        }
     }
-    pclose($fp);
 
-    // delete temp file
-    unlink($tmpFilePath);
+    // Reverse the array to process the most recent lines first
+    $allLines = array_reverse($allLines);
+    $lineCount = count($allLines);
+
+    // Calculate the number of pages
+    $pageCount = ceil($lineCount / $linesPerPage);
+    $page = min($page, $pageCount - 1); // Ensure the page is within bounds
+
+    // Get the lines for the requested page
+    $start = $linesPerPage * $page;
+    $pageLines = array_slice($allLines, $start, $linesPerPage);
 
     // Read in CLF header name array from clfhead.json
     $headers = json_decode(file_get_contents('auth/loghead.json'));
@@ -64,8 +41,7 @@ function tail($page, $linesPerPage)
     $logLines[] = $headers;
 
     // Process each line and add to the array
-    $pageLineCount = 0;
-    foreach ($lines as $line) {
+    foreach ($pageLines as $line) {
         // parse log line
         $data = parseAuthLogLine($line);
 
@@ -73,11 +49,6 @@ function tail($page, $linesPerPage)
         $status = getAuthLogStatus($data[2]);
 
         $logLines[] = [$data[0], $data[1], $data[2], $status];
-
-        // $pageLineCount++;
-        // if ($pageLineCount >= $linesPerPage) {
-        //     break;
-        // }
     }
 
     // Output $logLines, $page and $lineCount as a JSON dictionary
