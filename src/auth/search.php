@@ -7,6 +7,7 @@ function search($searchDict, $doSummary = true)
 {
     // Parameters
     $maxItems = 2500;  // line items
+    $maxLines = 1024;  // log lines
     $maxSummarize = 100000;  // matching lines
 
     // Path to the auth log file
