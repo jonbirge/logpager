@@ -5,6 +5,9 @@ include 'authparse.php';
 
 function heatmap($searchDict)
 {
+    // set $doSearch to false if $searchDict is empty
+    $doSearch = !empty($searchDict);
+
     // Log files to read
     $logFilePaths = array_reverse(getAuthLogFiles());
 
@@ -36,28 +39,30 @@ function heatmap($searchDict)
             $status = getAuthLogStatus($line);
             $data = parseAuthLogLine($line);
 
-            // If $stat is set, check if $status matches $stat
-            if ($stat && $status !== $stat) {
-                continue;
-            }
-
-            // If $ip is set, check if $data[0] contains $ip
-            if ($ip && strpos($data[0], $ip) === false) {
-                continue;
-            }
-
-            // If $dateStr is set, check if $data[1] contains $dateStr
-            if ($dateStr && strpos($data[1], $dateStr) === false) {
-                continue;
-            }
-
-            // If $search is set, check if $line contains $search
-            if ($search && strpos($line, $search) === false) {
-                continue;
-            }
-
             // Extract the timestamp from the auth log entry
             $timeStamp = $data[1];
+            
+            if ($doSearch) {
+                // If $stat is set, check if $status matches $stat
+                if ($stat && $status !== $stat) {
+                    continue;
+                }
+
+                // If $ip is set, check if $data[0] contains $ip
+                if ($ip && strpos($data[0], $ip) === false) {
+                    continue;
+                }
+
+                // If $dateStr is set, check if $data[1] contains $dateStr
+                if ($dateStr && strpos($timeStamp, $dateStr) === false) {
+                    continue;
+                }
+
+                // If $search is set, check if $line contains $search
+                if ($search && strpos($line, $search) === false) {
+                    continue;
+                }
+            }
 
             // Convert the timestamp to a DateTime object
             $date = DateTime::createFromFormat('d/M/Y:H:i:s', $timeStamp);
@@ -73,13 +78,8 @@ function heatmap($searchDict)
                 continue;
             }
 
-            // Initialize the count for the day of the year and hour of the day
             $hStr = hourStr($hour);
-            if (!isset($logSummary[$dayOfYear][$hStr])) {
-                $logSummary[$dayOfYear][$hStr] = 0;
-            }
-            // Increment the count for the day of the year and hour of the day
-            $logSummary[$dayOfYear][$hStr]++;
+            $logSummary[$dayOfYear][$hStr] = ($logSummary[$dayOfYear][$hStr] ?? 0) + 1;
         }
 
         // Close the file handle
