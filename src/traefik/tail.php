@@ -1,39 +1,58 @@
 <?php
 
-// Include traefik.php
-include 'traefik.php';
+// Return list of auth log files
+function getTraefikLogFiles()
+{
+    // Array of log files to read
+    $logFilePaths = ['/access.log.1', '/access.log'];
+
+    // Remove any log files that don't exist
+    foreach ($logFilePaths as $key => $logFilePath) {
+        if (!file_exists($logFilePath)) {
+            unset($logFilePaths[$key]);
+        }
+    }
+
+    return $logFilePaths;
+}
+
+function readAllLinesFromFiles($logFilePaths)
+{
+    $allLines = [];
+    foreach ($logFilePaths as $filePath) {
+        $file = fopen($filePath, 'r');
+        while (!feof($file)) {
+            $line = fgets($file);
+            if ($line !== false) {
+                $allLines[] = $line;
+            }
+        }
+        fclose($file);
+    }
+    return $allLines;
+}
 
 function tail($page, $linesPerPage)
 {
-    // Concatenate log files
-    $tmpFilePath = getTempLogFilePath();
+    // Retrieve log file paths using getTraefikLogFiles()
+    $logFilePaths = getTraefikLogFiles();
 
-    // use UNIX wc command to count lines in file
-    $cmd = "wc -l $tmpFilePath";
-    $fp = popen($cmd, 'r');
-    $lineCount = intval(fgets($fp));
-    pclose($fp);
+    // Read all lines from log files
+    $allLines = readAllLinesFromFiles($logFilePaths);
 
-    // calculate number of pages
-    $pageCount = ceil($lineCount / $linesPerPage);
+    // Calculate total lines and number of pages
+    $totalLines = count($allLines);
+    $pageCount = ceil($totalLines / $linesPerPage);
 
-    // calculate the page number we'll actually be returning
-    $page = min($page, $pageCount);
+    // Calculate the page number we'll actually be returning
+    $page = min($page, $pageCount - 1);
 
-    // build UNIX command
-    $lastLine = ($page + 1) * $linesPerPage;  // counting back from end
-    $cmd = "tail -n $lastLine $tmpFilePath | head -n $linesPerPage | tac";  // faster near the end of the file
+    // Determine the range of lines to read
+    $startLine = max(0, $totalLines - ($page + 1) * $linesPerPage);
+    $endLine = min($totalLines, $totalLines - $page * $linesPerPage);
 
-    // execute UNIX command and read lines from pipe
-    $fp = popen($cmd, 'r');
-    $lines = [];
-    while ($line = fgets($fp)) {
-        $lines[] = $line;
-    }
-    pclose($fp);
-
-    // delete temp file
-    unlink($tmpFilePath);
+    // Extract the lines for the requested page
+    $lines = array_slice($allLines, $startLine, $endLine - $startLine);
 
     // Read in CLF header name array from loghead.json
     $headers = json_decode(file_get_contents('traefik/loghead.json'));
@@ -60,7 +79,7 @@ function tail($page, $linesPerPage)
     echo json_encode([
         'page' => $page,
         'pageCount' => $pageCount,
-        'lineCount' => $lineCount,
+        'lineCount' => $totalLines,
         'logLines' => $logLines
     ]);
 }
