@@ -31,6 +31,11 @@ function heatmap($searchDict)
 
         // Read each line from the log file
         while (($line = fgets($fileHandle)) !== false) {
+            // Skip lines that aren't sshd-related
+            if (strpos($line, 'sshd') === false) {
+                continue;
+            }
+
             // Skip lines that don't contain a valid IP address
             if (!preg_match('/([0-9]{1,3}\.){3}[0-9]{1,3}/', $line)) {
                 continue;
