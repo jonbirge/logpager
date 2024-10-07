@@ -13,78 +13,65 @@ function getTraefikLogFiles()
     return $logFilePaths;
 }
 
-function getLogFileContent()
+function hourStr($hour)
 {
-    $logFilePaths = getTraefikLogFiles();
-    $logContent = '';
-
-    foreach ($logFilePaths as $logFilePath) {
-        $logContent .= file_get_contents($logFilePath);
-    }
-
-    return $logContent;
+    return $hour < 10 ? "0$hour" : "$hour";
 }
 
 function heatmap($searchDict)
 {
-    $logContent = getLogFileContent();
+    // set $doSearch to false if $searchDict is empty
+    $doSearch = !empty($searchDict);
 
-    $search = $searchDict['search'];
-    $ip = $searchDict['ip'];
-    $dateStr = $searchDict['date'];
-    $stat = $searchDict['stat'];
-
-    $logLines = explode("\n", $logContent);
+    $logFilePaths = getTraefikLogFiles();
     $logSummary = [];
 
-    foreach ($logLines as $line) {
-        if (empty($line)) {
-            continue;
-        }
+    foreach ($logFilePaths as $logFilePath) {
+        $handle = fopen($logFilePath, 'r');
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                if (empty($line)) {
+                    continue;
+                }
 
-        $logEntry = explode(' ', $line);
-        $ipAddress = $logEntry[0];
-        $timeStamp = $logEntry[3];
-        $date = DateTime::createFromFormat('[d/M/Y:H:i:s', $timeStamp);
+                $logEntry = explode(' ', $line, 9); // Limit the number of splits to 9 for efficiency
+                $ipAddress = $logEntry[0];
+                $timeStamp = $logEntry[3];
 
-        if ($ip && strpos($ipAddress, $ip) === false) {
-            continue;
-        }
+                // Skip unnecessary checks early
+                if ($doSearch) {
+                    if (($searchDict['ip'] && strpos($ipAddress, $searchDict['ip']) === false) ||
+                        ($searchDict['date'] && strpos($timeStamp, $searchDict['date']) === false) ||
+                        ($searchDict['stat'] && $logEntry[8] !== $searchDict['stat']) ||
+                        ($searchDict['search'] && strpos($line, $searchDict['search']) === false)
+                    ) {
+                        continue;
+                    }
+                }
 
-        if ($dateStr && strpos($timeStamp, $dateStr) === false) {
-            continue;
-        }
+                $date = DateTime::createFromFormat('[d/M/Y:H:i:s', $timeStamp);
+                if ($date === false) {
+                    echo "<p>Invalid timestamp format encountered: $timeStamp</p>";
+                    return;
+                }
 
-        if ($stat) {
-            $status = $logEntry[8];
-            if ($status !== $stat) {
-                continue;
+                $dayOfYear = $date->format('Y-m-d');
+                $hour = $date->format('G');
+                $hStr = hourStr($hour); // Use hourStr function
+
+                if (!isset($logSummary[$dayOfYear])) {
+                    $logSummary[$dayOfYear] = [];
+                }
+                if (!isset($logSummary[$dayOfYear][$hStr])) {
+                    $logSummary[$dayOfYear][$hStr] = 0;
+                }
+                $logSummary[$dayOfYear][$hStr]++;
             }
-        }
-
-        if ($search && strpos($line, $search) === false) {
-            continue;
-        }
-
-        if ($date !== false) {
-            $dayOfYear = $date->format('Y-m-d');
-            $hour = $date->format('G');
+            fclose($handle);
         } else {
-            echo "<p>Invalid timestamp format encountered: $timeStamp</p>";
-            return;
+            echo "<p>Unable to open file: $logFilePath</p>";
         }
-
-        $hStr = hourStr($hour);
-        if (!isset($logSummary[$dayOfYear][$hStr])) {
-            $logSummary[$dayOfYear][$hStr] = 0;
-        }
-        $logSummary[$dayOfYear][$hStr]++;
     }
 
     echo json_encode($logSummary);
-}
-
-function hourStr($hour)
-{
-    return $hour < 10 ? "0$hour" : "$hour";
 }
