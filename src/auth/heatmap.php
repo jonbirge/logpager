@@ -1,5 +1,9 @@
 <?php
 
+// Define the cache file name as a constant
+define('CACHE_FILE', '/tmp/auth_heatmap_cache.json');
+define('CACHE_LIFE', 15);  // cache life in minutes
+
 // Include the authparse.php file
 include 'authparse.php';
 
@@ -34,7 +38,6 @@ function readLines($fileHandle, $bufferSize = 2 * 1024 * 1024) {
     return $lines;
 }
 
-
 // Hour integer to string conversion function
 function hourStr($hour)
 {
@@ -42,6 +45,34 @@ function hourStr($hour)
 }
 
 function heatmap($searchDict)
+{
+    // set $doSearch to false if $searchDict is empty
+    $doSearch = !empty($searchDict);
+
+    // if searching, always generate a new summary
+    if ($doSearch) {
+        genLogSummary($searchDict);
+        return;
+    }
+
+    // check the cache file for a valid cache
+    if (file_exists(CACHE_FILE)) {
+        $cacheData = json_decode(file_get_contents(CACHE_FILE), true);
+        $cacheTime = strtotime($cacheData['generatedAt']);
+        $currentTime = time();
+        $cacheAge = ($currentTime - $cacheTime) / 60;  // cache age in minutes
+
+        // if cache is fresh, echo the cache data and return
+        if ($cacheAge < CACHE_LIFE) {
+            echo json_encode($cacheData['logSummary']);
+            return;
+        }
+    } else {  // generate new log summary
+        genLogSummary();
+    }
+}
+
+function genLogSummary($searchDict = [])
 {
     // set $doSearch to false if $searchDict is empty
     $doSearch = !empty($searchDict);
@@ -137,15 +168,15 @@ function heatmap($searchDict)
         fclose($fileHandle);
     }
 
-    // Echo the log summary data as JSON
+    // Echo the log summary data as JSON, ASAP
     echo json_encode($logSummary);
 
-    // Create a JSON object that includes the log summary and the time of its generation
-    $cacheData = [
-        'generatedAt' => date('Y-m-d H:i:s'),
-        'logSummary' => $logSummary
-    ];
-
-    // Write the JSON object to a cache file in /tmp
-    file_put_contents('/tmp/auth_heatmap_cache.json', json_encode($cacheData));
+    // Cache the results unless a search was performed
+    if (!$doSearch) {
+        $cacheData = [
+            'generatedAt' => date('Y-m-d H:i:s'),
+            'logSummary' => $logSummary
+        ];
+        file_put_contents(CACHE_FILE, json_encode($cacheData));
+    }
 }
