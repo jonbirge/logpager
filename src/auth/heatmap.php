@@ -67,9 +67,10 @@ function heatmap($searchDict)
             echo json_encode($cacheData['logSummary']);
             return;
         }
-    } else {  // generate new log summary
-        genLogSummary();
     }
+    
+    // if all else fails, generate a new log summary
+    genLogSummary();
 }
 
 function genLogSummary($searchDict = [])
@@ -81,7 +82,7 @@ function genLogSummary($searchDict = [])
     $year = date('Y');
 
     // Log files to read
-    $logFilePaths = array_reverse(getAuthLogFiles());
+    $logFilePaths = getAuthLogFiles();
 
     // Get search parameters
     $search = $searchDict['search'];
@@ -164,7 +165,7 @@ function genLogSummary($searchDict = [])
             }
         }
 
-        // Close the file handle
+        // Close the file
         fclose($fileHandle);
     }
 
@@ -174,7 +175,7 @@ function genLogSummary($searchDict = [])
     // Cache the results unless a search was performed
     if (!$doSearch) {
         $cacheData = [
-            'generatedAt' => date('Y-m-d H:i:s'),
+            'generatedAt' => date('c'),
             'logSummary' => $logSummary
         ];
         file_put_contents(CACHE_FILE, json_encode($cacheData));

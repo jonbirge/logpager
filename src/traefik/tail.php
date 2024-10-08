@@ -1,20 +1,6 @@
 <?php
 
-// Return list of auth log files
-function getTraefikLogFiles()
-{
-    // Array of log files to read
-    $logFilePaths = ['/access.log.1', '/access.log'];
-
-    // Remove any log files that don't exist
-    foreach ($logFilePaths as $key => $logFilePath) {
-        if (!file_exists($logFilePath)) {
-            unset($logFilePaths[$key]);
-        }
-    }
-
-    return $logFilePaths;
-}
+include 'traefik.php';
 
 function readAllLinesFromFiles($logFilePaths)
 {
