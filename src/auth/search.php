@@ -10,6 +10,9 @@ function search($searchDict, $doSummary = true)
     $maxLines = 1024;  // log lines
     $maxSummarize = 100000;  // matching lines
 
+    // Current year
+    $year = date('Y');
+
     // Path to the auth log file
     $logFilePaths = array_reverse(getAuthLogFiles());
 
@@ -37,7 +40,7 @@ function search($searchDict, $doSummary = true)
     // Process each line and add to the array
     $lineCount = 0;
     while ($line = fgets($fp)) {
-        $data = parseAuthLogLine($line);
+        $data = parseAuthLogLine($line, $year);
 
         if ($data === false) {
             $logLines[] = ['-', '-', $line, 'ERROR'];
