@@ -5,6 +5,9 @@ include 'authparse.php';
 
 function tail($page, $linesPerPage)
 {
+    // Current year
+    $year = date('Y');
+
     // path to the auth log files
     $logFilePaths = getAuthLogFiles();
 
@@ -43,7 +46,7 @@ function tail($page, $linesPerPage)
     // Process each line and add to the array
     foreach ($pageLines as $line) {
         // parse log line
-        $data = parseAuthLogLine($line);
+        $data = parseAuthLogLine($line, $year);
 
         // determine status based on $data[2]
         $status = getAuthLogStatus($data[2]);

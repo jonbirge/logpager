@@ -3,7 +3,7 @@
 // Include the authparse.php file
 include 'authparse.php';
 
-function readLines($fileHandle, $bufferSize = 5 * 1024 * 1024) {
+function readLines($fileHandle, $bufferSize = 2 * 1024 * 1024) {
     $lines = [];
     $buffer = '';
 
@@ -34,10 +34,20 @@ function readLines($fileHandle, $bufferSize = 5 * 1024 * 1024) {
     return $lines;
 }
 
+
+// Hour integer to string conversion function
+function hourStr($hour)
+{
+    return str_pad($hour, 2, "0", STR_PAD_LEFT);
+}
+
 function heatmap($searchDict)
 {
     // set $doSearch to false if $searchDict is empty
     $doSearch = !empty($searchDict);
+
+    // Current year
+    $year = date('Y');
 
     // Log files to read
     $logFilePaths = array_reverse(getAuthLogFiles());
@@ -76,14 +86,14 @@ function heatmap($searchDict)
                     continue;
                 }
 
-                $status = getAuthLogStatus($line);
-                $data = parseAuthLogLine($line);
-
                 // Extract the timestamp from the auth log entry
+                $data = parseAuthLogLine($line, $year);
                 $timeStamp = $data[1];
 
                 if ($doSearch) {
-                    // If $stat is set, check if $status matches $stat
+                    $status = getAuthLogStatus($line);
+
+                    // Check if $status matches $stat exactly
                     if ($stat && $status !== $stat) {
                         continue;
                     }
@@ -129,10 +139,13 @@ function heatmap($searchDict)
 
     // Echo the log summary data as JSON
     echo json_encode($logSummary);
-}
 
-// Hour integer to string conversion function
-function hourStr($hour)
-{
-    return str_pad($hour, 2, "0", STR_PAD_LEFT);
+    // Create a JSON object that includes the log summary and the time of its generation
+    $cacheData = [
+        'generatedAt' => date('Y-m-d H:i:s'),
+        'logSummary' => $logSummary
+    ];
+
+    // Write the JSON object to a cache file in /tmp
+    file_put_contents('/tmp/auth_heatmap_cache.json', json_encode($cacheData));
 }

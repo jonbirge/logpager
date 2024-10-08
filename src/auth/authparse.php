@@ -25,16 +25,18 @@ function getAuthLogStatus($line)
 
     // check if $line contains any of the failed words
     $status = 'INFO';
+    
     foreach ($failedWords as $word) {
         if (stripos($line, $word) !== false) {
             $status = 'FAIL';
-            break;
+            return $status;
         }
     }
+
     foreach ($successWords as $word) {
         if (stripos($line, $word) !== false) {
             $status = 'OK';
-            break;
+            return $status;
         }
     }
 
@@ -59,13 +61,10 @@ function convertCLFDate($date)
 }
 
 // Parse auth log file into standard format
-function parseAuthLogLine($line)
+function parseAuthLogLine($line, $year)
 {
-    // Current year
-    $year = date('Y');
-
     // Determine the kind of time stamp used
-    if (preg_match('/^[a-zA-Z]/', $line)) {  // CLF format
+    if (($line[0] >= 'A' && $line[0] <= 'Z') || ($line[0] >= 'a' && $line[0] <= 'z')) {  // old CLF-type date format
         // Extract the month, day, and time from the line
         if (!preg_match('/(\S+)\s+(\d+) (\d+):(\d+):(\d+)/', $line, $matches)) {
             return false; // handle error as appropriate
