@@ -45,7 +45,6 @@ function tail($page, $linesPerPage)
 
     // Create array of CLF log lines
     $logLines = [];
-    $logLines[] = $headers;
 
     // Process each line and add to the array
     foreach ($lines as $line) {
@@ -58,14 +57,15 @@ function tail($page, $linesPerPage)
         $matches[5] = $temp;
 
         // Go through each match and add to the array with htmlspecialchars()
-        $logLines[] = array_map('htmlspecialchars', array_slice($matches, 1));
+        $logLines[] = array_slice($matches, 1);
     }
+    $logLines[] = $headers;
 
     // Output $logLines, $page and $lineCount as a JSON dictionary
     echo json_encode([
         'page' => $page,
         'pageCount' => $pageCount,
         'lineCount' => $totalLines,
-        'logLines' => $logLines
+        'logLines' => array_reverse($logLines)
     ]);
 }
