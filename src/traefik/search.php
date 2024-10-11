@@ -94,7 +94,7 @@ function search($searchDict, $doSummary = true)
             $logLines[] = [$data[1], $dateObj, $data[5]];  // IP, date, stat
             if ($lineCount >= $maxSummarize) break;
         } else {
-            $logLines[] = array_map('htmlspecialchars', array_slice($data, 1));
+            $logLines[] = array_slice($data, 1);
             if ($lineCount >= $maxItems) break;
         }
     }

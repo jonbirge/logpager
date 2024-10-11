@@ -63,12 +63,13 @@ function genLogSummary($searchDict = [])
             $logEntry = explode(' ', $line, 9);
             $ipAddress = $logEntry[0];
             $timeStamp = $logEntry[3];
+            $status = $logEntry[8];
 
             // Skip unnecessary checks early
             if ($doSearch) {
                 if (($searchDict['ip'] && strpos($ipAddress, $searchDict['ip']) === false) ||
                     ($searchDict['date'] && strpos($timeStamp, $searchDict['date']) === false) ||
-                    ($searchDict['stat'] && $logEntry[8] !== $searchDict['stat']) ||
+                    ($searchDict['stat'] && strpos($status, $searchDict['stat']) === false) ||
                     ($searchDict['search'] && strpos($line, $searchDict['search']) === false)
                 ) {
                     continue;
