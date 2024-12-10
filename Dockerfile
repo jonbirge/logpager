@@ -1,5 +1,6 @@
 # Alpine Linux as the base image
-FROM alpine:3
+# NOTE: alpine:3.21 break the MariaDB client
+FROM alpine:3.20
 
 # Labels
 LABEL org.opencontainers.image.source=https://github.com/jonbirge/logpager

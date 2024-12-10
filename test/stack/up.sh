@@ -6,4 +6,5 @@ if [ ! -f ./logs/access.log ]; then
 fi
 
 # Run docker-compose
-docker compose up --remove-orphans -d
+docker compose up --remove-orphans
+

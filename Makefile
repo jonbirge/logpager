@@ -32,6 +32,7 @@ $(BUILD_SMALL_FILE): $(SRC_FILES) $(DOCKERFILE_SMALL)
 	mkdir -p build
 	touch $(BUILD_SMALL_FILE)
 
+# Remove cached builds
 clean:
 	docker builder prune --all -f
 	rm -rf build
