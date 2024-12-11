@@ -16,7 +16,7 @@ header("Pragma: no-cache");
     <link href="styles.css" rel="stylesheet" type="text/css">
     <link rel="shortcut icon" href="intel/favicon.ico" type="image/x-icon" />
     <?php
-        // get the target IP from the URL ip parameter. if it's not there use client ip address
+        // Get the target IP from the URL ip parameter. If it's not there use client ip address
         if (!isset($_GET['ip'])) {
             $target_ip = $_SERVER['HTTP_X_REAL_IP'] ? $_SERVER['HTTP_X_REAL_IP'] : $_SERVER['REMOTE_ADDR'];
         } else {
@@ -70,7 +70,7 @@ header("Pragma: no-cache");
         </div>
 
         <!-- version footer -->
-        <div>1.9-d14</div>
+        <div>1.9</div>
     </div>
 
     <script src="timeutils.js"></script>
