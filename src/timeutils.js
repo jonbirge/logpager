@@ -13,21 +13,26 @@ function parseCLFDate(clfstamp) {
     return dateObj;
 }
 
-// take two Date objects and return the difference in time in simple human-readable terms, such as "3 days" or "5 seconds"
-function timeDiff(date1, date2) {
-    const diff = date2 - date1;
-    const seconds = Math.ceil(diff / 1000) + 1;
+// take a timestamp in ISO 8601 format and return a Date object
+function parseISODate(isostamp) {
+    return new Date(isostamp);
+}
+
+// take two Date objects and return the difference in time in simple human-readable terms, such as "3 days" or "5 s"
+function timeDiff(date1, date2, offset = 0) {
+    const diff = date2 - date1 - offset;
+    const seconds = Math.ceil(diff / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
     if (days > 2) {
         return days + " days";
     } else if (hours > 2) {
-        return hours + " hrs";
+        return hours + " hr";
     } else if (minutes > 5) {
         return minutes + " min";
     } else {
-        return seconds + " sec";
+        return seconds + "<br>sec";
     }
 }
 

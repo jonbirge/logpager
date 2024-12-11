@@ -1,24 +1,28 @@
 services:
-
   traefik:
     image: traefik
     restart: always
     command:
-      - "--configFile=/etc/traefik.yml"
+      - "--accesslog.filepath=/logs/access.log"
+      - "--providers.file.directory=/etc/traefik"
+      - "--providers.file.watch=true"
+      - "--providers.docker.exposedbydefault=true"
+      - "--api.insecure=true"
+      - "--entrypoints.web.address=:80"
+      - "--experimental.plugins.denyip.modulename=github.com/kevtainer/denyip"
+      - "--experimental.plugins.denyip.version=v1.0.0"
     ports:
       - "80:80"
-      - "8080:8080"  # traefik admin
+      - "8080:8080" # Traefik admin
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik.yml:/etc/traefik.yml:ro
       - ./traefik:/etc/traefik
       - ./logs/:/logs/:rw
     depends_on:
       - logpager
-      - www
 
   logpager:
-    image: logpager_test
+    image: logpager-dev
     restart: always
     environment:
       SQL_HOST: db
@@ -29,9 +33,10 @@ services:
       - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
-      # - ../logs/auth.log:/auth.log:ro  # fake auth logs for testing
+      - ../../src:/var/www:ro  # live development
+      - ../logs/auth.log:/auth.log:ro  # test auth logs
+      - ../logs/clf.log:/clf.log:ro  # test clf logs
       - ./logs/access.log:/access.log:ro  # actual logs from this stack
-      - ../../src:/var/www:ro  # for live development (comment out to run from image)
     depends_on:
       - db
 
@@ -42,16 +47,6 @@ services:
       - dbdata:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: testpass
-
-  www:
-    image: nginx
-    restart: always
-    labels:
-      - "traefik.http.routers.www.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.www.middlewares=blacklist@file"
-    volumes:
-      - ./www:/usr/share/nginx/html:rw
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
 
   adminer:
     image: adminer

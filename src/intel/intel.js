@@ -3,11 +3,9 @@ const params = new URLSearchParams(window.location.search);
 const targetIP = params.get("ip");
 
 // initialize the page
-loadBlacklist();
 pullIntel();
 
 // function to pull geolocation and whois data from web services and display it
-// in the intel div in a table
 function pullIntel() {
     const intelDiv = document.getElementById("intel");
     fetch("intel/data.php?ip=" + targetIP)
@@ -18,27 +16,50 @@ function pullIntel() {
             return response.json();
         })
         .then((data) => {
-            // generate table of the data object
-            // TODO: share blacklist button functionality in blacklist.js
             let table = "<table>";
             table += "<tr><th>Property</th><th>Value</th></tr>";
             for (const [key, value] of Object.entries(data)) {
+                let displayValue = value;
+
+                // Check for boolean true or false values and replace with HTML for colored dots
+                if (value === true) {
+                    displayValue = '<span style="color: green;">●</span>';
+                } else if (value === false) {
+                    displayValue = '<span style="color: darkred;">●</span>';
+                }
+
+                // Handle special cases
                 if (key === "cidr") {
                     const cidr = value;
-                    table += `<tr><td>${key}</td><td>${cidr}`;
-                    if (blackList.includes(cidr)) {  // already blacklisted it
-                        const blacklistCall = `onclick="blacklistRemove('${cidr}');"`;
-                        const blacklistID = `id="block-${cidr}"`;
-                        table += ` <button ${blacklistID} class="toggle-button tight red" ${blacklistCall}">unblock</button>`;
-                    } else {  // not blacklisted yet
-                        const timeStamp = new Date();
-                        const blacklistCall = `onclick="blacklistAdd('${cidr}','cidr',null,'N/A');"`;
-                        const blacklistID = `id="block-${cidr}"`;
-                        table += ` <button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block</button>`;
-                    }
+                    const blacklistURL = `blacklist.php?ip=${cidr}`;
+
+                    // add a block button
+                    const blacklistCall = `onclick="blacklistAdd('${cidr}','cidr',null,'NULL');"`;
+                    const blacklistID = `id="block-${cidr}"`;
+                    table += `<tr><td>${key}</td><td>${displayValue} <button ${blacklistID} class="toggle-button tight" ${blacklistCall}>block</button></td></tr>`;
+
+                    // query the blacklistURL synchronously to see if the CIDR is blacklisted
+                    fetch(blacklistURL)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            // check if the blacklist is an empty array
+                            const isblack = data.length > 0;
+                            if (isblack) {
+                                // disable the block button
+                                const button = document.getElementById(`block-${cidr}`);
+                                button.disabled = true;
+                                button.classList.add("tight");
+                                button.classList.add("disabled");
+                                button.innerHTML = "blocked";
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                        });
+
                     table += "</td></tr>";
                 } else {
-                    table += `<tr><td>${key}</td><td>${value}</td></tr>`;
+                    table += `<tr><td>${key}</td><td>${displayValue}</td></tr>`;
                 }
             }
             intelDiv.innerHTML = table;
@@ -114,11 +135,11 @@ function runPing() {
     pingCanvas.innerHTML = '<canvas id="pingChart" style="width: 80%"></canvas>';
     var ctx = document.getElementById('pingChart').getContext('2d');
     var pingChart = new Chart(ctx, {
-        type: 'line', // You can change this to 'bar' if you prefer a bar chart
+        type: 'bar', // Using bar chart to represent histogram
         data: {
             labels: [], // Empty labels
             datasets: [{
-                label: 'Ping Time (ms)',
+                label: 'Ping Time Frequency',
                 data: [], // Empty data
                 backgroundColor: 'rgba(0, 123, 255, 0.5)',
                 borderColor: 'rgba(0, 123, 255, 1)',
@@ -151,12 +172,30 @@ function runPing() {
                     console.log("Ping done!");
                 }
 
-                // Preparing labels for each data point (assuming sequential labels)
-                var labels = pingData.map((_, index) => `Ping ${index + 1}`);
+                // Calculate min and max ping values
+                const minPing = Math.min(...pingData);
+                const maxPing = Math.max(...pingData);
+                const binCount = 15;
+                const binSize = (maxPing - minPing) / binCount;
+
+                // Create bins for histogram
+                const histogram = new Array(binCount).fill(0);
+
+                pingData.forEach(ping => {
+                    const binIndex = Math.floor((ping - minPing) / binSize);
+                    histogram[Math.min(binIndex, binCount - 1)]++;
+                });
+
+                // Preparing labels for each bin
+                const labels = histogram.map((_, index) => {
+                    const start = (minPing + index * binSize).toFixed(2);
+                    const end = (minPing + (index + 1) * binSize).toFixed(2);
+                    return `${start}-${end} ms`;
+                });
 
                 // Updating chart with new data
                 pingChart.data.labels = labels;
-                pingChart.data.datasets[0].data = pingData;
+                pingChart.data.datasets[0].data = histogram;
                 pingChart.update();
 
                 if (pingDone) {
@@ -231,7 +270,7 @@ function runWhois() {
 }
 
 function runAll() {
-    runScan();
+    runScan('deep');
     runPing();
     runTrace();
     runWhois(targetIP);

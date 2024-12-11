@@ -4,7 +4,7 @@
 function getAuthLogFiles()
 {
     // Array of log files to read
-    $logFilePaths = ['/auth.log'];
+    $logFilePaths = ['/auth.log.1', '/auth.log'];
 
     // Remove any log files that don't exist
     foreach ($logFilePaths as $key => $logFilePath) {
@@ -25,16 +25,18 @@ function getAuthLogStatus($line)
 
     // check if $line contains any of the failed words
     $status = 'INFO';
+    
     foreach ($failedWords as $word) {
         if (stripos($line, $word) !== false) {
             $status = 'FAIL';
-            break;
+            return $status;
         }
     }
+
     foreach ($successWords as $word) {
         if (stripos($line, $word) !== false) {
             $status = 'OK';
-            break;
+            return $status;
         }
     }
 
@@ -59,13 +61,10 @@ function convertCLFDate($date)
 }
 
 // Parse auth log file into standard format
-function parseAuthLogLine($line)
+function parseAuthLogLine($line, $year)
 {
-    // Current year
-    $year = date('Y');
-
     // Determine the kind of time stamp used
-    if (preg_match('/^[a-zA-Z]/', $line)) {  // CLF
+    if (($line[0] >= 'A' && $line[0] <= 'Z') || ($line[0] >= 'a' && $line[0] <= 'z')) {  // old CLF-type date format
         // Extract the month, day, and time from the line
         if (!preg_match('/(\S+)\s+(\d+) (\d+):(\d+):(\d+)/', $line, $matches)) {
             return false; // handle error as appropriate
@@ -79,7 +78,7 @@ function parseAuthLogLine($line)
         // Convert the month to a number
         $dateInfo = date_parse($monthStr);
         $monthNum = $dateInfo['month'];
-    } else {  // auth
+    } else {  // auth format
         // Split $line at the first space
         $parts = explode(' ', $line, 2); // Limiting to 2 parts ensures only the first space is used for splitting
 

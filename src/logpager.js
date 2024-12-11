@@ -1,36 +1,41 @@
 // hard-wired settings
 const geolocate = true; // pull IP geolocation from external service?
+const includeDomain = false; // include domain in geolocation?
 const tileLabels = false; // show tile labels on heatmap?
 const fillToNow = true; // fill heatmap to current time?
+const chunkSize = 200; // number of IPs to check against server at a time
+const maxGeoRequests = 32; // maximum number of IPs to externally geolocate at once
 const heatmapRatio = 0.5; // width to height ratio of heatmap
-const maxDetailLength = 48; // truncation length of log details
-const maxGeoRequests = 30; // maximum number of IPs to externally geolocate at once
-const pollWait = 30; // seconds to wait between polling the server
-const mapWait = 15; // minutes to wait between updating the heatmap (always)
+const maxDetailLength = 96; // truncation length of log details
+const pollWait = 10; // seconds to wait between polling the server
+const mapWait = 15; // minutes to wait between updating the heatmap
 
 // global variables
-let params = new URLSearchParams(window.location.search);
 let polling = false;
+let tableLength = 0; // used to decide when to reuse the table
+let serverTimeOffset = 0;  // offset between client and server time (pos if client is ahead)
+let logLines = []; // cache of current displayed table data
+let geoCache = {}; // cache of geolocation data
 let pollInterval;
 let heatmapTimeout;
 let controller;
-let page = params.get("page") !== null ? Number(params.get("page")) : 0;
-let search = params.get("search");
-let summary = params.get("summary") !== null ? params.get("summary") == "true" : true; // applies to search
-let logType = params.get("type") !== null ? params.get("type") : "auth"; // "clf" or "auth"
-let tableLength = 0; // used to decide when to reuse the table
-let logLines = []; // cache of current displayed table data
-let geoCache = {}; // cache of geolocation data
+let page;
+let search;
+let summary;
+let logType;
 
-// start initial data fetches
-loadManifest();
-loadBlacklist();
 
-// create update interval
-updateClock();
+// ***** init *****
+
+updateTabs();
+getServerTimeOffset();
 setInterval(updateClock, 1000);
 
 // decide what to do on page load
+let params = new URLSearchParams(window.location.search);page = params.get("page") !== null ? Number(params.get("page")) : 0;
+search = params.get("search");
+summary = params.get("summary") !== null ? params.get("summary") == "true" : true; // applies to search
+logType = params.get("type") !== null ? params.get("type") : "traefik"; // "auth", "clf" or "traefik" (default)
 if (search !== null) {
     // search trumps page
     console.log("page load: searching for " + search + ", summary = " + summary);
@@ -45,8 +50,8 @@ if (search !== null) {
 }
 
 // enable the search button when something is typed in the search box
+const searchButton = document.getElementById("search-button");
 document.getElementById("search-input").oninput = function () {
-    const searchButton = document.getElementById("search-button");
     // if the search box is empty, disable the search button
     if (this.value === "") {
         searchButton.disabled = true;
@@ -57,17 +62,26 @@ document.getElementById("search-input").oninput = function () {
     }
 };
 
+
+// ***** function definitions *****
+
 // load the log manifest and update the log type tabs
-function loadManifest() {
+function updateTabs() {
     fetch("manifest.php")
         .then((response) => response.json())
         .then((data) => {
-            const haveCLF = data.includes("access.log");
+            const haveCLF = data.includes("clf.log");
             const haveAuth = data.includes("auth.log");
+            const haveTraefik = data.includes("access.log");
             if (!haveCLF) {
                 document.getElementById("clftab").style.display = "none";
             } else {
                 document.getElementById("clftab").style.display = "";
+            }
+            if (!haveTraefik) {
+                document.getElementById("traefiktab").style.display = "none";
+            } else {
+                document.getElementById("traefiktab").style.display = "";
             }
             if (!haveAuth) {
                 document.getElementById("authtab").style.display = "none";
@@ -76,28 +90,64 @@ function loadManifest() {
                 document.getElementById("authtab").style.display = "";
             }
             // highlight the current log type
-            if (logType == "clf") {
-                document.getElementById("clftab").classList.add("selected");
-                document.getElementById("authtab").classList.remove("selected");
-            } else {
-                document.getElementById("authtab").classList.add("selected");
-                document.getElementById("clftab").classList.remove("selected");
+            switch (logType) {
+                case "clf":
+                    document.getElementById("clftab").classList.add("selected");
+                    document.getElementById("authtab").classList.remove("selected");
+                    document.getElementById("traefiktab").classList.remove("selected");
+                    break;
+                case "auth":
+                    document.getElementById("clftab").classList.remove("selected");
+                    document.getElementById("authtab").classList.add("selected");
+                    document.getElementById("traefiktab").classList.remove("selected");
+                    break;
+                case "traefik":
+                    document.getElementById("clftab").classList.remove("selected");
+                    document.getElementById("authtab").classList.remove("selected");
+                    document.getElementById("traefiktab").classList.add("selected");
+                    break;
+                default:
+                    console.error("Unknown log type: " + logType);
             }
         });
 }
 
-// ***** function definitions *****
+// get the server time offset from the client
+async function getServerTimeOffset(repeatCount = 1) {
+    const offsets = [];
+
+    for (let i = 0; i < repeatCount; i++) {
+        const txTime = new Date();
+        const response = await fetch("time.php");
+        const data = await response.json();
+        const rxTime = new Date();
+        const rtDelay = rxTime - txTime;  // ms
+        const serverTimeISO = data;
+        const serverDate = parseISODate(serverTimeISO);  // Date obj
+        const timeOffset = (rxTime - serverDate) - rtDelay / 2 - 500;  // ms (plus margin)
+        offsets.push(timeOffset);
+
+        console.log(`Round trip delay [${i + 1}]: ${rtDelay} ms`);
+        console.log(`Server time offset [${i + 1}]: ${timeOffset} ms`);
+    }
+
+    serverTimeOffset = offsets.reduce((sum, offset) => sum + offset, 0) / offsets.length;
+    console.log(`Average server time offset: ${serverTimeOffset} ms`);
+}
 
 // update time sensitive elements every second
 function updateClock() {
-    // find all elements with id of the form timestamp:*
+    // client time
+    const curTime = new Date();
+
+    // all elements with id of the form timestamp:*
     const timestampElements = document.querySelectorAll('[id^="timestamp:"]');
 
     // update each timestamp element
     timestampElements.forEach((element) => {
         const timestamp = element.id.replace("timestamp:", "");
         const dateObj = new Date(timestamp);
-        const timediff = timeDiff(dateObj, new Date());
+        const timediff = timeDiff(dateObj, curTime, serverTimeOffset);
         element.innerHTML = timediff;
     });
 }
@@ -105,6 +155,10 @@ function updateClock() {
 // pull the relevent log data from the server
 function pollLog() {
     console.log("***** pollLog: fetching page " + page + " of type " + logType);
+
+    // Add spinning loading icon to log div
+    const statusDiv = document.getElementById("status");
+    statusDiv.innerHTML = '<div class="loader small"></div>';
 
     // abort any pending fetches
     if (controller) {
@@ -122,10 +176,6 @@ function pollLog() {
     url.searchParams.set("type", logType);
     search = null;
 
-    // update page to show loading...
-    const statusDiv = document.getElementById("status");
-    statusDiv.innerHTML = "<b>Loading...</b>";
-
     // get the log from the server
     fetch("logtail.php?type=" + logType + "&page=" + page)
         .then((response) => response.text())
@@ -137,6 +187,10 @@ function pollLog() {
 // search the log and return table of results
 function searchLog(searchTerm, doSummary) {
     console.log("searchLog: searching for " + searchTerm + ", summary = " + doSummary);
+
+    // Add spinning loading icon to log div
+    const heatmapDiv = document.getElementById("log");
+    heatmapDiv.innerHTML = '<div class="loader"></div>';
 
     // abort any pending fetches
     if (controller) {
@@ -201,6 +255,8 @@ function searchLog(searchTerm, doSummary) {
 
 // sort table data in logLines by column
 function sortTable(column, isDate = false) {
+    console.log("sortTable: sorting by column " + column);
+
     // extract the given column from logLines, minus the header element
     const columnData = logLines.slice(1).map((row) => row[column]);
 
@@ -247,7 +303,7 @@ function refreshTable() {
 
     // check to see if the table needs to be rebuilt
     if (dataLength != tableLength) {
-        console.log("updateTable: rebuilding table");
+        console.log("refreshTable: rebuilding table...");
         tableLength = logLines.length;
         let table0 = '<table id="log-table" class="log">';
         for (let i = 0; i < logLines.length; i++) {
@@ -255,6 +311,8 @@ function refreshTable() {
         }
         table0 += "</table>";
         logDiv.innerHTML = table0;
+    } else {
+        console.log("refreshTable: updating table in place...");
     }
 
     // utility function to create HTML link for sorting
@@ -282,7 +340,9 @@ function refreshTable() {
             case "IP":
                 row += "<th>" + addSortLink(j, headerName) + "</th>";
                 if (geolocate) {
-                    row += '<th class="hideable">Domain</th>';
+                    if (includeDomain) {
+                        row += '<th class="hideable">Domain</th>';
+                    }
                     row += '<th class="hideable">Organization</th>';
                     row += "<th>Geolocation</th>";
                 }
@@ -334,8 +394,10 @@ function refreshTable() {
                     const intelLink = `onclick="window.open('intel.php?ip=${ip}'); return false"`;
                     row += ` <button id="intel-${ip}" class="toggle-button tight" ${intelLink}>intel</button></nobr></td>`;
                     if (geolocate) {
-                        const hostnameid = `hostname-${ip}`;
-                        row += `<td class="hideable" id="${hostnameid}"></td>`;
+                        if (includeDomain) {
+                            const hostnameid = `hostname-${ip}`;
+                            row += `<td class="hideable" id="${hostnameid}"></td>`;
+                        }
                         const orgid = `org-${ip}`;
                         row += `<td class="hideable" id="${orgid}"></td>`;
                         const geoid = `geo-${ip}`;
@@ -382,28 +444,17 @@ function refreshTable() {
         rowElement.innerHTML = row;
     }
 
-    // asyncronously get the host locations from the IPs
-    const ipSet = [...new Set(ips)]; // Get unique IP addresses
-    if (geolocate) getGeoLocations(ipSet, signal);
-}
+    // Asynchronously get the geolocation and blacklist data from the IPs
+    console.log(
+        "refreshTable: async getting geolocation and blacklist data..."
+    );
 
-// function to enable or disable a set of buttons
-function toggleButtons(buttons, enable) {
-    if (polling) {
-        buttons.forEach((button) => {
-            button.disabled = true;
-            button.classList.add("disabled");
-        });
-    } else {
-        buttons.forEach((button) => {
-            button.disabled = !enable;
-            if (enable) {
-                button.classList.remove("disabled");
-            } else {
-                button.classList.add("disabled");
-            }
-        });
-    }
+    // Use setTimeout to allow the browser to update the DOM
+    setTimeout(() => {
+        const ipSet = [...new Set(ips)]; // Get unique IP addresses
+        asyncUpdate(ipSet, signal);
+        console.log("refreshTable: done");
+    }, 10);
 }
 
 // take JSON array of common log data and write HTML table
@@ -415,7 +466,7 @@ function updateTable(jsonData) {
     const pageCount = parseInt(logdata.pageCount, 10);
     const lineCount = parseInt(logdata.lineCount, 10);
     const page = parseInt(logdata.page, 10);
-    logLines = logdata.logLines;
+    logLines = logdata.logLines;  // TODO: can we do this without a global variable?
 
     // report the number of results in the status div
     const searchStatus = document.getElementById("status");
@@ -471,11 +522,9 @@ function updateSummaryTable(jsonData) {
     // report the number of results in the status div
     const searchStatus = document.getElementById("status");
     searchStatus.innerHTML =
-        "<b>Found " +
-        (dataLength - 1) +
-        " IP addresses from " +
-        total +
-        " matching log entries</b>";
+        "<b>" + (dataLength - 1) +
+        " IPs from " + total +
+        " matching lines</b>";
 
     // write HTML from data...
     refreshTable();
@@ -485,12 +534,41 @@ function updateSummaryTable(jsonData) {
     pageSpan.innerHTML = "Summary search results";
 }
 
+// function to enable or disable a set of buttons
+function toggleButtons(buttons, enable) {
+    if (polling) {
+        buttons.forEach((button) => {
+            button.disabled = true;
+            button.classList.add("disabled");
+        });
+    } else {
+        buttons.forEach((button) => {
+            button.disabled = !enable;
+            if (enable) {
+                button.classList.remove("disabled");
+            } else {
+                button.classList.add("disabled");
+            }
+        });
+    }
+}
+
 // plot heatmap of log entries by hour and day, potentially including a search term
 function plotHeatmap(searchTerm, plotLogType = null) {
-    // cancel existing heatmap timeout
-    if (heatmapTimeout) {
-        clearTimeout(heatmapTimeout);
+    // Check if SVG element already exists and remove if so
+    const svgElement = document.querySelector("svg");
+    if (svgElement) {
+        svgElement.remove();
     }
+
+    // Add spinning loading icon to heatmap div
+    const heatmapDiv = document.getElementById("heatmap");
+    heatmapDiv.innerHTML = '<div class="loader"></div>';
+
+    // cancel existing heatmap timeout
+    // if (heatmapTimeout) {
+    //     clearTimeout(heatmapTimeout);
+    // }
 
     // set plotLogType to global logType if not provided
     if (plotLogType === null) {
@@ -510,10 +588,10 @@ function plotHeatmap(searchTerm, plotLogType = null) {
         .then(buildHeatmap);
 
     // set interval to update the heatmap every mapWait minutes
-    console.log("plotHeatmap: refresh time " + mapWait + " minutes");
-    heatmapTimeout = setTimeout(() => {
-        plotHeatmap(searchTerm, plotLogType);
-    }, mapWait * 60 * 1000);
+    // console.log("plotHeatmap: refresh time " + mapWait + " minutes");
+    // heatmapTimeout = setTimeout(() => {
+    //     plotHeatmap(searchTerm, plotLogType);
+    // }, mapWait * 60 * 1000);
 }
 
 // Take JSON array of command log data and build SVG heatmap
@@ -523,6 +601,10 @@ function buildHeatmap(jsonData) {
     if (svgElement) {
         svgElement.remove();
     }
+
+    // Remove wait animation
+    const heatmapDiv = document.getElementById("heatmap");
+    heatmapDiv.innerHTML = '';
 
     // Iterate through every entry in jsonDate[date][hour] and create an array of Date objects
     let dateObjs = [];
@@ -757,7 +839,7 @@ function buildHeatmap(jsonData) {
 function handleSearchForm() {
     const searchInput = document.getElementById("search-input");
     let searchStr = searchInput.value;
-    console.log("handleSearchButton: searching for " + searchStr);
+    // console.log("handleSearchButton: searching for " + searchStr);
 
     // add search term to URL
     const url = new URL(window.location.href);
@@ -773,7 +855,7 @@ function handleSearchForm() {
 function doSearch(searchTerm, doSummary) {
     const searchInput = document.getElementById("search-input");
     searchInput.value = searchTerm; // set search box to search term
-    console.log("doSearch: searching for " + searchTerm);
+    // console.log("doSearch: searching for " + searchTerm);
 
     // abort any pending fetches
     if (controller) {
@@ -834,159 +916,239 @@ function resetSearch() {
     plotHeatmap();
 }
 
-// get geolocations and update table cells
-function getGeoLocations(ips, signal) {
-    // take care of everything locally cached
-    localHits = 0;
-    ips.forEach((ip) => {
-        if (geoCache[ip]) {
-            localHits += 1;
-            updateGeoLocation(geoCache[ip], ip);
-            // remove ip from ips
-            ips = ips.filter((value) => value !== ip);
+// Function to handle all async updates (geolocation and blacklists)
+function asyncUpdate(ips, signal) {
+    console.log("asyncUpdate: updating " + ips.length + " ips...");
+    if (geolocate) {
+        handleGeolocation();
+    }
+    handleBlacklist();
+    console.log("asyncUpdate: leaving");
+
+    // asynchronously check list of ips for blacklist
+    async function handleBlacklist() {
+        // split ips into chunks of chunkSize and send to fetchBlacklist
+        for (let i = 0; i < ips.length; i += chunkSize) {
+            const chunk = ips.slice(i, i + chunkSize);
+            await fetchBlacklist(chunk);
         }
-    });
-    if (localHits > 0) {
-        console.log("got " + localHits + " hit(s) from local cache");
-    }
 
-    // send remaining ips to remote sql cache, and of those that aren't satisfied, send to external web service
-    if (ips.length > 0) {
-        ipsJSON = JSON.stringify(ips);
-        fetch("geo.php", {
-            method: "POST",
-            body: ipsJSON,
-            signal,
-        })
-            .then((response) => response.json())
-            .then((geodata) => {
-                if (geodata === null) {
-                    console.log("geo: bad data from server");
-                } else {
-                    cachedips = Object.keys(geodata);
-                    console.log(
-                        "got " + cachedips.length + " hit(s) from server cache"
-                    );
-                    for (let ip of cachedips) {
-                        updateGeoLocation(geodata[ip], ip);
-                        ips = ips.filter((value) => value !== ip);
-                        geoCache[ip] = geodata[ip];
-                    }
-                }
-                // asyncronously recurse queries to external web service for remaining ips
-                if (ips.length > 0) {
-                    setTimeout(() => recurseFetchGeoLocations(ips), 0);
-                }
-            })
-            .catch((error) => {
-                console.log("geo fetch error:", error);
+        // check list of ips against server and update table
+        async function fetchBlacklist(ips) {
+            console.log("blacklist: checking " + ips.length + " ips...");
+            const ipList = JSON.stringify(ips);
+            const resp = await fetch("blacklist.php", {
+                method: "POST",
+                body: ipList,
+                signal,
             });
+            const blacklist = await resp.json();
+            console.log("blacklist: got " + blacklist.length + " hits");
+            blacklist.forEach((ip) => {
+                updateBlacklist(ip);
+            });
+        }
+
+        // function to update buttons for a given ip in all matching cells
+        function updateBlacklist(ip) {
+            const blockButtons = document.querySelectorAll(
+                '[id^="block-' + ip + '"]'
+            );
+            blockButtons.forEach((button) => {
+                button.innerHTML = "blocked";
+                button.disabled = true;
+                button.classList.add("tight");
+                button.classList.add("disabled");
+            });
+        }
     }
 
-    // function to update geo location for given ip in all matching cells
-    function updateGeoLocation(data, ip) {
-        // Get all cells with id of the form geo-ipAddress
-        const geoCells = document.querySelectorAll('[id^="geo-' + ip + '"]');
-        const hostnameCells = document.querySelectorAll(
-            '[id^="hostname-' + ip + '"]'
-        );
-        const orgCells = document.querySelectorAll('[id^="org-' + ip + '"]');
-        if (data.status !== undefined) {
-            if (data.status != "fail") {
-                // set each cell in geoCells to data
-                geoCells.forEach((cell) => {
-                    cell.innerHTML =
-                        data.city +
-                        ", " +
-                        data.region +
-                        ", " +
-                        data.countryCode;
-                });
-                // get rDNS and set hostname
-                let hostname;
-                if (data.reverse === "" || data.reverse === undefined) {
-                    hostname = "-";
-                } else {
-                    // extract domain.tld from reverse DNS entry
-                    const parts = data.reverse.split(".");
-                    hostname =
-                        parts[parts.length - 2] + "." + parts[parts.length - 1];
-                }
-                // set each cell in hostnameCells to hostname
-                hostnameCells.forEach((cell) => {
-                    cell.innerHTML = hostname;
-                });
-                // set each cell in orgCells to org
-                let orgname = "-";
-                if (data.org !== undefined && data.org !== "") {
-                    orgname = data.org;
-                } else if (data.isp !== undefined && data.isp !== "") {
-                    orgname = data.isp;
-                } else if (data.as !== undefined && data.as !== "") {
-                    orgname = data.as;
-                }
-                orgCells.forEach((cell) => {
-                    cell.innerHTML = orgname;
-                });
+    // asynchronously geolocate list of ips
+    async function handleGeolocation() {
+        console.log("geo: checking " + ips.length + " ips...");
+
+        // make local copy of ips
+        let geoips = ips.slice();
+
+        // take care of everything locally cached
+        let localHits = 0;
+        geoips.forEach((ip) => {
+            if (geoCache[ip]) {
+                localHits += 1;
+                updateGeoLocation(geoCache[ip], ip);
+                geoips = geoips.filter((value) => value !== ip);
+            }
+        });
+        if (localHits > 0) {
+            console.log("got " + localHits + " hits from local cache");
+        }
+
+        // split geoips into chunks of chunkSize and send to checkRemoteCache
+        let checkips = geoips.slice(); // yet another copy
+        for (let i = 0; i < checkips.length; i += chunkSize) {
+            const ipchunk = checkips.slice(i, i + chunkSize);
+            await checkRemoteCache(ipchunk);
+        }
+
+        // asyncronously recurse queries to external web service for remaining geoips
+        if (geoips.length > 0) {
+            console.log(
+                "recursing external server for " + geoips.length + " ips..."
+            );
+            setTimeout(() => recurseFetchGeoLocations(geoips), 0);
+        }
+
+        // check server cache for first n geoips
+        async function checkRemoteCache(ipchunk) {
+            console.log(
+                "checking server geo cache for " + ipchunk.length + " ips..."
+            );
+            const geoipsJSON = JSON.stringify(ipchunk);
+            const resp = await fetch("geo.php", {
+                method: "POST",
+                body: geoipsJSON,
+                signal,
+            });
+            const geodata = await resp.json();
+            if (geodata === null) {
+                console.log("geo: bad data from server");
             } else {
-                // we have a private address
+                let cachedips = Object.keys(geodata);
+                console.log(
+                    "got " + cachedips.length + " hits from server cache"
+                );
+                for (let ip of cachedips) {
+                    updateGeoLocation(geodata[ip], ip);
+                    geoips = geoips.filter((value) => value !== ip);
+                    geoCache[ip] = geodata[ip];
+                }
+            }
+        }
+
+        // recursively fetch geolocation data for ips
+        function recurseFetchGeoLocations(ips, apiCount = 0) {
+            // wait time
+            const waitTime = 1200;
+            // pop the first ip off of ips
+            const ip = ips.shift();
+            console.log("fetching geo web service: " + ip);
+            fetch("geo.php?ip=" + ip, { signal })
+                .then((response) => response.json())
+                .then((geodata) => {
+                    // cache the data
+                    geoCache[ip] = geodata;
+                    updateGeoLocation(geodata, ip);
+                    apiCount++;
+                    if (apiCount == maxGeoRequests) {
+                        console.log("geo api limit reached!");
+                    }
+                    if (ips.length > 0) {
+                        if (apiCount < maxGeoRequests) {
+                            recurseFetchGeoLocations(ips, apiCount);
+                        } else {
+                            // throttle back the request rate
+                            setTimeout(
+                                () => recurseFetchGeoLocations(ips, apiCount),
+                                waitTime
+                            );
+                        }
+                    } else {
+                        console.log("geo: done!");
+                    }
+                })
+                .catch((error) => {
+                    if (error.name === "AbortError") {
+                        console.log("geo fetch aborted for " + ip);
+                    } else {
+                        console.log("fetch error:", ip, error);
+                        updateGeoLocation(null, ip);
+                    }
+                });
+        }
+
+        // function to update geo location for given ip in all matching cells
+        function updateGeoLocation(data, ip) {
+            // Get all cells with id of the form geo-ipAddress
+            const geoCells = document.querySelectorAll(
+                '[id^="geo-' + ip + '"]'
+            );
+            const hostnameCells = document.querySelectorAll(
+                '[id^="hostname-' + ip + '"]'
+            );
+            const orgCells = document.querySelectorAll(
+                '[id^="org-' + ip + '"]'
+            );
+            if (data.status !== undefined) {
+                if (data.status != "fail") {
+                    // set each cell in geoCells to data
+                    geoCells.forEach((cell) => {
+                        cell.innerHTML =
+                            data.city +
+                            ", " +
+                            data.region +
+                            ", " +
+                            data.countryCode;
+                    });
+                    // get rDNS and set hostname
+                    let hostname;
+                    if (data.reverse === "" || data.reverse === undefined) {
+                        hostname = "-";
+                    } else {
+                        // extract domain.tld from reverse DNS entry
+                        const parts = data.reverse.split(".");
+                        hostname =
+                            parts[parts.length - 2] +
+                            "." +
+                            parts[parts.length - 1];
+                    }
+                    // set each cell in hostnameCells to hostname
+                    hostnameCells.forEach((cell) => {
+                        cell.innerHTML = hostname;
+                    });
+                    // set each cell in orgCells to org
+                    let orgname = "-";
+                    if (data.org !== undefined && data.org !== "") {
+                        orgname = data.org;
+                    } else if (data.isp !== undefined && data.isp !== "") {
+                        orgname = data.isp;
+                    } else if (data.as !== undefined && data.as !== "") {
+                        orgname = data.as;
+                    }
+                    orgCells.forEach((cell) => {
+                        cell.innerHTML = orgname;
+                    });
+                } else {
+                    // we have a private address
+                    geoCells.forEach((cell) => {
+                        cell.innerHTML = "local";
+                    });
+                    orgCells.forEach((cell) => {
+                        cell.innerHTML = "local";
+                    });
+                    hostnameCells.forEach((cell) => {
+                        cell.innerHTML = "local";
+                    });
+                }
+            } else {
+                // we got bad JSON
+                console.log("* geo: bad data for " + ip + ":");
+                console.log(JSON.stringify(data));
+
+                // remove ip from local cache, if it's there
+                delete geoCache[ip];
+
+                // write N/A values everywhere
                 geoCells.forEach((cell) => {
-                    cell.innerHTML = "local";
+                    cell.innerHTML = "N/A";
                 });
                 orgCells.forEach((cell) => {
-                    cell.innerHTML = "local";
+                    cell.innerHTML = "N/A";
                 });
                 hostnameCells.forEach((cell) => {
-                    cell.innerHTML = "local";
+                    cell.innerHTML = "-";
                 });
             }
-        } else {
-            // we got bad JSON
-            console.log("* geo: bad data for " + ip + ":");
-            console.log(JSON.stringify(data));
-
-            // remove ip from local cache, if it's there
-            delete geoCache[ip];
-
-            // write N/A values everywhere
-            geoCells.forEach((cell) => {
-                cell.innerHTML = "N/A";
-            });
-            orgCells.forEach((cell) => {
-                cell.innerHTML = "N/A";
-            });
-            hostnameCells.forEach((cell) => {
-                cell.innerHTML = "-";
-            });
         }
-    }
-
-    function recurseFetchGeoLocations(ips, apiCount = 0) {
-        // pop the first ip off of ips
-        const ip = ips.shift();
-        console.log("fetching geo from web service: " + ip);
-        fetch("geo.php?ip=" + ip, { signal })
-            .then((response) => response.json())
-            .then((geodata) => {
-                // cache the data
-                geoCache[ip] = geodata;
-                updateGeoLocation(geodata, ip);
-                apiCount++;
-                if (apiCount >= maxGeoRequests) {
-                    console.log("geo api limit reached!");
-                }
-                if (ips.length > 0 && apiCount < maxGeoRequests) {
-                    recurseFetchGeoLocations(ips, apiCount);
-                }
-            })
-            .catch((error) => {
-                if (error.name === "AbortError") {
-                    console.log("geo fetch aborted for " + ip);
-                } else {
-                    console.log("fetch error:", ip, error);
-                    updateGeoLocation(null, ip);
-                }
-            });
     }
 }
 

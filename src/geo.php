@@ -7,7 +7,6 @@ $pass = getenv('SQL_PASS');
 $db = getenv('SQL_DB');
 
 // No caching allowed
-// header("Cache-Control: max-age=86400, must-revalidate");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
 // Get HTML request method
@@ -22,18 +21,18 @@ if ($conn->connect_error) {
 // Use case to handle GET versus POST requests
 $locJSON = "";
 switch ($method) {
-    case 'GET':  // get get data by hook or crook
+    case 'GET':  // get, filling cache if needed from external source
         // Get parameters from URL
         $ipAddress = $_GET['ip'];
         if ($ipAddress == "") {
-            $ipAddress = "8.8.8.8";
+            $ipAddress = "8.8.8.8";  // default to test IP address
         }
         $locArray = getGeoInfo($conn, $ipAddress);
         $locJSON = json_encode($locArray);
 
         break;
 
-    case 'POST':  // only check the cache, with no fail-over to external service
+    case 'POST':  // check list against cache, with no fail-over to external service
         $data = json_decode(file_get_contents('php://input'), true);
         $locArray = array();
         foreach ($data as $ipAddress) {
@@ -54,6 +53,7 @@ switch ($method) {
 $conn->close();
 
 // Output
+header('Content-Type: application/json');
 echo $locJSON;
 
 
@@ -72,7 +72,7 @@ function getGeoInfo($conn, $ipAddress, $failOver = true)
     $cacheTime = "";
     if ($result->num_rows == 0) {
         if ($failOver == false) {
-            return false;  // FIX: this is pretty awful...
+            return false;
         }
 
         // If the IP address is not in the database, get the geolocation data from the external service
@@ -95,6 +95,9 @@ function getGeoInfo($conn, $ipAddress, $failOver = true)
             $sql = "DELETE FROM geo WHERE ip = '$ipAddress'";
             $conn->query($sql);
             $locJSON = extGeoInfo($ipAddress);
+            if ($locJSON == false) {
+                return false;
+            }
             cacheGeoInfo($conn, $ipAddress, $locJSON);
             $isCached = false;
         } else {

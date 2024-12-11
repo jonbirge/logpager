@@ -10,7 +10,7 @@ echo "SQL_PASS: $SQL_PASS"
 echo "SQL_DB: $SQL_DB"
 
 # Wait for SQL...
-echo "Waiting for MySQL..."
+echo "Waiting for MariaDB..."
 sleep 5
 
 # Start PHP-FPM

@@ -7,11 +7,13 @@ function parseSearch($search)
     $ip = null;
     $dateStr = null;
     $stat = null;
+    $serv = null;
     if ($search) {
         $search = trim($search);
         $ipPos = strpos($search, 'ip:');
         $datePos = strpos($search, 'date:');
         $statPos = strpos($search, 'stat:');
+        $servPos = strpos($search, 'serv:');
         if ($ipPos !== false) {
             $ip = substr($search, $ipPos + 3);
             $search = trim(substr($search, 0, $ipPos));
@@ -24,6 +26,10 @@ function parseSearch($search)
             $stat = substr($search, $statPos + 5);
             $search = trim(substr($search, 0, $statPos));
         }
+        if ($servPos !== false) {
+            $serv = substr($search, $servPos + 5);
+            $search = trim(substr($search, 0, $servPos));
+        }
         if ($search === '') {
             $search = null;
         }
@@ -33,22 +39,12 @@ function parseSearch($search)
             'search' => $search,
             'ip' => $ip,
             'date' => $dateStr,
-            'stat' => $stat
+            'stat' => $stat,
+            'serv' => $serv
         );
     } else {
         return null;
     }
-}
-
-function searchLines($logLines)
-{
-    // Read in CLF header name array from searchhead.json
-    $headers = json_decode(file_get_contents('loghead.json'), true);
-
-    // Add the header to the top of the array
-    array_unshift($logLines, $headers);
-
-    return $logLines;
 }
 
 function searchStats($logLines)
@@ -77,7 +73,7 @@ function searchStats($logLines)
     }
 
     // Read in CLF header name array from searchhead.json
-    $headers = json_decode(file_get_contents('searchhead.json'), true);
+    $headers = json_decode(file_get_contents('summaryhead.json'), true);
 
     // Write out the $ipDict as a table with the columns: Total, IP, Last, Fail
     $searchLines = [];

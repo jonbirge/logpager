@@ -68,6 +68,39 @@ h2 {
     font-weight: 500;
 }
 
+#heatmap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Ensure it takes full width */
+}
+
+#log {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Ensure it takes full width */
+}
+
+.loader {
+    border: 3px solid #f3f3f3; /* Light grey */
+    border-top: 3px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+}
+
+.loader.small {
+    width: 20px;
+    height: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Make links bold & black by default */
 a {
     color: black;
@@ -94,7 +127,6 @@ a.header {
     display: inline;
 }
 
-/* Text box with 16pt font and wide left and right margins */
 .text-box {
     font-family: inherit;
     font-size: inherit;
@@ -106,6 +138,7 @@ a.header {
 /* Status text styling */
 .status {
     margin: 5px;
+    font-size: 12pt;
 }
 
 /* Style tables to have a smaller font size */
@@ -254,6 +287,7 @@ tr:nth-child(even) {
     }
     .status {
         margin: 1px;
+        font-size: 9pt;
     }
     th.hideable, td.hideable {
         display: none;

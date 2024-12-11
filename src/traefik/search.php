@@ -1,22 +1,27 @@
 <?php
 
+// Include traefik.php
+include 'traefik.php';
+
 function search($searchDict, $doSummary = true)
 {
     // Maximum number of items to return
-    $maxItems = 1024;  // summary items
+    $maxItems = 2500;  // line items
     $maxSearchLines = 100000;  // matching lines
+    $maxSummarize = 100000;  // max summary items
 
-    // Path to the CLF log file
-    $logFilePath = '/clf.log';
-    $escFilePath = escapeshellarg($logFilePath);
+    // TODO: Follow auth pattern here...
+    // Concatenate log files
+    $tmpFilePath = getTempLogFilePath();
 
-    // get search parameters
+    // Get search parameters
     $search = $searchDict['search'];
     $ip = $searchDict['ip'];
     $date = $searchDict['date'];
     $stat = $searchDict['stat'];
+    $serv = $searchDict['serv'];
 
-    // build UNIX command
+    // Build UNIX command
     $grepSearch = '';
     if ($search) {
         $grepSearch .= " -e $search";
@@ -30,24 +35,27 @@ function search($searchDict, $doSummary = true)
     if ($stat) {
         $grepSearch .= " -e $stat";
     }
-    $cmd = "tac $escFilePath | grep -m $maxSearchLines $grepSearch";
-
-    // execute UNIX command and read lines from pipe
-    $fp = popen($cmd, 'r');
-    $lines = [];
-    while ($line = fgets($fp)) {
-        $lines[] = $line;
+    if ($serv) {
+        $grepSearch .= " -e $serv";
     }
-    pclose($fp);
+    $cmd = "tac $tmpFilePath | grep -m $maxSearchLines $grepSearch";
 
+    // Execute UNIX command and read lines from pipe
+    $fp = popen($cmd, 'r');
+    
     // Create array of CLF log lines
     $logLines = [];
 
     // Process each line and add to the array
     $lineCount = 0;
-    foreach ($lines as $line) {
+    while ($line = fgets($fp)) {
         // Extract the CLF fields from the line
-        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $data);
+        preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+) \S+ \"-\" \"-\" \S+ \"(\S+)\" \"\S+\" \S+/', $line, $data);
+
+        // swap the last two matches so the status is always last
+        $temp = $data[4];
+        $data[4] = $data[5];
+        $data[5] = $temp;
 
         // If $ip is set, skip this line if it doesn't contain $ip
         if ($ip !== null && strpos($data[1], $ip) === false) {
@@ -59,8 +67,13 @@ function search($searchDict, $doSummary = true)
             continue;
         }
 
+        // If $serv is set, skip this line if it doesn't contain $serv
+        if ($serv !== null && strpos($data[4], $serv) === false) {
+            continue;
+        }
+
         // If $stat is set, skip this line if it doesn't contain $stat
-        if ($stat !== null && strpos($data[4], $stat) === false) {
+        if ($stat !== null && strpos($data[5], $stat) === false) {
             continue;
         }
 
@@ -70,32 +83,33 @@ function search($searchDict, $doSummary = true)
         }
 
         $lineCount++;
-
         if ($doSummary) {
-            // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object,  ignoring the timezone part
+            // convert the standard log date format to a PHP DateTime object
             $theDate = $data[2];
-            // remove time zone from $theDate
             $theDate = preg_replace('/\s+\S+$/', '', $theDate);
             $dateObj = DateTime::createFromFormat('d/M/Y:H:i:s', $theDate);
             if ($dateObj === false) {
                 echo "Error parsing date: $theDate\n";
             }
-            $logLines[] = [$data[1], $dateObj, $data[4]];
+            $logLines[] = [$data[1], $dateObj, $data[5]];  // IP, date, stat
+            if ($lineCount >= $maxSummarize) break;
         } else {
-            $logLines[] = array_map('htmlspecialchars', array_slice($data, 1));
+            $logLines[] = array_slice($data, 1);
             if ($lineCount >= $maxItems) break;
         }
     }
 
+    // Clean up
+    pclose($fp);
+    unlink($tmpFilePath);
+
     // If $doSummary is true, summarize the log lines
     if ($doSummary) {  // return summary 
         $searchLines = searchStats($logLines);
-        // take the first $maxItems items
         $searchLines = array_slice($searchLines, 0, $maxItems + 1);
         echo json_encode($searchLines);
     } else {  // return standard log 
-        // read in loghead.json and prepend to $logLines to create $searchLines
-        $headers = json_decode(file_get_contents('clf/loghead.json'));
+        $headers = json_decode(file_get_contents('traefik/loghead.json'));
         $searchLines = [];
         $searchLines[] = $headers;
         $searchLines = array_merge($searchLines, $logLines);

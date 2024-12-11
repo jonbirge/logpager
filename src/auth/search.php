@@ -6,10 +6,15 @@ include 'authparse.php';
 function search($searchDict, $doSummary = true)
 {
     // Parameters
-    $maxItems = 1024;  // Maximum number of items to return
+    $maxItems = 2500;  // line items
+    $maxLines = 1024;  // log lines
+    $maxSummarize = 100000;  // matching lines
+
+    // Current year
+    $year = date('Y');
 
     // Path to the auth log file
-    $logFilePaths = getAuthLogFiles();
+    $logFilePaths = array_reverse(getAuthLogFiles());
 
     // get search parameters
     $search = $searchDict['search'];
@@ -20,38 +25,22 @@ function search($searchDict, $doSummary = true)
     // generate UNIX grep command line argument to only include lines containing IP addresses
     $grepIPCmd = "grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}'";
 
-    // generate UNIX grep command line arguments to include services we care about
-    $services = ['sshd', 'sudo'];
-    $grepArgs = '';
-    foreach ($services as $service) {
-        $grepArgs .= " -e $service";
-    }
-    $grepSrvCmd = "grep $grepArgs";
-
     // generate cat command to concatenate all log files
-    $catCmd = 'cat ' . implode(' ', $logFilePaths);
+    $catCmd = 'tac ' . implode(' ', $logFilePaths);
 
     // build UNIX command
-    $cmd = "$catCmd | $grepSrvCmd | $grepIPCmd | tac ";
+    $cmd = "$catCmd | $grepIPCmd";
 
     // execute the UNIX command
     $fp = popen($cmd, 'r');
-
-    // read the lines from UNIX pipe
-    $lines = [];
-    while ($line = fgets($fp)) {
-        $lines[] = $line;
-    }
-
-    pclose($fp);
 
     // Create array of auth log lines
     $logLines = [];
 
     // Process each line and add to the array
     $lineCount = 0;
-    foreach ($lines as $line) {
-        $data = parseAuthLogLine($line);
+    while ($line = fgets($fp)) {
+        $data = parseAuthLogLine($line, $year);
 
         if ($data === false) {
             $logLines[] = ['-', '-', $line, 'ERROR'];
@@ -92,24 +81,32 @@ function search($searchDict, $doSummary = true)
         $lineCount++;
         if ($doSummary) {
             // convert the standard log date format (e.g. 18/Jan/2024:17:47:55) to a PHP DateTime object
-            // this is required by the searchStats() function
             $theDate = $data[1];
             $dateObj = DateTime::createFromFormat('d/M/Y:H:i:s', $theDate);
+            if ($dateObj === false) {
+                echo "Error parsing date: $theDate\n";
+            }
             $logLines[] = [$data[0], $dateObj, $status];
+            if ($lineCount >= $maxSummarize) break;
         } else {
             $logLines[] = [$data[0], $data[1], $data[2], $status];
-            if ($lineCount >= $maxItems) break;
+            if ($lineCount >= $maxLines) break;
         }
     }  // end foreach
 
+    // Clean up
+    pclose($fp);
+
     // If $doSummary is true, summarize the log lines
-    if ($doSummary) { // return summary format
+    if ($doSummary) { // return summary
         $searchLines = searchStats($logLines);
-        // take the first $maxItems items
-        $searchLines = array_slice($searchLines, 0, $maxItems);
+        $searchLines = array_slice($searchLines, 0, $maxItems + 1);
         echo json_encode($searchLines);
-    } else {
-        $searchLines = searchLines($logLines);
+    } else {  // return standard log
+        $headers = json_decode(file_get_contents('auth/loghead.json'));
+        $searchLines = [];
+        $searchLines[] = $headers;
+        $searchLines = array_merge($searchLines, $logLines);
         echo json_encode([
             'page' => 0,
             'pageCount' => 0,

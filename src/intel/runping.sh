@@ -10,7 +10,7 @@ LOCK_FILE="/tmp/ping_output_$UNIQUE_ID.lock"
 touch "$LOCK_FILE"
 
 # Write results to temporary file
-ping -c 64 -i 0.1 $TARGET_HOST > $OUT_FILE
+ping -c 256 -i 0.2 $TARGET_HOST > $OUT_FILE
 
 # Delete the lock file to indicate completion
 rm "$LOCK_FILE"

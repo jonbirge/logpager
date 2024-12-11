@@ -8,29 +8,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="styles.css" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Roboto+Mono&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="styles.css" type="text/css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     <title>Log Forensics</title>
 </head>
 
 <body>
     <div id="logpager" class="container">
+        <!-- log tabs -->
         <div class="tab-header">
-            <a id="authtab" class="tab" href="./?type=auth&page=0">auth.log</a>
-            <a id="clftab" class="tab" href="./?type=clf&page=0">access.log</a>
+            <a id="authtab" class="tab" href="./?type=auth" style="display: none;">Auth</a>
+            <a id="traefiktab" class="tab" href="./?type=traefik" style="display: none;">Træfik</a>
+            <a id="clftab" class="tab" href="./?type=clf" style="display: none;">CLF</a>
         </div>
 
         <!-- summary charts -->
         <h2 id="heatmap-title" style="text-align: center;">
             Log entries by time
         </h2>
-        <div id="heatmap"></div>
+        <div id="heatmap">
+            <div class="loader"></div>
+        </div>
 
         <!-- search header -->
         <div class="search-header">
-            <span id="status" class="status"></span>
+            <span id="status" class="status">
+                <div class="loader small"></div>
+            </span>
             <span id="search-header">
                 <form id="search-form" class="search-form" onsubmit="handleSearchForm(); return false;">
                     <input type="text" id="search-input" placeholder="Search..." autocomplete="off" class="text-box">
@@ -54,13 +60,12 @@
         </div>
 
         <!-- version footer -->
-        <div>1.8</div>
-
+        <div>1.9</div>
     </div>
 
-    <script src="timeutils.js?ver=1"></script>
-    <script src="blacklist.js?ver=18"></script>
-    <script src="logpager.js?ver=21"></script>
+    <script src="timeutils.js"></script>
+    <script src="blacklist.js"></script>
+    <script src="logpager.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 </body>
 
