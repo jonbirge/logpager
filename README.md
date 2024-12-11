@@ -49,33 +49,32 @@ Export `/blacklist.csv` to provide a live list of blacklisted IP addresses and C
 The easiest way to use this is within an orchestrated set of containers that includes a reverse proxy and an SQL database (to handle the backlisting functionality). You can quickly stand up a fully functional instance of logpager using the `docker-compose.yml` file found in `/test/stack`. Below is an example `docker-compose.yml` file showing how to integrate with a reverse proxy (Traefik) to access logs for all proxy traffic.
 
 ```
-version: '3.7'
 
 services:
-
   traefik:
     image: traefik
     restart: always
     command:
-      - "--accesslog.filePath=/logs/access.log"
+      - "--accesslog.filepath=/logs/access.log"
       - "--providers.file.directory=/etc/traefik"
       - "--providers.file.watch=true"
-      - "--providers.docker.exposedByDefault=true"
+      - "--providers.docker.exposedbydefault=true"
       - "--api.insecure=true"
-      - "--entryPoints.web.address=:80"
+      - "--entrypoints.web.address=:80"
+      - "--experimental.plugins.denyip.modulename=github.com/kevtainer/denyip"
+      - "--experimental.plugins.denyip.version=v1.0.0"
     ports:
       - "80:80"
-      - "8080:8080"  # traefik admin
+      - "8080:8080" # Traefik admin
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik:/etc/traefik
       - ./logs/:/logs/:rw
     depends_on:
       - logpager
-      - www
 
   logpager:
-    image: logpager_test
+    image: ghcr.io/jonbirge/logpager:dev
     restart: always
     environment:
       SQL_HOST: db
@@ -86,8 +85,10 @@ services:
       - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
-      - /var/log/auth.log:/auth.log:ro
-      - ./logs/access.log:/access.log:ro  # web logs from this stack
+      - ../../src:/var/www:ro  # live development
+      - ../logs/auth.log:/auth.log:ro  # test auth logs
+      - ../logs/clf.log:/clf.log:ro  # test clf logs
+      - ./logs/access.log:/access.log:ro  # actual logs from this stack
     depends_on:
       - db
 
@@ -99,8 +100,18 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: testpass
 
-# Other services
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      ADMINER_DESIGN: nette
+    labels:
+      - "traefik.http.routers.adminer.rule=PathPrefix(`/adminer`)"
+      - "traefik.port=8080"
+    depends_on:
+      - db
 
 volumes:
   dbdata:
+
 ```

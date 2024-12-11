@@ -1,16 +1,21 @@
 services:
-
   traefik:
     image: traefik
     restart: always
     command:
-      - "--configFile=/etc/traefik.yml"
+      - "--accesslog.filepath=/logs/access.log"
+      - "--providers.file.directory=/etc/traefik"
+      - "--providers.file.watch=true"
+      - "--providers.docker.exposedbydefault=true"
+      - "--api.insecure=true"
+      - "--entrypoints.web.address=:80"
+      - "--experimental.plugins.denyip.modulename=github.com/kevtainer/denyip"
+      - "--experimental.plugins.denyip.version=v1.0.0"
     ports:
       - "80:80"
-      - "8080:8080"  # traefik admin
+      - "8080:8080" # Traefik admin
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik.yml:/etc/traefik.yml:ro
       - ./traefik:/etc/traefik
       - ./logs/:/logs/:rw
     depends_on:
