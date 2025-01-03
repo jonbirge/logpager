@@ -104,11 +104,6 @@ function parseAuthLogLine($line, $year)
         $monthStr = date('M', mktime(0, 0, 0, $monthNum, 1));
     }
 
-    // Infer the year from the month
-    if ($monthNum > date('n')) {
-        $year--;
-    }
-
     // Extract the IP address from the line
     if (!preg_match('/(\d+\.\d+\.\d+\.\d+)/', $line, $matches)) {
         $ip = '-';
