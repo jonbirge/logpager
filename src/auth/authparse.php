@@ -43,23 +43,6 @@ function getAuthLogStatus($line)
     return $status;
 }
 
-// Take CLF date format and convert to (old) auth.log date format
-function convertCLFDate($date)
-{
-    // Convert the month number to a three-letter month string
-    $monthNum = intval(substr($date, 3, 2));
-    $monthStr = date('M', mktime(0, 0, 0, $monthNum, 1));
-
-    // Extract the day, hour, minute, and second from the date
-    $day = substr($date, 0, 2);
-    $hour = substr($date, 6, 2);
-    $minute = substr($date, 9, 2);
-    $second = substr($date, 12, 2);
-
-    // Return the date in auth.log format
-    return "$day/$monthStr $hour:$minute:$second";
-}
-
 // Parse auth log file into standard format
 function parseAuthLogLine($line, $year)
 {
