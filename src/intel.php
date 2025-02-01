@@ -45,6 +45,13 @@ function ipRange2cidr($start_ip, $end_ip) {
     return null;
 }
 
+function checkIfBlacklisted($cidr) {
+    $blacklist_url = "blacklist.php?ip=" . urlencode($cidr);
+    $response = file_get_contents($blacklist_url);
+    $data = json_decode($response, true);
+    return !empty($data); // Returns true if blacklisted
+}
+
 $intel_data = getIntelData($target_ip);
 ?>
 
@@ -75,7 +82,16 @@ $intel_data = getIntelData($target_ip);
                         } elseif ($value === false) {
                             $value = '<span style="color: darkred;">●</span>';
                         }
-                        echo "<tr><td>{$key}</td><td>{$value}</td></tr>";
+
+                        if ($key === 'cidr') {
+                            $is_blacklisted = checkIfBlacklisted($value);
+                            $button_text = $is_blacklisted ? 'blocked' : 'block';
+                            $button_class = $is_blacklisted ? 'toggle-button tight disabled' : 'toggle-button tight';
+                            $button_disabled = $is_blacklisted ? 'disabled' : '';
+                            echo "<tr><td>{$key}</td><td>{$value} <button id='block-" . str_replace('/', '-', $value) . "' class='{$button_class}' {$button_disabled}>{$button_text}</button></td></tr>";
+                        } else {
+                            echo "<tr><td>{$key}</td><td>{$value}</td></tr>";
+                        }
                     }
                 ?>
             </table>
@@ -116,7 +132,7 @@ $intel_data = getIntelData($target_ip);
         </div>
 
         <!-- version footer -->
-        <div>1.9.1b</div>
+        <div>1.9</div>
     </div>
 
     <script src="timeutils.js"></script>
