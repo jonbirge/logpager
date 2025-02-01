@@ -132,7 +132,7 @@ $intel_data = getIntelData($target_ip);
         </div>
 
         <!-- version footer -->
-        <div>1.9</div>
+        <div>1.9.2b</div>
     </div>
 
     <script src="timeutils.js"></script>
