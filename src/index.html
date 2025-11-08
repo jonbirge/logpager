@@ -38,6 +38,10 @@
                 <div class="loader small"></div>
             </span>
             <span id="search-header">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="summary-checkbox" onchange="toggleSummary()">
+                    Show Summaries
+                </label>
                 <form id="search-form" class="search-form" onsubmit="handleSearchForm(); return false;">
                     <input type="text" id="search-input" placeholder="Search..." autocomplete="off" class="text-box">
                     <button class="toggle-button gray disabled" id="search-button">Search</button>
