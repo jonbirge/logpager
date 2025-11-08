@@ -1,5 +1,8 @@
 <?php
 
+// Include the clfparse.php file
+include 'clfparse.php';
+
 // Evaluate if a single term matches the log data
 function evaluateHeatmapTerm($term, $ipAddress, $timeStamp, $status, $line)
 {
@@ -95,17 +98,18 @@ function evaluateHeatmapLegacySearch($searchDict, $ipAddress, $timeStamp, $statu
 
 function heatmap($searchDict)
 {
-    // Log file to read
-    $logFilePath = '/clf.log';
+    // Get the concatenated log file path
+    $tmpFilePath = getCLFTempLogFilePath();
 
     // Determine search mode
     $mode = $searchDict['mode'] ?? 'legacy';
     $doSearch = !empty($searchDict);
 
     // Open the log file for reading
-    $logFile = fopen($logFilePath, 'r');
+    $logFile = fopen($tmpFilePath, 'r');
     if (!$logFile) {
         echo "<p>Failed to open log file.</p>";
+        unlink($tmpFilePath);
         return;
     }
 
@@ -166,6 +170,9 @@ function heatmap($searchDict)
 
     // Close the log file
     fclose($logFile);
+
+    // Clean up temporary file
+    unlink($tmpFilePath);
 
     // Echo the log summary data as JSON
     echo json_encode($logSummary);

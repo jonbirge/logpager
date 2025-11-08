@@ -34,9 +34,13 @@ services:
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
       - ../../src:/var/www:ro  # live development
-      - ../logs/auth.log:/auth.log:ro  # test auth logs
-      - ../logs/clf.log:/clf.log:ro  # test clf logs
-      - ./logs/access.log:/access.log:ro  # actual logs from this stack
+      - ../logs:/log/auth:ro  # test auth logs directory
+      - ../logs:/log/clf:ro  # test clf logs directory
+      - ./logs/:/log/traefik/:ro  # actual logs from this stack
+      # Fallback for backward compatibility
+      - ../logs/auth.log:/auth.log:ro
+      - ../logs/clf.log:/clf.log:ro
+      - ./logs/access.log:/access.log:ro
     depends_on:
       - db
 
