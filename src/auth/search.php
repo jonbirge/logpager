@@ -71,11 +71,11 @@ function evaluateBooleanSearch($searchDict, $data, $status)
 // Evaluate legacy search query
 function evaluateLegacySearch($searchDict, $data, $status)
 {
-    $search = $searchDict['search'];
-    $ip = $searchDict['ip'];
-    $date = $searchDict['date'];
-    $stat = $searchDict['stat'];
-    $details = $searchDict['details'];
+    $search = $searchDict['search'] ?? null;
+    $ip = $searchDict['ip'] ?? null;
+    $date = $searchDict['date'] ?? null;
+    $stat = $searchDict['stat'] ?? null;
+    $details = $searchDict['details'] ?? null;
 
     // If $search is set, check if $data[2] contains $search
     if ($search) {

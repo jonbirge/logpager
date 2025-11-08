@@ -68,11 +68,11 @@ function evaluateBooleanSearch($searchDict, $data, $line)
 // Evaluate legacy search query
 function evaluateLegacySearch($searchDict, $data, $line)
 {
-    $search = $searchDict['search'];
-    $ip = $searchDict['ip'];
-    $date = $searchDict['date'];
-    $stat = $searchDict['stat'];
-    $details = $searchDict['details'];
+    $search = $searchDict['search'] ?? null;
+    $ip = $searchDict['ip'] ?? null;
+    $date = $searchDict['date'] ?? null;
+    $stat = $searchDict['stat'] ?? null;
+    $details = $searchDict['details'] ?? null;
 
     // If $ip is set, skip this line if it doesn't contain $ip
     if ($ip !== null && strpos($data[1], $ip) === false) {
@@ -121,10 +121,10 @@ function search($searchDict, $doSummary = true)
         $cmd = "tac $escFilePath | head -n $maxSearchLines";
     } else {
         // get search parameters for legacy mode
-        $search = $searchDict['search'];
-        $ip = $searchDict['ip'];
-        $date = $searchDict['date'];
-        $stat = $searchDict['stat'];
+        $search = $searchDict['search'] ?? null;
+        $ip = $searchDict['ip'] ?? null;
+        $date = $searchDict['date'] ?? null;
+        $stat = $searchDict['stat'] ?? null;
 
         // build grep command
         $grepSearch = '';
@@ -140,7 +140,13 @@ function search($searchDict, $doSummary = true)
         if ($stat) {
             $grepSearch .= " -e $stat";
         }
-        $cmd = "tac $escFilePath | grep -m $maxSearchLines $grepSearch";
+
+        // If no search terms, skip grep (return all logs)
+        if ($grepSearch === '') {
+            $cmd = "tac $escFilePath | head -n $maxSearchLines";
+        } else {
+            $cmd = "tac $escFilePath | grep -m $maxSearchLines $grepSearch";
+        }
     }
 
     // execute UNIX command and read lines from pipe
