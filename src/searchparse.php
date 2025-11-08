@@ -7,7 +7,8 @@ function getFieldSynonyms()
         'ip' => ['ip', 'addr', 'address'],
         'date' => ['date', 'time', 'when'],
         'stat' => ['stat', 'status', 'code'],
-        'serv' => ['serv', 'service', 'server']
+        'serv' => ['serv', 'service', 'server'],
+        'details' => ['details', 'detail', 'det']
     );
 }
 
@@ -103,6 +104,7 @@ function parseLegacySearch($search)
     $dateStr = null;
     $stat = null;
     $serv = null;
+    $details = null;
 
     $search = trim($search);
     $synonyms = getFieldSynonyms();
@@ -130,6 +132,7 @@ function parseLegacySearch($search)
         'date' => $dateStr,
         'stat' => $stat,
         'serv' => $serv,
+        'details' => $details,
         'mode' => 'legacy'
     );
 }

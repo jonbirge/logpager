@@ -429,13 +429,19 @@ function refreshTable() {
                         "FAIL",
                     ];
                     const status = logLines[i][j];
+                    const statusLink = `?type=${logType}&summary=false&search=stat:${status}`;
                     if (greenStatus.includes(status)) {
-                        row += `<td class="green">${status}</td>`;
+                        row += `<td class="green"><a href="${statusLink}">${status}</a></td>`;
                     } else if (redStatus.includes(status)) {
-                        row += `<td class="red">${status}</td>`;
+                        row += `<td class="red"><a href="${statusLink}">${status}</a></td>`;
                     } else {
-                        row += `<td class="gray">${status}</td>`;
+                        row += `<td class="gray"><a href="${statusLink}">${status}</a></td>`;
                     }
+                    break;
+                case "Service":
+                    const service = logLines[i][j];
+                    const serviceLink = `?type=${logType}&summary=false&search=serv:${service}`;
+                    row += `<td><a href="${serviceLink}">${service}</a></td>`;
                     break;
                 default:
                     row += `<td>${logLines[i][j]}</td>`;

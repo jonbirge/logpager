@@ -21,6 +21,9 @@ function evaluateTerm($term, $data, $line)
             // CLF logs don't have service field
             $matches = false;
             break;
+        case 'details':
+            $matches = strpos($data[3], $value) !== false;
+            break;
         case 'search':
             $matches = strpos($line, $value) !== false;
             break;
@@ -69,6 +72,7 @@ function evaluateLegacySearch($searchDict, $data, $line)
     $ip = $searchDict['ip'];
     $date = $searchDict['date'];
     $stat = $searchDict['stat'];
+    $details = $searchDict['details'];
 
     // If $ip is set, skip this line if it doesn't contain $ip
     if ($ip !== null && strpos($data[1], $ip) === false) {
@@ -82,6 +86,11 @@ function evaluateLegacySearch($searchDict, $data, $line)
 
     // If $stat is set, skip this line if it doesn't contain $stat
     if ($stat !== null && strpos($data[4], $stat) === false) {
+        return false;
+    }
+
+    // If $details is set, skip this line if it doesn't contain $details
+    if ($details !== null && strpos($data[3], $details) === false) {
         return false;
     }
 

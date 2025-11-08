@@ -20,6 +20,9 @@ function evaluateTerm($term, $data, $status)
         case 'stat':
             $matches = $status === $value;
             break;
+        case 'details':
+            $matches = strpos($data[2], $value) !== false;
+            break;
         case 'search':
             $matches = strpos($data[2], $value) !== false;
             break;
@@ -72,6 +75,7 @@ function evaluateLegacySearch($searchDict, $data, $status)
     $ip = $searchDict['ip'];
     $date = $searchDict['date'];
     $stat = $searchDict['stat'];
+    $details = $searchDict['details'];
 
     // If $search is set, check if $data[2] contains $search
     if ($search) {
@@ -97,6 +101,13 @@ function evaluateLegacySearch($searchDict, $data, $status)
     // If $stat is set, check if $status matches $stat
     if ($stat) {
         if ($status !== $stat) {
+            return false;
+        }
+    }
+
+    // If $details is set, check if $data[2] contains $details
+    if ($details) {
+        if (strpos($data[2], $details) === false) {
             return false;
         }
     }

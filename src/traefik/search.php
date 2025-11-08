@@ -23,6 +23,9 @@ function evaluateTerm($term, $data, $line)
         case 'serv':
             $matches = strpos($data[4], $value) !== false;
             break;
+        case 'details':
+            $matches = strpos($data[3], $value) !== false;
+            break;
         case 'search':
             $matches = strpos($line, $value) !== false;
             break;
@@ -72,6 +75,7 @@ function evaluateLegacySearch($searchDict, $data, $line)
     $date = $searchDict['date'];
     $stat = $searchDict['stat'];
     $serv = $searchDict['serv'];
+    $details = $searchDict['details'];
 
     // If $ip is set, skip this line if it doesn't contain $ip
     if ($ip !== null && strpos($data[1], $ip) === false) {
@@ -90,6 +94,11 @@ function evaluateLegacySearch($searchDict, $data, $line)
 
     // If $stat is set, skip this line if it doesn't contain $stat
     if ($stat !== null && strpos($data[5], $stat) === false) {
+        return false;
+    }
+
+    // If $details is set, skip this line if it doesn't contain $details
+    if ($details !== null && strpos($data[3], $details) === false) {
         return false;
     }
 
