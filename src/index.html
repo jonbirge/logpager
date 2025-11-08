@@ -34,10 +34,6 @@
 
         <!-- search header -->
         <div class="search-header">
-            <label class="checkbox-label">
-                <input type="checkbox" id="summary-checkbox" onchange="toggleSummary()">
-                Show Summary
-            </label>
             <span id="status" class="status">
                 <div class="loader small"></div>
             </span>
@@ -46,6 +42,10 @@
                     <input type="text" id="search-input" placeholder="Search..." autocomplete="off" class="text-box">
                     <button class="toggle-button gray disabled" id="search-button">Search</button>
                 </form>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="summary-checkbox" onchange="toggleSummary()">
+                    Show Summary
+                </label>
             </span>
         </div>
 
