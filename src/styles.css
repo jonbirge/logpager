@@ -141,6 +141,21 @@ a.header {
     font-size: 12pt;
 }
 
+/* Checkbox label styling */
+.checkbox-label {
+    display: inline-block;
+    margin-right: 15px;
+    font-size: 11pt;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 5px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
 /* Style tables to have a smaller font size */
 table, th, td {
     border: 3px solid white;

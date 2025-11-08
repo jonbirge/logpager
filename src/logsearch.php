@@ -5,10 +5,17 @@ include 'searchparse.php';
 
 // Get parameters from URL
 $type = $_GET['type'] ?? "auth";  // auth, traefik, or clf
-$search = $_GET['search'] ?? "publickey";  // search string
+$search = $_GET['search'] ?? null;  // search string (null for all logs)
 $summary = $_GET['summary'] ?? "true";  // true or false
 $doSummary = $summary === "true";
-$searchDict = parseSearch($search);
+
+// Only parse search if it's not empty
+if ($search !== null && $search !== '') {
+    $searchDict = parseSearch($search);
+} else {
+    // Empty search means no filters - return all logs
+    $searchDict = array('mode' => 'legacy');
+}
 
 // Include the appropriate heatmap function based on the log type
 $searchInc = $type . '/search.php';

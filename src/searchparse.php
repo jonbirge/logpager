@@ -1,50 +1,140 @@
 <?php
 
+// Field synonym mappings - allows flexible field names
+function getFieldSynonyms()
+{
+    return array(
+        'ip' => ['ip', 'addr', 'address'],
+        'date' => ['date', 'time', 'when'],
+        'stat' => ['stat', 'status', 'code'],
+        'serv' => ['serv', 'service', 'server'],
+        'details' => ['details', 'detail', 'det']
+    );
+}
+
+// Parse a single term and extract field:value pairs
+function parseTerm($term)
+{
+    $term = trim($term);
+    $synonyms = getFieldSynonyms();
+
+    // Check for field:value pattern
+    foreach ($synonyms as $canonical => $aliases) {
+        foreach ($aliases as $alias) {
+            $pattern = '/^' . preg_quote($alias, '/') . ':/i';
+            if (preg_match($pattern, $term, $matches)) {
+                $value = preg_replace($pattern, '', $term);
+                return array(
+                    'field' => $canonical,
+                    'value' => trim($value),
+                    'negate' => false
+                );
+            }
+        }
+    }
+
+    // No field prefix found, treat as free text search
+    return array(
+        'field' => 'search',
+        'value' => $term,
+        'negate' => false
+    );
+}
+
+// Parse search string with boolean operators
 function parseSearch($search)
 {
-    // Check $search string for terms preceded by ip: or date: (etc.) and assume there is,
-    // at most, one of each (for now). If $string is empty afterwards, set it to null.
+    if (!$search || trim($search) === '') {
+        return null;
+    }
+
+    $search = trim($search);
+
+    // Check if the search contains boolean operators
+    $hasBoolean = preg_match('/\s+(AND|OR)\s+/i', $search);
+
+    if (!$hasBoolean) {
+        // Legacy mode: backward compatibility with old search format
+        return parseLegacySearch($search);
+    }
+
+    // Parse boolean expression
+    $terms = [];
+    $operators = [];
+
+    // Split by AND and OR operators while preserving the operator type
+    // This regex captures the operators as well
+    $parts = preg_split('/\s+(AND|OR)\s+/i', $search, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+    for ($i = 0; $i < count($parts); $i++) {
+        $part = trim($parts[$i]);
+
+        if ($part === '') {
+            continue;
+        }
+
+        // Check if this is an operator
+        if (preg_match('/^(AND|OR)$/i', $part)) {
+            $operators[] = strtoupper($part);
+        } else {
+            // Check for NOT prefix
+            $negate = false;
+            if (preg_match('/^NOT\s+/i', $part)) {
+                $negate = true;
+                $part = preg_replace('/^NOT\s+/i', '', $part);
+            }
+
+            $term = parseTerm($part);
+            $term['negate'] = $negate;
+            $terms[] = $term;
+        }
+    }
+
+    return array(
+        'terms' => $terms,
+        'operators' => $operators,
+        'mode' => 'boolean'
+    );
+}
+
+// Legacy search parser for backward compatibility
+function parseLegacySearch($search)
+{
     $ip = null;
     $dateStr = null;
     $stat = null;
     $serv = null;
-    if ($search) {
-        $search = trim($search);
-        $ipPos = strpos($search, 'ip:');
-        $datePos = strpos($search, 'date:');
-        $statPos = strpos($search, 'stat:');
-        $servPos = strpos($search, 'serv:');
-        if ($ipPos !== false) {
-            $ip = substr($search, $ipPos + 3);
-            $search = trim(substr($search, 0, $ipPos));
-        }
-        if ($datePos !== false) {
-            $dateStr = substr($search, $datePos + 5);
-            $search = trim(substr($search, 0, $datePos));
-        }
-        if ($statPos !== false) {
-            $stat = substr($search, $statPos + 5);
-            $search = trim(substr($search, 0, $statPos));
-        }
-        if ($servPos !== false) {
-            $serv = substr($search, $servPos + 5);
-            $search = trim(substr($search, 0, $servPos));
-        }
-        if ($search === '') {
-            $search = null;
-        }
+    $details = null;
 
-        // return as dictionary array
-        return array(
-            'search' => $search,
-            'ip' => $ip,
-            'date' => $dateStr,
-            'stat' => $stat,
-            'serv' => $serv
-        );
-    } else {
-        return null;
+    $search = trim($search);
+    $synonyms = getFieldSynonyms();
+
+    // Extract field filters using flexible prefixes
+    foreach ($synonyms as $canonical => $aliases) {
+        foreach ($aliases as $alias) {
+            $pattern = '/' . preg_quote($alias, '/') . ':([^\s]+)/i';
+            if (preg_match($pattern, $search, $matches)) {
+                $$canonical = $matches[1];
+                $search = preg_replace($pattern, '', $search);
+                break; // Only take first match for each field
+            }
+        }
     }
+
+    $search = trim($search);
+    if ($search === '') {
+        $search = null;
+    }
+
+    return array(
+        'search' => $search,
+        'ip' => $ip,
+        'date' => $dateStr,
+        'stat' => $stat,
+        'serv' => $serv,
+        'details' => $details,
+        'mode' => 'legacy'
+    );
 }
 
 function searchStats($logLines)

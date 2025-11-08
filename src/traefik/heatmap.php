@@ -6,6 +6,96 @@ define('CACHE_LIFE', 15);  // cache life in minutes
 
 include 'traefik.php';
 
+// Evaluate if a single term matches the log data
+function evaluateHeatmapTerm($term, $ipAddress, $timeStamp, $status, $line)
+{
+    $field = $term['field'];
+    $value = $term['value'];
+    $matches = false;
+
+    switch ($field) {
+        case 'ip':
+            $matches = strpos($ipAddress, $value) !== false;
+            break;
+        case 'date':
+            $matches = strpos($timeStamp, $value) !== false;
+            break;
+        case 'stat':
+            $matches = strpos($status, $value) !== false;
+            break;
+        case 'serv':
+            // For heatmap, we don't have easy access to service field
+            // Would need to parse the full log line
+            $matches = strpos($line, $value) !== false;
+            break;
+        case 'search':
+            $matches = strpos($line, $value) !== false;
+            break;
+    }
+
+    // Apply negation if needed
+    if ($term['negate']) {
+        $matches = !$matches;
+    }
+
+    return $matches;
+}
+
+// Evaluate boolean search query for heatmap
+function evaluateHeatmapBooleanSearch($searchDict, $ipAddress, $timeStamp, $status, $line)
+{
+    $terms = $searchDict['terms'];
+    $operators = $searchDict['operators'];
+
+    if (empty($terms)) {
+        return true;
+    }
+
+    // Evaluate first term
+    $result = evaluateHeatmapTerm($terms[0], $ipAddress, $timeStamp, $status, $line);
+
+    // Process remaining terms with operators
+    for ($i = 1; $i < count($terms); $i++) {
+        $operator = $operators[$i - 1] ?? 'AND'; // Default to AND
+        $termResult = evaluateHeatmapTerm($terms[$i], $ipAddress, $timeStamp, $status, $line);
+
+        if ($operator === 'AND') {
+            $result = $result && $termResult;
+        } else if ($operator === 'OR') {
+            $result = $result || $termResult;
+        }
+    }
+
+    return $result;
+}
+
+// Evaluate legacy search query for heatmap
+function evaluateHeatmapLegacySearch($searchDict, $ipAddress, $timeStamp, $status, $line)
+{
+    $search = $searchDict['search'] ?? null;
+    $ip = $searchDict['ip'] ?? null;
+    $date = $searchDict['date'] ?? null;
+    $stat = $searchDict['stat'] ?? null;
+
+    if ($ip && strpos($ipAddress, $ip) === false) {
+        return false;
+    }
+
+    if ($date && strpos($timeStamp, $date) === false) {
+        return false;
+    }
+
+    if ($stat && strpos($status, $stat) === false) {
+        return false;
+    }
+
+    if ($search && strpos($line, $search) === false) {
+        return false;
+    }
+
+    return true;
+}
+
 function hourStr($hour)
 {
     return $hour < 10 ? "0$hour" : "$hour";
@@ -45,6 +135,9 @@ function genLogSummary($searchDict = [])
     // set $doSearch to false if $searchDict is empty
     $doSearch = !empty($searchDict);
 
+    // Determine search mode
+    $mode = $searchDict['mode'] ?? 'legacy';
+
     $logFilePaths = getTraefikLogFiles();
     $logSummary = [];
 
@@ -67,11 +160,15 @@ function genLogSummary($searchDict = [])
 
             // Skip unnecessary checks early
             if ($doSearch) {
-                if (($searchDict['ip'] && strpos($ipAddress, $searchDict['ip']) === false) ||
-                    ($searchDict['date'] && strpos($timeStamp, $searchDict['date']) === false) ||
-                    ($searchDict['stat'] && strpos($status, $searchDict['stat']) === false) ||
-                    ($searchDict['search'] && strpos($line, $searchDict['search']) === false)
-                ) {
+                // Evaluate search based on mode
+                $matches = false;
+                if ($mode === 'boolean') {
+                    $matches = evaluateHeatmapBooleanSearch($searchDict, $ipAddress, $timeStamp, $status, $line);
+                } else {
+                    $matches = evaluateHeatmapLegacySearch($searchDict, $ipAddress, $timeStamp, $status, $line);
+                }
+
+                if (!$matches) {
                     continue;
                 }
             }
