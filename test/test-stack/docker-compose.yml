@@ -9,15 +9,11 @@ services:
       - "--providers.docker.exposedbydefault=true"
       - "--api.insecure=true"
       - "--entrypoints.web.address=:80"
-      - "--experimental.plugins.denyip.modulename=github.com/kevtainer/denyip"
-      - "--experimental.plugins.denyip.version=v1.0.0"
     ports:
       - "80:80"
       - "8080:8080" # Traefik admin
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik:/etc/traefik
-      - ./logs/:/logs/:rw
     depends_on:
       - logpager
 
@@ -33,14 +29,8 @@ services:
       - "traefik.http.middlewares.striplogdev.stripprefix.prefixes=/logs/"
       - "traefik.http.routers.logpagerdev.middlewares=striplogdev"
     volumes:
-      - ../../src:/var/www:ro  # live development
-      - ../logs:/log/auth:ro  # test auth logs directory
-      - ../logs:/log/clf:ro  # test clf logs directory
-      - ./logs/:/log/traefik/:ro  # actual logs from this stack
-      # Fallback for backward compatibility
-      - ../logs/auth.log:/auth.log:ro
-      - ../logs/clf.log:/clf.log:ro
-      - ./logs/access.log:/access.log:ro
+      # - ../../src:/var/www:ro  # live development
+      - ../test-logs:/log/:ro  # test logs directory
     depends_on:
       - db
 
@@ -54,3 +44,4 @@ services:
 
 volumes:
   dbdata:
+
