@@ -30,6 +30,9 @@ function getTempLogFilePath()
     // Retrieve log file paths using getTraefikLogFiles()
     $logFilePaths = getTraefikLogFiles();
 
+    // Reverse the array to get oldest files first for chronological order
+    $logFilePaths = array_reverse($logFilePaths);
+
     // Create random temporary file path
     $tmpFilePath = '/tmp/traefiklog-' . bin2hex(random_int(0, PHP_INT_MAX)) . '.log';
 

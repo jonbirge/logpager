@@ -11,6 +11,9 @@ function tail($page, $linesPerPage)
     // path to the auth log files
     $logFilePaths = getAuthLogFiles();
 
+    // Reverse the array to get oldest files first for chronological order
+    $logFilePaths = array_reverse($logFilePaths);
+
     $allLines = [];
 
     // Concatenate all log files into an array in memory
