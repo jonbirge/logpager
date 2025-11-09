@@ -104,7 +104,7 @@ h2 {
 /* Make links bold & black by default */
 a {
     color: black;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 /* White links for the header */
@@ -144,8 +144,9 @@ a.header {
 /* Checkbox label styling */
 .checkbox-label {
     display: inline-block;
-    margin-right: 15px;
-    font-size: 11pt;
+    margin-right: 5px;
+    margin-left: 21px;
+    font-size: 10pt;
     cursor: pointer;
     user-select: none;
 }
@@ -153,7 +154,6 @@ a.header {
 .checkbox-label input[type="checkbox"] {
     margin-right: 5px;
     cursor: pointer;
-    vertical-align: middle;
 }
 
 /* Style tables to have a smaller font size */
