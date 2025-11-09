@@ -1,5 +1,8 @@
 <?php
 
+// Include the clfparse.php file
+include 'clfparse.php';
+
 // Evaluate if a single term matches the log data
 function evaluateTerm($term, $data, $line)
 {
@@ -108,9 +111,9 @@ function search($searchDict, $doSummary = true)
     $maxItems = 1024;  // summary items
     $maxSearchLines = 100000;  // matching lines
 
-    // Path to the CLF log file
-    $logFilePath = '/clf.log';
-    $escFilePath = escapeshellarg($logFilePath);
+    // Get the concatenated log file path
+    $tmpFilePath = getCLFTempLogFilePath();
+    $escFilePath = escapeshellarg($tmpFilePath);
 
     // Determine search mode
     $mode = $searchDict['mode'] ?? 'legacy';
@@ -216,4 +219,7 @@ function search($searchDict, $doSummary = true)
             'search' => $searchDict
         ]);
     }
+    
+    // Clean up temporary file
+    unlink($tmpFilePath);
 }

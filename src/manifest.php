@@ -1,20 +1,22 @@
 <?php
 
-// parameters
-$logFiles = [
-    'access.log',  // traefik extended CLF file
-    'auth.log',
-    'clf.log'
-];
-$filePrefix = '/';
+include_once __DIR__ . '/logfiles.php';
 
-// check for files
+// Map manifest entries to their on-disk directories
+$logDirectories = [
+    'auth.log' => '/log/auth',
+    'clf.log' => '/log/clf',
+    'access.log' => '/log/traefik',
+];
+
 $existingLogFiles = [];
-foreach ($logFiles as $logFile) {
-    if (file_exists($filePrefix . $logFile)) {
-        $existingLogFiles[] = $logFile;
+
+foreach ($logDirectories as $manifestName => $directory) {
+    // We only need to know if at least one .log file exists in the directory
+    $logFiles = getLogFilesFromDirectory($directory, 1);
+    if (!empty($logFiles)) {
+        $existingLogFiles[] = $manifestName;
     }
 }
 
-// return existing log files as JSON
 echo json_encode($existingLogFiles);
