@@ -11,7 +11,7 @@ function getAuthLogFiles()
     
     // Fallback to old behavior if directory doesn't exist
     if (empty($logFilePaths)) {
-        $logFilePaths = ['/auth.log.1', '/auth.log'];
+        $logFilePaths = ['/auth.log', '/auth.log.1'];
         
         // Remove any log files that don't exist
         foreach ($logFilePaths as $key => $logFilePath) {

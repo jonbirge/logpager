@@ -23,6 +23,9 @@ function tail($page, $linesPerPage)
     // Retrieve log file paths using getTraefikLogFiles()
     $logFilePaths = getTraefikLogFiles();
 
+    // Reverse the array to get oldest files first for chronological order
+    $logFilePaths = array_reverse($logFilePaths);
+
     // Read all lines from log files
     $allLines = readAllLinesFromFiles($logFilePaths);
 

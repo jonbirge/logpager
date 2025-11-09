@@ -11,7 +11,7 @@ function getCLFLogFiles()
     
     // Fallback to old behavior if directory doesn't exist
     if (empty($logFilePaths)) {
-        $logFilePaths = ['/clf.log.1', '/clf.log'];
+        $logFilePaths = ['/clf.log', '/clf.log.1'];
         
         // Remove any log files that don't exist
         foreach ($logFilePaths as $key => $logFilePath) {
@@ -29,6 +29,9 @@ function getCLFTempLogFilePath()
 {
     // Retrieve log file paths using getCLFLogFiles()
     $logFilePaths = getCLFLogFiles();
+
+    // Reverse the array to get oldest files first for chronological order
+    $logFilePaths = array_reverse($logFilePaths);
 
     // Create random temporary file path
     $tmpFilePath = '/tmp/clflog-' . bin2hex(random_int(0, PHP_INT_MAX)) . '.log';

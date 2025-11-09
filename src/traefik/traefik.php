@@ -11,7 +11,7 @@ function getTraefikLogFiles()
     
     // Fallback to old behavior if directory doesn't exist
     if (empty($logFilePaths)) {
-        $logFilePaths = ['/access.log.1', '/access.log'];
+        $logFilePaths = ['/access.log', '/access.log.1'];
         
         // Remove any log files that don't exist
         foreach ($logFilePaths as $key => $logFilePath) {
@@ -29,6 +29,9 @@ function getTempLogFilePath()
 {
     // Retrieve log file paths using getTraefikLogFiles()
     $logFilePaths = getTraefikLogFiles();
+
+    // Reverse the array to get oldest files first for chronological order
+    $logFilePaths = array_reverse($logFilePaths);
 
     // Create random temporary file path
     $tmpFilePath = '/tmp/traefiklog-' . bin2hex(random_int(0, PHP_INT_MAX)) . '.log';
