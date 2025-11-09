@@ -52,16 +52,5 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: testpass
 
-  adminer:
-    image: adminer
-    restart: always
-    environment:
-      ADMINER_DESIGN: nette
-    labels:
-      - "traefik.http.routers.adminer.rule=PathPrefix(`/adminer`)"
-      - "traefik.port=8080"
-    depends_on:
-      - db
-
 volumes:
   dbdata:

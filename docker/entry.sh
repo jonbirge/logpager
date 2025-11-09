@@ -9,19 +9,17 @@ echo "SQL_USER: $SQL_USER"
 echo "SQL_PASS: $SQL_PASS"
 echo "SQL_DB: $SQL_DB"
 
-# Wait for SQL...
-until /usr/bin/mariadb -h $SQL_HOST -u $SQL_USER -p$SQL_PASS -e 'SELECT 1' > /dev/null; do
-  echo "Waiting for MariaDB..."
-  sleep 5
-done
-echo "Creating SQL database and tables, if needed..."
-/usr/bin/mariadb -h $SQL_HOST -u $SQL_USER -p$SQL_PASS < /db.sql   
-echo "SQL is ready. Continuing..."
+echo "Initializing SQL schema..."
+if ! php84 /db-init.php; then
+  echo "Failed to initialize SQL. Exiting."
+  exit 1
+fi
 
 # Start PHP-FPM
 echo "Starting php-fpm..."
-php-fpm83 -R
+php-fpm84 -R
 
 # Start nginx in the foreground
 echo "Starting nginx..."
 nginx -g 'daemon off;'
+
