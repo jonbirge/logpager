@@ -1,5 +1,6 @@
 .env
 .vscode
+.claude
 *.timestamp
 *.csv
 test/stack/db
