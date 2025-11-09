@@ -11,7 +11,7 @@ function getTraefikLogFiles()
     
     // Fallback to old behavior if directory doesn't exist
     if (empty($logFilePaths)) {
-        $logFilePaths = ['/access.log.1', '/access.log'];
+        $logFilePaths = ['/access.log', '/access.log.1'];
         
         // Remove any log files that don't exist
         foreach ($logFilePaths as $key => $logFilePath) {

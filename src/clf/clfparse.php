@@ -11,7 +11,7 @@ function getCLFLogFiles()
     
     // Fallback to old behavior if directory doesn't exist
     if (empty($logFilePaths)) {
-        $logFilePaths = ['/clf.log.1', '/clf.log'];
+        $logFilePaths = ['/clf.log', '/clf.log.1'];
         
         // Remove any log files that don't exist
         foreach ($logFilePaths as $key => $logFilePath) {
