@@ -37,7 +37,10 @@ let params = new URLSearchParams(window.location.search);page = params.get("page
 search = params.get("search");
 summary = params.get("summary") !== null ? params.get("summary") == "true" : false; // applies to search
 logType = params.get("type") !== null ? params.get("type") : "traefik"; // "auth", "clf" or "traefik" (default)
-showSummary = summary; // Set initial checkbox state based on URL parameter
+if (search !== null) {
+    summary = true; // force summary mode when loading with a search
+}
+showSummary = summary; // Set initial checkbox state based on URL parameter or search default
 
 if (search !== null) {
     // search trumps page
@@ -46,7 +49,7 @@ if (search !== null) {
         // Set checkbox state
         const checkbox = document.getElementById("summary-checkbox");
         if (checkbox) checkbox.checked = showSummary;
-        doSearch(search, summary);
+        doSearch(search, true);
     };
 } else {
     console.log("page load: loading " + logType + " log...");
@@ -889,13 +892,17 @@ function handleSearchForm() {
     const url = new URL(window.location.href);
     url.searchParams.set("search", searchStr);
     url.searchParams.delete("page");
-    url.searchParams.delete("summary");
+    url.searchParams.set("summary", "true");
     window.history.replaceState({}, "", url);
 
-    // Use the checkbox state to determine summary mode
+    // Searches always start in summary mode
     const checkbox = document.getElementById("summary-checkbox");
-    showSummary = checkbox.checked;
-    doSearch(searchStr, showSummary);
+    showSummary = true;
+    summary = true;
+    if (checkbox) {
+        checkbox.checked = true;
+    }
+    doSearch(searchStr, true);
 }
 
 // execute search
@@ -954,8 +961,13 @@ function resetSearch() {
 
     // clear search box and remove reset button
     search = null;
-    summary = null;
+    summary = false;
+    showSummary = false;
     searchInput.value = "";
+    const checkbox = document.getElementById("summary-checkbox");
+    if (checkbox) {
+        checkbox.checked = false;
+    }
     resetButton.remove();
 
     // load the log (respects showSummary checkbox)
