@@ -1,10 +1,13 @@
 <?php
 
+// Include the clfparse.php file
+include 'clfparse.php';
+
 function tail($page, $linesPerPage)
 {
-    // Path to the CLF log file
-    $logFilePath = '/clf.log';
-    $escFilePath = escapeshellarg($logFilePath);
+    // Get the concatenated log file path
+    $tmpFilePath = getCLFTempLogFilePath();
+    $escFilePath = escapeshellarg($tmpFilePath);
 
     // use UNIX wc command to count lines in file
     $cmd = "wc -l $escFilePath";
@@ -30,6 +33,9 @@ function tail($page, $linesPerPage)
         $lines[] = $line;
     }
     pclose($fp);
+
+    // Clean up temporary file
+    unlink($tmpFilePath);
 
     // Read in CLF header name array from loghead.json
     $headers = json_decode(file_get_contents('clf/loghead.json'));

@@ -1,6 +1,6 @@
 # Define variables
 IMAGE_NAME=logpager
-VERSION=1.9-dev
+VERSION=2.0-dev
 DOCKER_HUB_USER=jonbirge
 BUILD_FILE=build/build.timestamp
 
@@ -40,10 +40,10 @@ dev:
 
 # Bring up/down the local dev stack
 up: dev
-	cd ./test/stack && ./up.sh
+	cd ./test/test-stack && ./up.sh
 
 down:
-	- cd ./test/stack && ./down.sh
+	- cd ./test/test-stack && ./down.sh
 
 .PHONY: all build clean push release dev up down
 

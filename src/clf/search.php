@@ -1,36 +1,156 @@
 <?php
 
+// Include the clfparse.php file
+include 'clfparse.php';
+
+// Evaluate if a single term matches the log data
+function evaluateTerm($term, $data, $line)
+{
+    $field = $term['field'];
+    $value = $term['value'];
+    $matches = false;
+
+    switch ($field) {
+        case 'ip':
+            $matches = strpos($data[1], $value) !== false;
+            break;
+        case 'date':
+            $matches = strpos($data[2], $value) !== false;
+            break;
+        case 'stat':
+            $matches = strpos($data[4], $value) !== false;
+            break;
+        case 'serv':
+            // CLF logs don't have service field
+            $matches = false;
+            break;
+        case 'details':
+            $matches = strpos($data[3], $value) !== false;
+            break;
+        case 'search':
+            $matches = strpos($line, $value) !== false;
+            break;
+    }
+
+    // Apply negation if needed
+    if ($term['negate']) {
+        $matches = !$matches;
+    }
+
+    return $matches;
+}
+
+// Evaluate boolean search query
+function evaluateBooleanSearch($searchDict, $data, $line)
+{
+    $terms = $searchDict['terms'];
+    $operators = $searchDict['operators'];
+
+    if (empty($terms)) {
+        return true;
+    }
+
+    // Evaluate first term
+    $result = evaluateTerm($terms[0], $data, $line);
+
+    // Process remaining terms with operators
+    for ($i = 1; $i < count($terms); $i++) {
+        $operator = $operators[$i - 1] ?? 'AND'; // Default to AND
+        $termResult = evaluateTerm($terms[$i], $data, $line);
+
+        if ($operator === 'AND') {
+            $result = $result && $termResult;
+        } else if ($operator === 'OR') {
+            $result = $result || $termResult;
+        }
+    }
+
+    return $result;
+}
+
+// Evaluate legacy search query
+function evaluateLegacySearch($searchDict, $data, $line)
+{
+    $search = $searchDict['search'] ?? null;
+    $ip = $searchDict['ip'] ?? null;
+    $date = $searchDict['date'] ?? null;
+    $stat = $searchDict['stat'] ?? null;
+    $details = $searchDict['details'] ?? null;
+
+    // If $ip is set, skip this line if it doesn't contain $ip
+    if ($ip !== null && strpos($data[1], $ip) === false) {
+        return false;
+    }
+
+    // If $date is set, skip this line if it doesn't contain $date
+    if ($date !== null && strpos($data[2], $date) === false) {
+        return false;
+    }
+
+    // If $stat is set, skip this line if it doesn't contain $stat
+    if ($stat !== null && strpos($data[4], $stat) === false) {
+        return false;
+    }
+
+    // If $details is set, skip this line if it doesn't contain $details
+    if ($details !== null && strpos($data[3], $details) === false) {
+        return false;
+    }
+
+    // If $search is set, skip this line if it doesn't contain $search
+    if ($search !== null && strpos($line, $search) === false) {
+        return false;
+    }
+
+    return true;
+}
+
 function search($searchDict, $doSummary = true)
 {
     // Maximum number of items to return
     $maxItems = 1024;  // summary items
     $maxSearchLines = 100000;  // matching lines
 
-    // Path to the CLF log file
-    $logFilePath = '/clf.log';
-    $escFilePath = escapeshellarg($logFilePath);
+    // Get the concatenated log file path
+    $tmpFilePath = getCLFTempLogFilePath();
+    $escFilePath = escapeshellarg($tmpFilePath);
 
-    // get search parameters
-    $search = $searchDict['search'];
-    $ip = $searchDict['ip'];
-    $date = $searchDict['date'];
-    $stat = $searchDict['stat'];
+    // Determine search mode
+    $mode = $searchDict['mode'] ?? 'legacy';
 
-    // build UNIX command
-    $grepSearch = '';
-    if ($search) {
-        $grepSearch .= " -e $search";
+    // Build UNIX command - in boolean mode, we just use tac without grep
+    // to avoid pre-filtering, which allows us to handle complex boolean logic
+    if ($mode === 'boolean') {
+        $cmd = "tac $escFilePath | head -n $maxSearchLines";
+    } else {
+        // get search parameters for legacy mode
+        $search = $searchDict['search'] ?? null;
+        $ip = $searchDict['ip'] ?? null;
+        $date = $searchDict['date'] ?? null;
+        $stat = $searchDict['stat'] ?? null;
+
+        // build grep command
+        $grepSearch = '';
+        if ($search) {
+            $grepSearch .= " -e $search";
+        }
+        if ($ip) {
+            $grepSearch .= " -e $ip";
+        }
+        if ($date) {
+            $grepSearch .= " -e $date";
+        }
+        if ($stat) {
+            $grepSearch .= " -e $stat";
+        }
+
+        // If no search terms, skip grep (return all logs)
+        if ($grepSearch === '') {
+            $cmd = "tac $escFilePath | head -n $maxSearchLines";
+        } else {
+            $cmd = "tac $escFilePath | grep -m $maxSearchLines $grepSearch";
+        }
     }
-    if ($ip) {
-        $grepSearch .= " -e $ip";
-    }
-    if ($date) {
-        $grepSearch .= " -e $date";
-    }
-    if ($stat) {
-        $grepSearch .= " -e $stat";
-    }
-    $cmd = "tac $escFilePath | grep -m $maxSearchLines $grepSearch";
 
     // execute UNIX command and read lines from pipe
     $fp = popen($cmd, 'r');
@@ -49,23 +169,15 @@ function search($searchDict, $doSummary = true)
         // Extract the CLF fields from the line
         preg_match('/(\S+) \S+ \S+ \[(.+?)\] \"(.*?)\" (\S+)/', $line, $data);
 
-        // If $ip is set, skip this line if it doesn't contain $ip
-        if ($ip !== null && strpos($data[1], $ip) === false) {
-            continue;
+        // Evaluate search based on mode
+        $matches = false;
+        if ($mode === 'boolean') {
+            $matches = evaluateBooleanSearch($searchDict, $data, $line);
+        } else {
+            $matches = evaluateLegacySearch($searchDict, $data, $line);
         }
 
-        // If $date is set, skip this line if it doesn't contain $date
-        if ($date !== null && strpos($data[2], $date) === false) {
-            continue;
-        }
-
-        // If $stat is set, skip this line if it doesn't contain $stat
-        if ($stat !== null && strpos($data[4], $stat) === false) {
-            continue;
-        }
-
-        // If $search is set, skip this line if it doesn't contain $search
-        if ($search !== null && strpos($line, $search) === false) {
+        if (!$matches) {
             continue;
         }
 
@@ -107,4 +219,7 @@ function search($searchDict, $doSummary = true)
             'search' => $searchDict
         ]);
     }
+    
+    // Clean up temporary file
+    unlink($tmpFilePath);
 }

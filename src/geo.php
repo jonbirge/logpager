@@ -1,6 +1,6 @@
 <?php
 
-// Create array with all host environment variables
+// Create array with host environment variables
 $host = getenv('SQL_HOST');
 $user = getenv('SQL_USER');
 $pass = getenv('SQL_PASS');
@@ -21,8 +21,7 @@ if ($conn->connect_error) {
 // Use case to handle GET versus POST requests
 $locJSON = "";
 switch ($method) {
-    case 'GET':  // get, filling cache if needed from external source
-        // Get parameters from URL
+    case 'GET':  // get single ip, filling cache if needed from external source
         $ipAddress = $_GET['ip'];
         if ($ipAddress == "") {
             $ipAddress = "8.8.8.8";  // default to test IP address
@@ -32,7 +31,7 @@ switch ($method) {
 
         break;
 
-    case 'POST':  // check list against cache, with no fail-over to external service
+    case 'POST':  // check list against cache only
         $data = json_decode(file_get_contents('php://input'), true);
         $locArray = array();
         foreach ($data as $ipAddress) {
@@ -141,3 +140,4 @@ function cacheGeoInfo($conn, $ipAddress, $locJSON)
         $cacheError = $e->getMessage();
     }
 }
+

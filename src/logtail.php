@@ -8,7 +8,7 @@ $type = $_GET['type'] ?? "auth";  // auth, clf, or traefik
 $page = $_GET['page'] ?? 0;  // page size
 $linesPerPage = $_GET['n'] ?? $defaultLines;  // number of lines per page
 
-// Include the appropriate heatmap function based on the log type
+// Include the appropriate function based on the log type
 $searchInc = $type . '/tail.php';
 
 // Check to see if the file exists

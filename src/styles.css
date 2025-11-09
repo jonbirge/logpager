@@ -104,7 +104,7 @@ h2 {
 /* Make links bold & black by default */
 a {
     color: black;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 /* White links for the header */
@@ -139,6 +139,21 @@ a.header {
 .status {
     margin: 5px;
     font-size: 12pt;
+}
+
+/* Checkbox label styling */
+.checkbox-label {
+    display: inline-block;
+    margin-right: 5px;
+    margin-left: 21px;
+    font-size: 10pt;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 5px;
+    cursor: pointer;
 }
 
 /* Style tables to have a smaller font size */

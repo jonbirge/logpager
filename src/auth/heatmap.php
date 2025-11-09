@@ -7,6 +7,99 @@ define('CACHE_LIFE', 15);  // cache life in minutes
 // Include the authparse.php file
 include 'authparse.php';
 
+// Evaluate if a single term matches the log data
+function evaluateHeatmapTerm($term, $data, $status, $line)
+{
+    $field = $term['field'];
+    $value = $term['value'];
+    $matches = false;
+
+    switch ($field) {
+        case 'ip':
+            $matches = strpos($data[0], $value) !== false;
+            break;
+        case 'date':
+            $matches = strpos($data[1], $value) !== false;
+            break;
+        case 'stat':
+            $matches = $status === $value;
+            break;
+        case 'search':
+            $matches = strpos($line, $value) !== false;
+            break;
+        case 'serv':
+            // Auth logs don't have service field
+            $matches = false;
+            break;
+    }
+
+    // Apply negation if needed
+    if ($term['negate']) {
+        $matches = !$matches;
+    }
+
+    return $matches;
+}
+
+// Evaluate boolean search query for heatmap
+function evaluateHeatmapBooleanSearch($searchDict, $data, $status, $line)
+{
+    $terms = $searchDict['terms'];
+    $operators = $searchDict['operators'];
+
+    if (empty($terms)) {
+        return true;
+    }
+
+    // Evaluate first term
+    $result = evaluateHeatmapTerm($terms[0], $data, $status, $line);
+
+    // Process remaining terms with operators
+    for ($i = 1; $i < count($terms); $i++) {
+        $operator = $operators[$i - 1] ?? 'AND'; // Default to AND
+        $termResult = evaluateHeatmapTerm($terms[$i], $data, $status, $line);
+
+        if ($operator === 'AND') {
+            $result = $result && $termResult;
+        } else if ($operator === 'OR') {
+            $result = $result || $termResult;
+        }
+    }
+
+    return $result;
+}
+
+// Evaluate legacy search query for heatmap
+function evaluateHeatmapLegacySearch($searchDict, $data, $status, $line)
+{
+    $search = $searchDict['search'] ?? null;
+    $ip = $searchDict['ip'] ?? null;
+    $dateStr = $searchDict['date'] ?? null;
+    $stat = $searchDict['stat'] ?? null;
+
+    // Check if $status matches $stat exactly
+    if ($stat && $status !== $stat) {
+        return false;
+    }
+
+    // If $ip is set, check if $data[0] contains $ip
+    if ($ip && strpos($data[0], $ip) === false) {
+        return false;
+    }
+
+    // If $dateStr is set, check if $data[1] contains $dateStr
+    if ($dateStr && strpos($data[1], $dateStr) === false) {
+        return false;
+    }
+
+    // If $search is set, check if $line contains $search
+    if ($search && strpos($line, $search) === false) {
+        return false;
+    }
+
+    return true;
+}
+
 function readLines($fileHandle, $bufferSize = 2 * 1024 * 1024) {
     $lines = [];
     $buffer = '';
@@ -78,17 +171,14 @@ function genLogSummary($searchDict = [])
     // set $doSearch to false if $searchDict is empty
     $doSearch = !empty($searchDict);
 
+    // Determine search mode
+    $mode = $searchDict['mode'] ?? 'legacy';
+
     // Current year
     $year = date('Y');
 
     // Log files to read
     $logFilePaths = getAuthLogFiles();
-
-    // Get search parameters
-    $search = $searchDict['search'];
-    $ip = $searchDict['ip'];
-    $dateStr = $searchDict['date'];
-    $stat = $searchDict['stat'];
 
     // Initialize an empty array to store the log summary data
     $logSummary = [];
@@ -125,23 +215,15 @@ function genLogSummary($searchDict = [])
                 if ($doSearch) {
                     $status = getAuthLogStatus($line);
 
-                    // Check if $status matches $stat exactly
-                    if ($stat && $status !== $stat) {
-                        continue;
+                    // Evaluate search based on mode
+                    $matches = false;
+                    if ($mode === 'boolean') {
+                        $matches = evaluateHeatmapBooleanSearch($searchDict, $data, $status, $line);
+                    } else {
+                        $matches = evaluateHeatmapLegacySearch($searchDict, $data, $status, $line);
                     }
 
-                    // If $ip is set, check if $data[0] contains $ip
-                    if ($ip && strpos($data[0], $ip) === false) {
-                        continue;
-                    }
-
-                    // If $dateStr is set, check if $data[1] contains $dateStr
-                    if ($dateStr && strpos($timeStamp, $dateStr) === false) {
-                        continue;
-                    }
-
-                    // If $search is set, check if $line contains $search
-                    if ($search && strpos($line, $search) === false) {
+                    if (!$matches) {
                         continue;
                     }
                 }

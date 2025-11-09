@@ -2,6 +2,57 @@
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
+
+// Get the target IP from the URL ip parameter. If it's not there, use client IP address
+$target_ip = $_GET['ip'] ?? ($_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR']);
+$target_ip = htmlspecialchars($target_ip);
+
+function getIntelData($ip) {
+    $ipURL = "http://ip-api.com/json/$ip?fields=17563647";
+    $ipinfo = file_get_contents($ipURL);
+    $ipinfo = json_decode($ipinfo, true);
+
+    // Strip some of the more useless fields
+    unset($ipinfo['status'], $ipinfo['timezone'], $ipinfo['query'], $ipinfo['lat'], $ipinfo['lon'], $ipinfo['countryCode']);
+
+    // Remove any blank fields
+    $ipinfo = array_filter($ipinfo);
+
+    // Whois lookup
+    $whois = shell_exec("whois $ip");
+
+    // Extract CIDR or IP range from the whois output
+    if (preg_match('/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2}/', $whois, $cidr)) {
+        $ipinfo['cidr'] = $cidr[0];
+    } elseif (preg_match('/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*-\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/', $whois, $range)) {
+        $start_ip = $range[1];
+        $end_ip = $range[2];
+        $ipinfo['cidr'] = ipRange2cidr($start_ip, $end_ip) ?? "$start_ip→$end_ip";
+    }
+
+    return $ipinfo;
+}
+
+function ipRange2cidr($start_ip, $end_ip) {
+    $start = ip2long($start_ip);
+    $end = ip2long($end_ip);
+    $mask = $start ^ $end;
+    $masklen = 32 - log(($mask + 1), 2);
+
+    if (fmod($masklen, 1) < 0.0001) {
+        return long2ip($start) . "/" . round($masklen);
+    }
+    return null;
+}
+
+function checkIfBlacklisted($cidr) {
+    $blacklist_url = "blacklist.php?ip=" . urlencode($cidr);
+    $response = file_get_contents($blacklist_url);
+    $data = json_decode($response, true);
+    return !empty($data); // Returns true if blacklisted
+}
+
+$intel_data = getIntelData($target_ip);
 ?>
 
 <!DOCTYPE html>
@@ -15,24 +66,35 @@ header("Pragma: no-cache");
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
     <link href="styles.css" rel="stylesheet" type="text/css">
     <link rel="shortcut icon" href="intel/favicon.ico" type="image/x-icon" />
-    <?php
-        // Get the target IP from the URL ip parameter. If it's not there use client ip address
-        if (!isset($_GET['ip'])) {
-            $target_ip = $_SERVER['HTTP_X_REAL_IP'] ? $_SERVER['HTTP_X_REAL_IP'] : $_SERVER['REMOTE_ADDR'];
-        } else {
-            $target_ip = $_GET['ip'];
-        }
-        echo "<title>Target intel: $target_ip</title>"
-    ?>
+    <title>Target intel: <?php echo $target_ip; ?></title>
 </head>
 
 <body>
     <div class="container">
-        <?php
-            echo "<h1>Target intel: $target_ip</h1>";
-        ?>
+        <h1>Target intel: <?php echo $target_ip; ?></h1>
         <div id="intel">
-            <!-- This is where the intel table will go -->
+            <table>
+                <tr><th>Property</th><th>Value</th></tr>
+                <?php
+                    foreach ($intel_data as $key => $value) {
+                        if ($value === true) {
+                            $value = '<span style="color: green;">●</span>';
+                        } elseif ($value === false) {
+                            $value = '<span style="color: darkred;">●</span>';
+                        }
+
+                        if ($key === 'cidr') {
+                            $is_blacklisted = checkIfBlacklisted($value);
+                            $button_text = $is_blacklisted ? 'blocked' : 'block';
+                            $button_class = $is_blacklisted ? 'toggle-button tight disabled' : 'toggle-button tight';
+                            $button_disabled = $is_blacklisted ? 'disabled' : '';
+                            echo "<tr><td>{$key}</td><td>{$value} <button id='block-" . str_replace('/', '-', $value) . "' class='{$button_class}' {$button_disabled}>{$button_text}</button></td></tr>";
+                        } else {
+                            echo "<tr><td>{$key}</td><td>{$value}</td></tr>";
+                        }
+                    }
+                ?>
+            </table>
         </div>
         <button class="toggle-button" onclick="runAll()">Execute all...</button>
 
@@ -70,7 +132,7 @@ header("Pragma: no-cache");
         </div>
 
         <!-- version footer -->
-        <div>1.9</div>
+        <div>1.9.2b</div>
     </div>
 
     <script src="timeutils.js"></script>

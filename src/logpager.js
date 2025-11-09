@@ -23,6 +23,7 @@ let page;
 let search;
 let summary;
 let logType;
+let showSummary = false; // global state for summary checkbox
 
 
 // ***** init *****
@@ -34,16 +35,26 @@ setInterval(updateClock, 1000);
 // decide what to do on page load
 let params = new URLSearchParams(window.location.search);page = params.get("page") !== null ? Number(params.get("page")) : 0;
 search = params.get("search");
-summary = params.get("summary") !== null ? params.get("summary") == "true" : true; // applies to search
+summary = params.get("summary") !== null ? params.get("summary") == "true" : false; // applies to search
 logType = params.get("type") !== null ? params.get("type") : "traefik"; // "auth", "clf" or "traefik" (default)
+showSummary = summary; // Set initial checkbox state based on URL parameter
+
 if (search !== null) {
     // search trumps page
     console.log("page load: searching for " + search + ", summary = " + summary);
-    window.onload = doSearch(search, summary);
+    window.onload = () => {
+        // Set checkbox state
+        const checkbox = document.getElementById("summary-checkbox");
+        if (checkbox) checkbox.checked = showSummary;
+        doSearch(search, summary);
+    };
 } else {
     console.log("page load: loading " + logType + " log...");
     // on window load run pollServer() and plotHeatmap()
     window.onload = () => {
+        // Set checkbox state
+        const checkbox = document.getElementById("summary-checkbox");
+        if (checkbox) checkbox.checked = showSummary;
         pollLog();
         plotHeatmap();
     };
@@ -152,6 +163,27 @@ function updateClock() {
     });
 }
 
+// toggle summary mode
+function toggleSummary() {
+    const checkbox = document.getElementById("summary-checkbox");
+    showSummary = checkbox.checked;
+
+    // Refresh the current view with the new summary state
+    if (search !== null) {
+        // If we have an active search, re-run it with the new summary state
+        doSearch(search, showSummary);
+    } else {
+        // If no active search, either show summary of all logs or regular poll
+        if (showSummary) {
+            // Show summary of all logs by searching with empty string
+            searchLog("", true);
+        } else {
+            // Show regular log view
+            pollLog();
+        }
+    }
+}
+
 // pull the relevent log data from the server
 function pollLog() {
     console.log("***** pollLog: fetching page " + page + " of type " + logType);
@@ -175,6 +207,12 @@ function pollLog() {
     url.searchParams.delete("summary");
     url.searchParams.set("type", logType);
     search = null;
+
+    // If summary mode is enabled, show summary of all logs instead
+    if (showSummary) {
+        searchLog("", true);
+        return;
+    }
 
     // get the log from the server
     fetch("logtail.php?type=" + logType + "&page=" + page)
@@ -429,13 +467,19 @@ function refreshTable() {
                         "FAIL",
                     ];
                     const status = logLines[i][j];
+                    const statusLink = `?type=${logType}&summary=false&search=stat:${status}`;
                     if (greenStatus.includes(status)) {
-                        row += `<td class="green">${status}</td>`;
+                        row += `<td class="green"><a href="${statusLink}">${status}</a></td>`;
                     } else if (redStatus.includes(status)) {
-                        row += `<td class="red">${status}</td>`;
+                        row += `<td class="red"><a href="${statusLink}">${status}</a></td>`;
                     } else {
-                        row += `<td class="gray">${status}</td>`;
+                        row += `<td class="gray"><a href="${statusLink}">${status}</a></td>`;
                     }
+                    break;
+                case "Service":
+                    const service = logLines[i][j];
+                    const serviceLink = `?type=${logType}&summary=false&search=serv:${service}`;
+                    row += `<td><a href="${serviceLink}">${service}</a></td>`;
                     break;
                 default:
                     row += `<td>${logLines[i][j]}</td>`;
@@ -848,7 +892,10 @@ function handleSearchForm() {
     url.searchParams.delete("summary");
     window.history.replaceState({}, "", url);
 
-    doSearch(searchStr, true);
+    // Use the checkbox state to determine summary mode
+    const checkbox = document.getElementById("summary-checkbox");
+    showSummary = checkbox.checked;
+    doSearch(searchStr, showSummary);
 }
 
 // execute search
@@ -911,7 +958,7 @@ function resetSearch() {
     searchInput.value = "";
     resetButton.remove();
 
-    // load the log
+    // load the log (respects showSummary checkbox)
     pollLog();
     plotHeatmap();
 }

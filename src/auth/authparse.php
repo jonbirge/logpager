@@ -1,15 +1,23 @@
 <?php
 
+// Include the logfiles utility
+include_once __DIR__ . '/../logfiles.php';
+
 // Return list of auth log files
 function getAuthLogFiles()
 {
-    // Array of log files to read
-    $logFilePaths = ['/auth.log.1', '/auth.log'];
-
-    // Remove any log files that don't exist
-    foreach ($logFilePaths as $key => $logFilePath) {
-        if (!file_exists($logFilePath)) {
-            unset($logFilePaths[$key]);
+    // Use directory-based log file discovery
+    $logFilePaths = getLogFilesFromDirectory('/log/auth', MAX_LOG_FILES, 'auth');
+    
+    // Fallback to old behavior if directory doesn't exist
+    if (empty($logFilePaths)) {
+        $logFilePaths = ['/auth.log', '/auth.log.1'];
+        
+        // Remove any log files that don't exist
+        foreach ($logFilePaths as $key => $logFilePath) {
+            if (!file_exists($logFilePath)) {
+                unset($logFilePaths[$key]);
+            }
         }
     }
 
