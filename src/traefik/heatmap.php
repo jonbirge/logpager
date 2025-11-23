@@ -101,6 +101,35 @@ function hourStr($hour)
     return $hour < 10 ? "0$hour" : "$hour";
 }
 
+function parseTimestampParts($timeStamp)
+{
+    // Example: 05/Mar/2024:12:34:56 +0000
+    $parts = sscanf($timeStamp, "%d/%3s/%d:%d:%d:%d %5s");
+    if ($parts === null || count($parts) < 6) {
+        return null;
+    }
+
+    [$day, $monthStr, $year, $hour, $minute, $second] = $parts;
+    static $monthMap = [
+        'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4,
+        'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8,
+        'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12,
+    ];
+
+    if (!isset($monthMap[$monthStr])) {
+        return null;
+    }
+
+    $month = $monthMap[$monthStr];
+    $dayStr = str_pad($day, 2, '0', STR_PAD_LEFT);
+    $monthStrNum = str_pad($month, 2, '0', STR_PAD_LEFT);
+
+    return [
+        'date' => $year . '-' . $monthStrNum . '-' . $dayStr,
+        'hour' => $hour,
+    ];
+}
+
 function heatmap($searchDict)
 {
     // set $doSearch to false if $searchDict is empty
@@ -140,23 +169,33 @@ function genLogSummary($searchDict = [])
 
     $logFilePaths = getTraefikLogFiles();
     $logSummary = [];
+    $pattern = '/(\S+) \S+ \S+ \[(.+?)\] "(.*?)" (\S+) \S+ "-" "-" \S+ "(\S+)" "\S+" \S+/';
 
     foreach ($logFilePaths as $logFilePath) {
-        $handle = fopen($logFilePath, 'r');
-        if (!$handle) {
+        $file = new SplFileObject($logFilePath, 'r');
+        if (!$file) {
             echo "<p>Unable to open file: $logFilePath</p>";
             continue;
         }
 
-        while (($line = fgets($handle)) !== false) {
+        while (!$file->eof()) {
+            $line = $file->fgets();
             if (empty($line)) {
                 continue;
             }
 
-            $logEntry = explode(' ', $line, 9);
-            $ipAddress = $logEntry[0];
-            $timeStamp = $logEntry[3];
-            $status = $logEntry[8];
+            if (!preg_match($pattern, $line, $matches)) {
+                continue;
+            }
+
+            // swap the last two matches so the status is always in index 4
+            $temp = $matches[4];
+            $matches[4] = $matches[5];
+            $matches[5] = $temp;
+
+            $ipAddress = $matches[1];
+            $timeStamp = $matches[2];
+            $status = $matches[4];
 
             // Skip unnecessary checks early
             if ($doSearch) {
@@ -173,20 +212,15 @@ function genLogSummary($searchDict = [])
                 }
             }
 
-            $date = DateTime::createFromFormat('[d/M/Y:H:i:s', $timeStamp);
-            if ($date === false) {
-                echo "<p>Invalid timestamp format encountered: $timeStamp</p>";
-                return;
+            $tsParts = parseTimestampParts($timeStamp);
+            if ($tsParts === null) {
+                continue;
             }
 
-            $dayOfYear = $date->format('Y-m-d');
-            $hour = $date->format('G');
-            $hStr = hourStr($hour); // Use hourStr function
+            $dayOfYear = $tsParts['date'];
+            $hStr = hourStr($tsParts['hour']); // Use hourStr function
             $logSummary[$dayOfYear][$hStr] = ($logSummary[$dayOfYear][$hStr] ?? 0) + 1;
         }
-
-        // Close the file
-        fclose($handle);
     }
 
     // Echo the log summary data as JSON, ASAP
