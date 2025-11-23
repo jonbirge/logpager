@@ -1,6 +1,6 @@
 <?php
 
-// Include the clfparse.php file
+include_once __DIR__ . '/../searchparse.php';
 include 'clfparse.php';
 
 // Evaluate if a single term matches the log data
@@ -40,29 +40,9 @@ function evaluateHeatmapTerm($term, $ipAddress, $timeStamp, $status, $line)
 // Evaluate boolean search query for heatmap
 function evaluateHeatmapBooleanSearch($searchDict, $ipAddress, $timeStamp, $status, $line)
 {
-    $terms = $searchDict['terms'];
-    $operators = $searchDict['operators'];
-
-    if (empty($terms)) {
-        return true;
-    }
-
-    // Evaluate first term
-    $result = evaluateHeatmapTerm($terms[0], $ipAddress, $timeStamp, $status, $line);
-
-    // Process remaining terms with operators
-    for ($i = 1; $i < count($terms); $i++) {
-        $operator = $operators[$i - 1] ?? 'AND'; // Default to AND
-        $termResult = evaluateHeatmapTerm($terms[$i], $ipAddress, $timeStamp, $status, $line);
-
-        if ($operator === 'AND') {
-            $result = $result && $termResult;
-        } else if ($operator === 'OR') {
-            $result = $result || $termResult;
-        }
-    }
-
-    return $result;
+    return evaluateBooleanChain($searchDict, function ($term) use ($ipAddress, $timeStamp, $status, $line) {
+        return evaluateHeatmapTerm($term, $ipAddress, $timeStamp, $status, $line);
+    });
 }
 
 // Evaluate legacy search query for heatmap

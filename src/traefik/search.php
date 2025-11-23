@@ -1,6 +1,6 @@
 <?php
 
-// Include traefik.php
+include_once __DIR__ . '/../searchparse.php';
 include 'traefik.php';
 
 // Evaluate if a single term matches the log data
@@ -42,29 +42,9 @@ function evaluateTerm($term, $data, $line)
 // Evaluate boolean search query
 function evaluateBooleanSearch($searchDict, $data, $line)
 {
-    $terms = $searchDict['terms'];
-    $operators = $searchDict['operators'];
-
-    if (empty($terms)) {
-        return true;
-    }
-
-    // Evaluate first term
-    $result = evaluateTerm($terms[0], $data, $line);
-
-    // Process remaining terms with operators
-    for ($i = 1; $i < count($terms); $i++) {
-        $operator = $operators[$i - 1] ?? 'AND'; // Default to AND
-        $termResult = evaluateTerm($terms[$i], $data, $line);
-
-        if ($operator === 'AND') {
-            $result = $result && $termResult;
-        } else if ($operator === 'OR') {
-            $result = $result || $termResult;
-        }
-    }
-
-    return $result;
+    return evaluateBooleanChain($searchDict, function ($term) use ($data, $line) {
+        return evaluateTerm($term, $data, $line);
+    });
 }
 
 // Evaluate legacy search query

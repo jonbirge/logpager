@@ -1,48 +1,59 @@
 <?php
 
-// load environment variables
-include 'blacklistutils.php';
+include_once __DIR__ . '/helpers.php';
+include_once __DIR__ . '/blacklistutils.php';
 
-// Get the data from the POST request body
-$ip = $_POST['ip'];
-$log_type = $_POST['log_type'];
-$log = $_POST['log'];
-$timestamp = $_POST['last_seen'];
+requireNoCacheHeaders();
 
-// Check to see if IP address is empty
-if (empty($ip)) {
-    die("no IP address provided!");
+$ip = validateIpOrCidr($_POST['ip'] ?? null);
+$logType = trim($_POST['log_type'] ?? '');
+$logLine = $_POST['log'] ?? null;
+$timestamp = trim($_POST['last_seen'] ?? '');
+
+if ($ip === null) {
+    respondError('No valid IP address or CIDR provided!', 400);
+    exit;
 }
 
-// Open SQL connection
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($timestamp === '') {
+    $timestamp = date('Y-m-d H:i:s');
+} elseif (strtotime($timestamp) === false) {
+    respondError('Invalid timestamp provided', 400);
+    exit;
 }
 
-// Insert $ip and $log (if exists) into the 'blacklist' table
-if ($log === 'NULL') {
-    $sql = "INSERT INTO $table (cidr, last_seen, log_type) VALUES ('$ip', '$timestamp', '$log_type')";
-} else {
-    $sql = "INSERT INTO $table (cidr, last_seen, log_type, log_line) VALUES ('$ip', '$timestamp', '$log_type', '$log')";
-}
+$logLine = ($logLine === null || $logLine === 'NULL' || $logLine === '') ? null : $logLine;
 
-try {
-    $conn->query($sql);
-    if ($conn->error) {
-        throw new Exception("SQL error: " . $conn->error);
-    }
-} catch (Exception $e) {
+$conn = getDbConnection();
+
+$sql = "
+    INSERT INTO " . BLACKLIST_TABLE . " (cidr, last_seen, log_type, log_line)
+    VALUES (?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+        last_seen = VALUES(last_seen),
+        log_type = VALUES(log_type),
+        log_line = VALUES(log_line)
+";
+
+$stmt = $conn->prepare($sql);
+if ($stmt === false) {
+    respondError('SQL error: ' . $conn->error, 500);
     $conn->close();
-    echo $e->getMessage();
-    die($e->getMessage());
+    exit;
 }
 
-// Update CSV file
-$blacklist = read_sql_recent($conn, $table);
-write_csv($blacklist, $csv_file);
+$stmt->bind_param('ssss', $ip, $timestamp, $logType, $logLine);
+$stmt->execute();
 
-echo $ip . ' added to blacklist';
+if ($conn->error) {
+    respondError('SQL error: ' . $conn->error, 500);
+    $conn->close();
+    exit;
+}
 
-// Close SQL connection
+$blacklist = read_sql_recent($conn);
+write_csv($blacklist, BLACKLIST_CSV);
+
+respondJson(['message' => $ip . ' added to blacklist']);
+
 $conn->close();

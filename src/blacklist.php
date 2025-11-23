@@ -1,83 +1,79 @@
 <?php
 
-// load environment variables
-include 'blacklistutils.php';
+include_once __DIR__ . '/helpers.php';
+include_once __DIR__ . '/blacklistutils.php';
 
-// No caching allowed
-header("Cache-Control: no-cache, no-store, must-revalidate");
+requireNoCacheHeaders();
 
-// Open SQL connection
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$conn = getDbConnection();
 
-// Handle HTTP methods
 switch ($_SERVER['REQUEST_METHOD']) {
-    case 'GET':  // search for single IP address
-        // Set doc type to JSON
-        header('Content-Type: application/json');
+    case 'GET':
+        $ip = validateIpOrCidr($_GET['ip'] ?? null);
 
-        // Get the IP address from the URL
-        $ip = $_GET['ip'];
-
-        if (empty($ip)) {  // Return everything
-            $blacklist = read_sql_recent($conn, $table);
-            echo json_encode($blacklist);
-        } else {  // Search for single IP from URL
-            $blacklist = search_blacklist($ip, $conn, $table);
-            echo json_encode($blacklist);
+        if ($ip === null) {
+            $blacklist = read_sql_recent($conn);
+            respondJson($blacklist);
+        } else {
+            $blacklist = search_blacklist($ip, $conn);
+            respondJson($blacklist);
         }
         break;
 
-    case 'POST':  // search for list of IP addresses
-        // Get the ip list the POST request body
-        $ips = json_decode(file_get_contents('php://input'), true);
-
-        // Check JSON
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            // Handle JSON parse error
-            http_response_code(400); // Bad Request
-            die("Invalid JSON payload");
+    case 'POST':
+        try {
+            $ips = readJsonBody();
+        } catch (InvalidArgumentException $e) {
+            respondError($e->getMessage(), 400);
+            break;
         }
 
-        // Go through each ip in $ips and search for it in the blacklist
         $blacklist = [];
-        foreach ($ips as $ip) {
-            $response = search_blacklist($ip, $conn, $table);
-            if ($response) {
+        foreach ($ips as $rawIp) {
+            $ip = validateIpOrCidr($rawIp);
+            if ($ip === null) {
+                continue;
+            }
+            $response = search_blacklist($ip, $conn);
+            if (!empty($response)) {
                 $blacklist[] = $ip;
             }
         }
-        echo json_encode($blacklist);
+        respondJson($blacklist);
 
         break;
 
-    case 'DELETE':  // delete IP address from the blacklist
-        // Get the IP address from the URL
-        $ip = $_GET['ip'];
-
-        // Delete $ip from the 'blacklist' table
-        $sql = "DELETE FROM $table WHERE cidr = '$ip'";
-        $conn->query($sql);
-        if ($conn->error) {
-            $conn->close();
-            die("SQL error: " . $conn->error);
+    case 'DELETE':
+        $ip = validateIpOrCidr($_GET['ip'] ?? null);
+        if ($ip === null) {
+            respondError('No valid IP address or CIDR provided!', 400);
+            break;
         }
 
-        // Write to files
-        $blacklist = read_sql_recent($conn, $table);
-        write_csv($blacklist, $csv_file);
+        $sql = "DELETE FROM " . BLACKLIST_TABLE . " WHERE cidr = ?";
+        $stmt = $conn->prepare($sql);
+        if ($stmt === false) {
+            respondError('SQL error: ' . $conn->error, 500);
+            break;
+        }
 
-        // Send a confirmation message
-        echo $ip . ' removed from blacklist';
+        $stmt->bind_param('s', $ip);
+        $stmt->execute();
+
+        if ($conn->error) {
+            respondError('SQL error: ' . $conn->error, 500);
+            break;
+        }
+
+        $blacklist = read_sql_recent($conn);
+        write_csv($blacklist, BLACKLIST_CSV);
+
+        respondJson(['message' => $ip . ' removed from blacklist']);
         break;
 
-    default:  // Send a 405 Method Not Allowed response
-        http_response_code(405);
-        echo 'Method Not Allowed';
+    default:
+        respondError('Method Not Allowed', 405);
         break;
 }
 
-// Close SQL connection
 $conn->close();

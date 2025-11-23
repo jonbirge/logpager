@@ -1,10 +1,9 @@
 <?php
 
-// Define the cache file name as a constant
 define('CACHE_FILE', '/tmp/auth_heatmap_cache.json');
 define('CACHE_LIFE', 15);  // cache life in minutes
 
-// Include the authparse.php file
+include_once __DIR__ . '/../searchparse.php';
 include 'authparse.php';
 
 // Evaluate if a single term matches the log data
@@ -44,29 +43,9 @@ function evaluateHeatmapTerm($term, $data, $status, $line)
 // Evaluate boolean search query for heatmap
 function evaluateHeatmapBooleanSearch($searchDict, $data, $status, $line)
 {
-    $terms = $searchDict['terms'];
-    $operators = $searchDict['operators'];
-
-    if (empty($terms)) {
-        return true;
-    }
-
-    // Evaluate first term
-    $result = evaluateHeatmapTerm($terms[0], $data, $status, $line);
-
-    // Process remaining terms with operators
-    for ($i = 1; $i < count($terms); $i++) {
-        $operator = $operators[$i - 1] ?? 'AND'; // Default to AND
-        $termResult = evaluateHeatmapTerm($terms[$i], $data, $status, $line);
-
-        if ($operator === 'AND') {
-            $result = $result && $termResult;
-        } else if ($operator === 'OR') {
-            $result = $result || $termResult;
-        }
-    }
-
-    return $result;
+    return evaluateBooleanChain($searchDict, function ($term) use ($data, $status, $line) {
+        return evaluateHeatmapTerm($term, $data, $status, $line);
+    });
 }
 
 // Evaluate legacy search query for heatmap

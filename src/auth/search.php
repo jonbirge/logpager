@@ -1,6 +1,6 @@
 <?php
 
-// Include the authparse.php file
+include_once __DIR__ . '/../searchparse.php';
 include 'authparse.php';
 
 // Evaluate if a single term matches the log data
@@ -43,29 +43,9 @@ function evaluateTerm($term, $data, $status)
 // Evaluate boolean search query
 function evaluateBooleanSearch($searchDict, $data, $status)
 {
-    $terms = $searchDict['terms'];
-    $operators = $searchDict['operators'];
-
-    if (empty($terms)) {
-        return true;
-    }
-
-    // Evaluate first term
-    $result = evaluateTerm($terms[0], $data, $status);
-
-    // Process remaining terms with operators
-    for ($i = 1; $i < count($terms); $i++) {
-        $operator = $operators[$i - 1] ?? 'AND'; // Default to AND
-        $termResult = evaluateTerm($terms[$i], $data, $status);
-
-        if ($operator === 'AND') {
-            $result = $result && $termResult;
-        } else if ($operator === 'OR') {
-            $result = $result || $termResult;
-        }
-    }
-
-    return $result;
+    return evaluateBooleanChain($searchDict, function ($term) use ($data, $status) {
+        return evaluateTerm($term, $data, $status);
+    });
 }
 
 // Evaluate legacy search query

@@ -1,42 +1,41 @@
 <?php
 
-// ***** Environment Variables *****
+include_once __DIR__ . '/helpers.php';
 
-$host = getenv('SQL_HOST');
-$user = getenv('SQL_USER');
-$pass = getenv('SQL_PASS');
-$db = getenv('SQL_DB');
-$table = 'ip_blacklist';
-$csv_file = '/blacklist.csv';
+const BLACKLIST_TABLE = 'ip_blacklist';
+const BLACKLIST_CSV = '/blacklist.csv';
+const DEFAULT_BLACKLIST_DAYS = 90;
 
-
-// ***** Utility Functions *****
-
-function search_blacklist($ip, $conn, $table) {
-    // SQL query
+function search_blacklist(string $ip, mysqli $conn): array
+{
     $sql = "
-            SELECT * FROM $table 
-            WHERE 
-                cidr = ? 
-                OR (
-                    cidr LIKE '%.%.%.%/%' AND
-                    INET_ATON(?) BETWEEN 
+        SELECT cidr, last_seen, log_type, log_line
+        FROM " . BLACKLIST_TABLE . "
+        WHERE cidr = ?
+            OR (
+                cidr LIKE '%.%.%.%/%'
+                AND INET_ATON(?) BETWEEN 
                     INET_ATON(SUBSTRING_INDEX(cidr, '/', 1)) 
                     AND 
                     INET_ATON(SUBSTRING_INDEX(cidr, '/', 1)) + POW(2, 32 - SUBSTRING_INDEX(cidr, '/', -1)) - 1
-                )
-        ";
+            )
+    ";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $ip, $ip);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($conn->error) {
-        die("SQL error: " . $conn->error);
+    if ($stmt === false) {
+        respondError('SQL error: ' . $conn->error, 500);
+        exit;
     }
 
-    // create an array of the rows returned
+    $stmt->bind_param('ss', $ip, $ip);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($conn->error) {
+        respondError('SQL error: ' . $conn->error, 500);
+        exit;
+    }
+
     $blacklist = [];
     while ($row = $result->fetch_assoc()) {
         $blacklist[] = $row;
@@ -45,18 +44,29 @@ function search_blacklist($ip, $conn, $table) {
     return $blacklist;
 }
 
-// function to write all blacklist IPs/CIDRs to a csv file
-function write_csv($blacklist, $csv_file) {
-    $file = fopen($csv_file, 'w');
+function write_csv(array $blacklist, string $csvFile): void
+{
+    $file = @fopen($csvFile, 'w');
+    if ($file === false) {
+        respondError('Unable to write blacklist CSV', 500);
+        return;
+    }
+
     foreach ($blacklist as $cidr) {
         fputcsv($file, [$cidr]);
     }
+
     fclose($file);
 }
 
-// function to write all ip/cidr values to a yml file suitable for use with traefik's denyip plugin middleware with the following examples format:
-function write_yml($blacklist, $yml_file) {
-    $file = fopen($yml_file, 'w');
+function write_yml(array $blacklist, string $ymlFile): void
+{
+    $file = @fopen($ymlFile, 'w');
+    if ($file === false) {
+        respondError('Unable to write blacklist YAML', 500);
+        return;
+    }
+
     fwrite($file, "http:\n");
     fwrite($file, "  middlewares:\n");
     fwrite($file, "    blacklist:\n");
@@ -69,18 +79,24 @@ function write_yml($blacklist, $yml_file) {
     fclose($file);
 }
 
-// function to read all cidr values from SQL into array
-function read_sql_recent($conn, $table, $days = 90) {
-    $sql = "SELECT * FROM $table WHERE last_seen >= DATE_SUB(CURDATE(), INTERVAL ? DAY)";
+function read_sql_recent(mysqli $conn, int $days = DEFAULT_BLACKLIST_DAYS): array
+{
+    $sql = "SELECT cidr FROM " . BLACKLIST_TABLE . " WHERE last_seen >= DATE_SUB(CURDATE(), INTERVAL ? DAY)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $days);
+    if ($stmt === false) {
+        respondError('SQL error: ' . $conn->error, 500);
+        exit;
+    }
+
+    $stmt->bind_param('i', $days);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($conn->error) {
-        die("SQL error: " . $conn->error);
+        respondError('SQL error: ' . $conn->error, 500);
+        exit;
     }
-    
+
     $blacklist = [];
     while ($row = $result->fetch_assoc()) {
         $blacklist[] = $row['cidr'];

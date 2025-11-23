@@ -182,3 +182,28 @@ function searchStats($logLines)
 
     return $searchLines;
 }
+
+function evaluateBooleanChain(array $searchDict, callable $termEvaluator)
+{
+    $terms = $searchDict['terms'] ?? [];
+    $operators = $searchDict['operators'] ?? [];
+
+    if (empty($terms)) {
+        return true;
+    }
+
+    $result = $termEvaluator($terms[0]);
+
+    for ($i = 1; $i < count($terms); $i++) {
+        $operator = $operators[$i - 1] ?? 'AND';
+        $termResult = $termEvaluator($terms[$i]);
+
+        if ($operator === 'AND') {
+            $result = $result && $termResult;
+        } else if ($operator === 'OR') {
+            $result = $result || $termResult;
+        }
+    }
+
+    return $result;
+}
