@@ -156,6 +156,21 @@ a.header {
     cursor: pointer;
 }
 
+/* Radio label styling */
+.radio-label {
+    display: inline-block;
+    margin-right: 15px;
+    margin-bottom: 8px;
+    font-size: 10pt;
+    cursor: pointer;
+    user-select: none;
+}
+
+.radio-label input[type="radio"] {
+    margin-right: 5px;
+    cursor: pointer;
+}
+
 /* Style tables to have a smaller font size */
 table, th, td {
     border: 3px solid white;

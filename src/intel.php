@@ -98,6 +98,37 @@ $intel_data = getIntelData($target_ip);
         </div>
         <button class="toggle-button" onclick="runAll()">Execute all...</button>
 
+        <h2>Settings</h2>
+        <div id="settings-section">
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: 600;">Satellite Region:</label>
+                <div style="margin-top: 8px;">
+                    <label class="radio-label"><input type="radio" name="region" value="conus" onchange="updateSatelliteRegion('conus')"> CONUS (USA)</label>
+                    <label class="radio-label"><input type="radio" name="region" value="mexico" onchange="updateSatelliteRegion('mexico')"> Mexico</label>
+                    <label class="radio-label"><input type="radio" name="region" value="canada" onchange="updateSatelliteRegion('canada')"> Canada</label>
+                    <label class="radio-label"><input type="radio" name="region" value="europe" onchange="updateSatelliteRegion('europe')"> Europe</label>
+                    <label class="radio-label"><input type="radio" name="region" value="china" onchange="updateSatelliteRegion('china')"> China</label>
+                </div>
+                <button class="toggle-button" onclick="useCurrentLocation()" style="margin-top: 10px;">Use current location</button>
+            </div>
+        </div>
+
+        <h2>Satellite</h2>
+        <div id="satellite-section">
+            <div id="satellite-controls" style="margin-bottom: 15px;">
+                <label style="font-weight: 600;">Image Type:</label>
+                <div style="margin-top: 8px;">
+                    <label class="radio-label"><input type="radio" name="imageType" value="geocolor" checked onchange="updateSatelliteImage()"> GeoColor</label>
+                    <label class="radio-label"><input type="radio" name="imageType" value="vis" onchange="updateSatelliteImage()"> Visible</label>
+                    <label class="radio-label"><input type="radio" name="imageType" value="ir" onchange="updateSatelliteImage()"> Infrared</label>
+                    <label class="radio-label"><input type="radio" name="imageType" value="wv" onchange="updateSatelliteImage()"> Water Vapor</label>
+                </div>
+            </div>
+            <div id="satellite-image-container" style="text-align: center; background: #f0f0f0; padding: 20px; border-radius: 5px;">
+                <p style="color: #666;">Select a region in Settings to view satellite imagery</p>
+            </div>
+        </div>
+
         <h2>nmap scan</h2>
         <div id="scan-buttons">
             <button class="toggle-button green" onclick="runScan('quick')">Quick port scan</button>
